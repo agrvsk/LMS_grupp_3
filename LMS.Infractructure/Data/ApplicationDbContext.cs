@@ -12,11 +12,17 @@ namespace LMS.Infractructure.Data
             : base(options)
         {
         }
+        public DbSet<Course> Courses { get; set; }
+        public DbSet<Document> Documents { get; set; }
+        public DbSet<Module> Modules { get; set; }
+        public DbSet<ModuleActivity> Activities { get; set; }
+        public DbSet<Submission> Submissions { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
             builder.ApplyConfiguration(new ApplicationUserConfigurations());
         }
+       
     }
 }

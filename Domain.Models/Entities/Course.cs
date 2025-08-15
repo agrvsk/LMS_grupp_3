@@ -9,14 +9,14 @@ namespace Domain.Models.Entities;
 
 public class Course
 {
-    string Id { get; set; }
+    public string Id { get; set; }
     [MaxLength(30)]
     [Required]
-    string Name { get; set; }
-    string? Description { get; set; }
-    DateTime StartDate { get; set; }
-    DateTime EndDate { get; set; }
-    List<ApplicationUser> Students { get; set; } = new List<ApplicationUser>();
-    List<Module> Modules { get; set; } = new List<Module>();
-    List<Document> Documents { get; set; } = new List<Document>();
+    public string Name { get; set; }
+    public string Description { get; set; }
+    public DateTime StartDate { get; set; }
+    public DateTime EndDate { get; set; }
+    public List<ApplicationUser> Students { get; set; } = new List<ApplicationUser>();
+    public List<Module> Modules { get; set; }
+
 }

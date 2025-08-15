@@ -9,15 +9,15 @@ namespace Domain.Models.Entities;
 
 public class Document
 {
-    string Id { get; set; }
+    public string Id { get; set; }
     [MaxLength(30)]
     [Required]
-    string Name { get; set; }
-    string? Description { get; set; }
-    DateTime UploadDate { get; set; }
-    string FilePath { get; set; }
-    string ParentType { get; set; } // e.g., "Course", "Module", "Activity"
-    string ParentId { get; set; }
+    public string Name { get; set; }
+    public string? Description { get; set; }
+    public DateTime UploadDate { get; set; }
+    public string FilePath { get; set; }
+    public string ParentType { get; set; }
+    public string ParentId { get; set; }
 
-    string UploaderId { get; set; }
+    public ApplicationUser Uploader { get; set; }
 }

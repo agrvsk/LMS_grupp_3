@@ -9,16 +9,15 @@ namespace Domain.Models.Entities;
 
 public class Module
 {
-    string Id { get; set; }
+    public string Id { get; set; }
     [MaxLength(30)]
     [Required]
-    string Name { get; set; }
-    string? Description { get; set; }
-    DateTime StartDate { get; set; }
-    DateTime EndDate { get; set; }
+    public string Name { get; set; }
+    public string Description { get; set; }
+    public DateTime StartDate { get; set; }
+    public DateTime EndDate { get; set; }
 
-    string CourseId { get; set; }
+    public string CourseId { get; set; }
 
-    List<Document> Documents { get; set; } = new List<Document>();
-    List<Activity> Activities { get; set; } = new List<Activity>();
+    public List<ModuleActivity> ModuleActivities { get; set; } = new List<ModuleActivity>();
 }
