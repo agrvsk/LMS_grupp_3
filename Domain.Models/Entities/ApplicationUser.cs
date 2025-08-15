@@ -6,4 +6,7 @@ public class ApplicationUser : IdentityUser
 {
     public string? RefreshToken { get; set; }
     public DateTime RefreshTokenExpireTime { get; set; }
+
+    public string? CourseId { get; set; }
+    public List<Submission> Submissions { get; set; } = new List<Submission>();
 }
