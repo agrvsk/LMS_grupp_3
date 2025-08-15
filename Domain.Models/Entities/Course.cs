@@ -13,10 +13,10 @@ public class Course
     [MaxLength(30)]
     [Required]
     string Name { get; set; }
-    string Description { get; set; }
+    string? Description { get; set; }
     DateTime StartDate { get; set; }
     DateTime EndDate { get; set; }
     List<ApplicationUser> Students { get; set; } = new List<ApplicationUser>();
-    List<Module> Modules { get; set; }
+    List<Module> Modules { get; set; } = new List<Module>();
     List<Document> Documents { get; set; } = new List<Document>();
 }

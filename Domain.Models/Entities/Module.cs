@@ -13,12 +13,12 @@ public class Module
     [MaxLength(30)]
     [Required]
     string Name { get; set; }
-    string Description { get; set; }
+    string? Description { get; set; }
     DateTime StartDate { get; set; }
     DateTime EndDate { get; set; }
 
     string CourseId { get; set; }
 
     List<Document> Documents { get; set; } = new List<Document>();
-    List<Activity> activities { get; set; } = new List<Activity>();
+    List<Activity> Activities { get; set; } = new List<Activity>();
 }

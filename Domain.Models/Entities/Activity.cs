@@ -13,10 +13,10 @@ public class Activity
     [MaxLength(30)]
     [Required]
     string Name { get; set; }
-    string Description { get; set; }
+    string? Description { get; set; }
     DateTime StartDate { get; set; }
     DateTime EndDate { get; set; }
-    ActivityType Type { get; set; }
+    ActivityType Type { get; set; } = ActivityType.Other;
     string ModuleId { get; set; }
     List<Document> Documents { get; set; } = new List<Document>();
 
@@ -28,5 +28,6 @@ public enum ActivityType
     Assignment,
     Quiz,
     Project,
-    Discussion
+    Discussion,
+    Other
 }

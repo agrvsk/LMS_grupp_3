@@ -16,8 +16,8 @@ public class Document
     string? Description { get; set; }
     DateTime UploadDate { get; set; }
     string FilePath { get; set; }
-    string ParentType { get; set; }
+    string ParentType { get; set; } // e.g., "Course", "Module", "Activity"
     string ParentId { get; set; }
 
-    ApplicationUser Uploader { get; set; }
+    string UploaderId { get; set; }
 }
