@@ -13,11 +13,11 @@ public abstract class RepositoryBase<T> : IRepositoryBase<T>, IInternalRepositor
         DbSet = context.Set<T>();
     }
 
-    public IQueryable<T> FindAll(bool trackChanges = false) =>
+    public async Task<IQueryable<T>> FindAllAsync(bool trackChanges = false) =>
         !trackChanges ? DbSet.AsNoTracking() :
                         DbSet;
 
-    public IQueryable<T> FindByCondition(Expression<Func<T, bool>> expression, bool trackChanges = false) =>
+    public async Task<IQueryable<T>> FindByConditionAsync(Expression<Func<T, bool>> expression, bool trackChanges = false) =>
         !trackChanges ? DbSet.Where(expression).AsNoTracking() :
                         DbSet.Where(expression);
 
