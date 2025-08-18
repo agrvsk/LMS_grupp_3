@@ -1,0 +1,15 @@
+﻿@page "/courses/{Id}"
+@using Microsoft.AspNetCore.Authorization
+@rendermode InteractiveWebAssembly
+
+<h3>Course @Id</h3> @* Should be Course.Name *@
+<div class="position-fixed end-0 top-0 p-3" style="width: 300px;">
+<MemberComponent/>
+<MemberComponent />
+<MemberComponent />
+</div>
+
+@code {
+	[SupplyParameterFromQuery]
+	[Parameter] public string Id { get; set; }
+}

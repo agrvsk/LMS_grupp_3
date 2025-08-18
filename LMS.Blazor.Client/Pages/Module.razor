@@ -1,0 +1,10 @@
+﻿@page "/modules/{Id}"
+@rendermode InteractiveWebAssembly
+<h3>Module</h3>
+
+
+
+@code {
+	[SupplyParameterFromQuery]
+	[Parameter] public string Id { get; set; }
+}
