@@ -1,8 +1,14 @@
-﻿
+﻿@inject NavigationManager NavigationManager
+
+@* TODO: EDIT AND ADD PAGES *@
+
 <div class="container mt-4">
+
 	<div class="card shadow-sm">
 		<div class="card-body">
-			<h5 class="card-title">@Course.Name</h5>
+			<h5 class="card-title">
+				@Course.Name
+			</h5>
 			<h6 class="card-subtitle mb-2 text-muted">Course ID: @Course.Id</h6>
 			<p class="card-text">
 				@Course.Description
@@ -16,11 +22,13 @@
 				</li>
 			</ul>
 		</div>
+		<a href="courses/@Course.Id" class="stretched-link"></a>
 	</div>
+
 </div>
 
 @code {
-	
+
 	FakeCourseDto Course = new FakeCourseDto
 	{
 		Id = "C001",

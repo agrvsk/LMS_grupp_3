@@ -1,5 +1,27 @@
-﻿<h3>ActivityComponent</h3>
+﻿<div class="container mt-4">
+	<div class="card shadow-sm">
+		<div class="card-body">
+			<h5 class="card-title">@Activity.Name</h5>
+			
+			<p class="card-text">
+				@Activity.StartDate.ToString("MMM dd HH:mm") - @Activity.EndDate.ToString("HH:mm")
+			</p>
+		</div>
+	</div>
+</div>
 
 @code {
+	FakeActivity Activity = new FakeActivity
+	{
+		Name = "Lecture",
+		StartDate = DateTime.Now,
+		EndDate = DateTime.Now.AddHours(2)
+	};
 
+	class FakeActivity
+	{
+		public string Name { get; set; }
+		public DateTime StartDate { get; set; }
+		public DateTime EndDate { get; set; }
+	}
 }

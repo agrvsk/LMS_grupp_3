@@ -1,8 +1,11 @@
 ﻿<div class="container mt-4">
+
 	<div class="card shadow-sm">
 		<div class="card-body">
-			<h5 class="card-title">@Module.Name</h5>
-			<h6 class="card-subtitle mb-2 text-muted">Module ID: @Module.Id</h6>
+			<h5 class="card-title">
+				@Module.Name
+			</h5>
+			<h6 class="card-subtitle mb-2 text-muted">Course ID: @Module.Id</h6>
 			<p class="card-text">
 				@Module.Description
 			</p>
@@ -15,7 +18,9 @@
 				</li>
 			</ul>
 		</div>
+		<a href="modules/@Module.Id" class="stretched-link"></a>
 	</div>
+
 </div>
 
 @code {

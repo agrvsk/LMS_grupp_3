@@ -2,11 +2,47 @@
 @using Microsoft.AspNetCore.Authorization
 @rendermode InteractiveWebAssembly
 
-<h3>Course @Id</h3> @* Should be Course.Name *@
-<div class="position-fixed end-0 top-0 p-3" style="width: 300px;">
-<MemberComponent/>
-<MemberComponent />
-<MemberComponent />
+@attribute [Authorize]
+
+<div class="container-fluid">
+    <div class="row">
+        
+        <div class="col-12 col-lg-3 border-start bg-light">
+            <div class="p-3 sticky-top">
+				<ModuleComponent />
+                <ModuleComponent />
+				<ModuleComponent />
+				<ModuleComponent />
+            </div>
+        </div>
+        <!-- Main content area -->
+        <div class="col-12 col-lg-6">
+            <h3>Kurs @Id</h3> @* Later bind this to Course.Name *@
+            <p>Main course details go here...</p>
+            <div class="row">
+                <div class="col-12 col-lg-9">
+                    <h4>Dokument</h4>
+                    <DocumentComponent />
+                    <DocumentComponent />
+                    <DocumentComponent />
+                    <DocumentComponent />
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar area -->
+        <div class="col-12 col-lg-3 border-start bg-light">
+            <div class="p-3 sticky-top">
+                <MemberComponent />
+                <MemberComponent />
+                <MemberComponent />
+                <MemberComponent />
+                <MemberComponent />
+                <MemberComponent />
+            </div>
+        </div>
+    </div>
+    
 </div>
 
 @code {
