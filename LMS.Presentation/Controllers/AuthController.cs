@@ -28,6 +28,7 @@ public class AuthController : ControllerBase
     [SwaggerResponse(StatusCodes.Status400BadRequest, "Invalid input or registration failed")]
     public async Task<IActionResult> RegisterUser(UserRegistrationDto userRegistrationDto)
     {
+        
         IdentityResult result = await serviceManager.AuthService.RegisterUserAsync(userRegistrationDto);
         return result.Succeeded ? StatusCode(StatusCodes.Status201Created) : BadRequest(result.Errors);
     }
