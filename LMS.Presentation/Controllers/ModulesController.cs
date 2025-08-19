@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using LMS.Shared.DTOs.EntityDto;
+using Microsoft.AspNetCore.Mvc;
 using Service.Contracts;
 using System;
 using System.Collections.Generic;
@@ -24,7 +25,7 @@ namespace LMS.Presentation.Controllers
             return Ok(modules);
         }
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetModuleById(Guid id)
+        public async Task<IActionResult> GetModuleById(string id)
         {
             var module = await _serviceManager.ModuleService.GetModuleByIdAsync(id);
             if (module == null)
@@ -32,7 +33,7 @@ namespace LMS.Presentation.Controllers
             return Ok(module);
         }
         [HttpPost]
-        public async Task<IActionResult> CreateModule([FromBody] ModuleDto moduleDto)
+        public async Task<IActionResult> CreateModule([FromBody] ModuleCreateDto moduleDto)
         {
             if (moduleDto == null)
                 return BadRequest("Module data is null");
@@ -40,7 +41,7 @@ namespace LMS.Presentation.Controllers
             return CreatedAtAction(nameof(GetModuleById), new { id = createdModule.Id }, createdModule);
         }
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateModule(Guid id, [FromBody] ModuleDto moduleDto)
+        public async Task<IActionResult> UpdateModule(string id, [FromBody] ModuleDto moduleDto)
         {
             if (moduleDto == null || id != moduleDto.Id)
                 return BadRequest("Module data is invalid");
@@ -50,7 +51,7 @@ namespace LMS.Presentation.Controllers
             return Ok(updatedModule);
         }
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteModule(Guid id)
+        public async Task<IActionResult> DeleteModule(string id)
         {
             var deleted = await _serviceManager.ModuleService.DeleteModuleAsync(id);
             if (!deleted)

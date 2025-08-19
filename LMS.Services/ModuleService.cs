@@ -35,4 +35,25 @@ public class ModuleService : IModuleService
         return await uow.ModuleRepository.GetModulesByCourseIdAsync(courseId);
 
     }
+    public async Task<Module> CreateModuleAsync(Module module)
+    {
+        uow.ModuleRepository.Create(module);
+        await uow.CompleteAsync();
+        return module;
+    }
+    public async Task<Module> UpdateModuleAsync(Module module)
+    {
+        uow.ModuleRepository.Update(module);
+        await uow.CompleteAsync();
+        return module;
+    }
+    public async Task DeleteModuleAsync(string moduleId)
+    {
+        var module = await uow.ModuleRepository.GetModuleByIdAsync(moduleId);
+        if (module != null)
+        {
+            uow.ModuleRepository.Delete(module);
+            await uow.CompleteAsync();
+        }
+    }
 }

@@ -7,4 +7,7 @@ public interface IModuleRepository: IRepositoryBase<Module>
     Task<Module?> GetModuleByIdAsync(string moduleId);
     Task<List<Module>> GetAllModulesAsync();
     Task<List<Module>> GetModulesByCourseIdAsync(string courseId);
+    void CreateModule(Module module);
+    void UpdateModule(Module module);
+    void DeleteModule(Module moduleId);
 }

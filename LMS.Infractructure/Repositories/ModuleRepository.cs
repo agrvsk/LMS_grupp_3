@@ -11,8 +11,11 @@ namespace LMS.Infractructure.Repositories;
 
 public class ModuleRepository : RepositoryBase<Module>, IModuleRepository
 {
+    private ApplicationDbContext context;
+
     public ModuleRepository(ApplicationDbContext context) : base(context)
     {
+        this.context = context;
     }
 
     public async Task<List<Module>> GetAllModulesAsync()
@@ -33,5 +36,17 @@ public class ModuleRepository : RepositoryBase<Module>, IModuleRepository
         
         return await FindByConditionAsync(m => m.CourseId == courseId, trackChanges: false)
             .ContinueWith(task => task.Result.ToList());
+    }
+    public void CreateModule(Module module)
+    {
+        context.Modules.Add(module);
+    }
+    public void UpdateModule(Module module)
+    {
+        context.Modules.Update(module);
+    }
+    public void DeleteModule(Module module)
+    {
+        context.Modules.Remove(module);
     }
 }

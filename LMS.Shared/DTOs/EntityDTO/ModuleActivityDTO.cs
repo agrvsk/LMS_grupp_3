@@ -6,10 +6,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace LMS.Shared.DTOs.EntityDTO
+namespace LMS.Shared.DTOs.EntityDto
 {
-    public class ModuleActivityDTO
+    public record ModuleActivityDto
     {
+        public string Id { get; set; }
         [MaxLength(30)]
         [Required]
         public string Name { get; set; }

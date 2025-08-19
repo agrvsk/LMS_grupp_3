@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using LMS.Shared.DTOs.EntityDto;
+using Microsoft.AspNetCore.Mvc;
 using Service.Contracts;
 
 namespace LMS.Presentation.Controllers
@@ -33,7 +34,7 @@ namespace LMS.Presentation.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateCourse([FromBody] CourseDto courseDto)
+        public async Task<IActionResult> CreateCourse([FromBody] CourseCreateDto courseDto)
         {
             if (courseDto == null)
             {
@@ -44,7 +45,7 @@ namespace LMS.Presentation.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateCourse(int id, [FromBody] CourseDto courseDto)
+        public async Task<IActionResult> UpdateCourse(string id, [FromBody] CourseDto courseDto)
         {
             if (courseDto == null || id != courseDto.Id)
             {
@@ -59,7 +60,7 @@ namespace LMS.Presentation.Controllers
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteCourse(int id)
+        public async Task<IActionResult> DeleteCourse(string id)
         {
             var result = await _serviceManager.CourseService.DeleteCourseAsync(id);
             if (!result)

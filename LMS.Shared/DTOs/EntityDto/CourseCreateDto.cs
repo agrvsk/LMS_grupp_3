@@ -7,17 +7,13 @@ using System.Threading.Tasks;
 
 namespace LMS.Shared.DTOs.EntityDto
 {
-    public record ModuleDto
+    public record CourseCreateDto
     {
-        public string Id { get; set; }
         [MaxLength(30)]
         [Required]
         public string Name { get; set; }
         public string Description { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
-
-        public List<ModuleActivityDto> ModuleActivities { get; set; } = new List<ModuleActivityDto>();
-
     }
 }

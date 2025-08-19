@@ -5,9 +5,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace LMS.Shared.DTOs.EntityDto
+namespace LMS.Shared.DTOs.EntityDTO
 {
-    public record ModuleDto
+    public record ModuleCreateDTO
     {
         public string Id { get; set; }
         [MaxLength(30)]
@@ -17,7 +17,6 @@ namespace LMS.Shared.DTOs.EntityDto
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
 
-        public List<ModuleActivityDto> ModuleActivities { get; set; } = new List<ModuleActivityDto>();
-
+        public List<ModuleActivityDTO> ModuleActivities { get; set; } = new List<ModuleActivityDTO>();
     }
 }
