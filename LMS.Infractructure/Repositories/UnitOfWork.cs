@@ -13,12 +13,24 @@ public class UnitOfWork : IUnitOfWork
     private readonly Lazy<ISubmissionRepository> submissionRepository;
     private readonly Lazy<IDocumentRepository> documentRepository;
 
-    public ICourseRepository CourseRepository => courseRepository.Value;
-    public IModuleRepository ModuleRepository => moduleRepository.Value;
-    public IModuleActivityRepository ModuleActivityRepository => moduleActivityRepository.Value;
-    public IApplicationUserRepository ApplicationUserRepository => applicationUserRepository.Value;
-    public ISubmissionRepository SubmissionRepository => submissionRepository.Value;
-    public IDocumentRepository DocumentRepository => documentRepository.Value;
+    public ICourseRepository CourseRepository { get => courseRepository.Value;  }
+    public IModuleRepository ModuleRepository { get => moduleRepository.Value;  }
+    public IModuleActivityRepository ModuleActivityRepository
+    {
+        get => moduleActivityRepository.Value;
+    }
+    public IApplicationUserRepository ApplicationUserRepository
+    {
+        get => applicationUserRepository.Value;
+    }
+    public ISubmissionRepository SubmissionRepository
+    {
+        get => submissionRepository.Value;
+    }
+    public IDocumentRepository DocumentRepository
+    {
+        get => documentRepository.Value;
+    }
 
 
     public UnitOfWork(ApplicationDbContext context

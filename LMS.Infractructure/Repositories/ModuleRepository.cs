@@ -15,7 +15,7 @@ public class ModuleRepository : RepositoryBase<Module>, IModuleRepository
     {
     }
 
-    public async Task<List<Module>> GetAllModules()
+    public async Task<List<Module>> GetAllModulesAsync()
     {
        
         return await FindAllAsync(trackChanges: false).ContinueWith(task => task.Result.ToList());
