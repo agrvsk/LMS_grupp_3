@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Domain.Models.Entities;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -7,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace LMS.Shared.DTOs.EntityDTO
 {
-    public class ModuleDTO
+    public class ModuleActivityDTO
     {
         [MaxLength(30)]
         [Required]
@@ -15,8 +16,6 @@ namespace LMS.Shared.DTOs.EntityDTO
         public string Description { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
-
-        public List<ModuleActivityDTO> ModuleActivities { get; set; } = new List<ModuleActivityDTO>();
-
+        public ActivityType Type { get; set; }
     }
 }
