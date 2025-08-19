@@ -34,7 +34,7 @@ namespace LMS.Presentation.Controllers
             return Ok(activity);
         }
         [HttpPost]
-        public async Task<IActionResult> CreateActivity([FromBody] ModuleActivityDto activityDto)
+        public async Task<IActionResult> CreateActivity([FromBody] ModuleActivityCreateDto activityDto)
         {
             if (activityDto == null)
                 return BadRequest("Activity data is null");

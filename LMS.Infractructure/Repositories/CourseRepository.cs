@@ -23,4 +23,5 @@ public class CourseRepository : RepositoryBase<Course>, ICourseRepository
     {
         return (await FindAllAsync(trackChanges: false)).ToList();
     }
+
 }

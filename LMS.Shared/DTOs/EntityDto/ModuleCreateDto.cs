@@ -1,13 +1,14 @@
-﻿using System;
+﻿using LMS.Shared.DTOs.EntityDto;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace LMS.Shared.DTOs.EntityDTO
+namespace LMS.Shared.DTOs.EntityDto
 {
-    public record ModuleCreateDTO
+    public record ModuleCreateDto
     {
         public string Id { get; set; }
         [MaxLength(30)]
@@ -17,6 +18,6 @@ namespace LMS.Shared.DTOs.EntityDTO
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
 
-        public List<ModuleActivityDTO> ModuleActivities { get; set; } = new List<ModuleActivityDTO>();
+        public List<ModuleActivityDto> ModuleActivities { get; set; } = new List<ModuleActivityDto>();
     }
 }

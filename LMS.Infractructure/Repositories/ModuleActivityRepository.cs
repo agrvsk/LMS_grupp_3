@@ -28,19 +28,4 @@ public class ModuleActivityRepository: RepositoryBase<ModuleActivity>, IModuleAc
     {
         return (await FindByConditionAsync(ma => ma.ModuleId == moduleId, trackChanges: false)).ToList();
     }
-
-    public void CreateActivityAsync(ModuleActivity moduleActivity)
-    {
-        _context.Activities.Add(moduleActivity);
-    }
-
-    public void UpdateActivityAsync(ModuleActivity moduleActivity)
-    {
-        _context.Activities.Update(moduleActivity);
-    }
-
-    public void DeleteActivity(ModuleActivity moduleActivityId)
-    {
-        _context.Activities.Remove(moduleActivityId);
-    }
 }
