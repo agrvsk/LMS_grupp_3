@@ -9,10 +9,10 @@ using LMS.Infractructure.Data;
 
 namespace LMS.Infractructure.Repositories;
 
-public class DocumentRopository: RepositoryBase<Document>, IDocumentRepository
+public class DocumentRepository: RepositoryBase<Document>, IDocumentRepository
 {
 
-    public DocumentRopository(ApplicationDbContext context) : base(context)
+    public DocumentRepository(ApplicationDbContext context) : base(context)
     {
     }
     public async Task<Document?> GetDocumentById(string documentId)

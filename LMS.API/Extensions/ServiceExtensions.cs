@@ -82,6 +82,20 @@ public static class ServiceExtensions
     public static void AddRepositories(this IServiceCollection services)
     {
         services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+        services.AddScoped<ICourseRepository, CourseRepository>();
+        services.AddScoped<IModuleRepository, ModuleRepository>();
+        services.AddScoped<IModuleActivityRepository, ModuleActivityRepository>();
+        services.AddScoped<IApplicationUserRepository, ApplicationUserRepository>();
+        services.AddScoped<ISubmissionRepository, SubmissionRepository>();
+        services.AddScoped<IDocumentRepository, DocumentRepository>();
+
+        services.AddLazy<ICourseRepository>();
+        services.AddLazy<IModuleRepository>();
+        services.AddLazy<IModuleActivityRepository>();
+        services.AddLazy<IApplicationUserRepository>();
+        services.AddLazy<ISubmissionRepository>();
+        services.AddLazy<IDocumentRepository>();
     }
 
     public static void AddServiceLayer(this IServiceCollection services)
@@ -91,4 +105,16 @@ public static class ServiceExtensions
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped(provider => new Lazy<IAuthService>(() => provider.GetRequiredService<IAuthService>()));
     }
+
+
+
 }
+
+public static class ServiceCollectionExtensions
+{
+    public static IServiceCollection AddLazy<TService>(this IServiceCollection services) where TService : class
+    {
+        return services.AddScoped(provider => new Lazy<TService>(() => provider.GetRequiredService<TService>()));
+    }
+}
+
