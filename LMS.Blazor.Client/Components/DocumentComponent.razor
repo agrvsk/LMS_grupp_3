@@ -1,15 +1,35 @@
 ﻿<div class="container mt-4">
-	<div class="card shadow-sm">
-		<div class="card-body">
-			<h5 class="card-title">@Doc.Name</h5>
-			<h6 class="card-subtitle mb-2 text-muted">@Doc.UploadDate.ToString("g")</h6>
-		</div>
-	</div>
+	<table class="table table-hover align-middle">
+		<thead>
+			<tr>
+				<th scope="col">Document Name</th>
+				<th scope="col">Uploaded</th>
+			</tr>
+		</thead>
+		<tbody>
+			@foreach (var Doc in Documents)
+			{
+				<tr>
+					<td>@Doc.Name</td>
+					<td>@Doc.UploadDate.ToString("g")</td>
+				</tr>
+			}
+		</tbody>
+	</table>
 </div>
 
 
 @code {
 	
+	List<FakeDocument> Documents = new List<FakeDocument>
+	{
+		new FakeDocument { Id = "1", Name = "Sample Document", UploadDate = DateTime.Now },
+		new FakeDocument { Id = "2", Name = "Another Document", UploadDate = DateTime.Now.AddDays(-1) },
+		new FakeDocument { Id = "3", Name = "Third Document", UploadDate = DateTime.Now.AddDays(-2) },
+		new FakeDocument { Id = "4", Name = "Fourth Document", UploadDate = DateTime.Now.AddDays(-3) },
+		new FakeDocument { Id = "5", Name = "Fifth Document", UploadDate = DateTime.Now.AddDays(-4) }
+	};
+
 	class FakeDocument
 	{
 		public string Id { get; set; }
