@@ -17,14 +17,14 @@ namespace LMS.Presentation.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAllCourses()
         {
-            var courses = await _serviceManager.GetAllCoursesAsync();
+            var courses = await _serviceManager.CourseService.GetAllCoursesAsync();
             return Ok(courses);
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetCourseById(int id)
+        public async Task<IActionResult> GetCourseById(string id)
         {
-            var course = await _serviceManager.GetCourseByIdAsync(id);
+            var course = await _serviceManager.CourseService.GetCourseByIdAsync(id);
             if (course == null)
             {
                 return NotFound();
@@ -39,7 +39,7 @@ namespace LMS.Presentation.Controllers
             {
                 return BadRequest("Course data is null");
             }
-            var createdCourse = await _serviceManager.CreateCourseAsync(courseDto);
+            var createdCourse = await _serviceManager.CourseService.CreateCourseAsync(courseDto);
             return CreatedAtAction(nameof(GetCourseById), new { id = createdCourse.Id }, createdCourse);
         }
 
@@ -50,7 +50,7 @@ namespace LMS.Presentation.Controllers
             {
                 return BadRequest("Course data is invalid");
             }
-            var updatedCourse = await _serviceManager.UpdateCourseAsync(courseDto);
+            var updatedCourse = await _serviceManager.CourseService.UpdateCourseAsync(courseDto);
             if (updatedCourse == null)
             {
                 return NotFound();
@@ -61,7 +61,7 @@ namespace LMS.Presentation.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteCourse(int id)
         {
-            var result = await _serviceManager.DeleteCourseAsync(id);
+            var result = await _serviceManager.CourseService.DeleteCourseAsync(id);
             if (!result)
             {
                 return NotFound();

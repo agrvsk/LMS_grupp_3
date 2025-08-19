@@ -14,15 +14,15 @@ public class ModuleActivityRepository: RepositoryBase<ModuleActivity>, IModuleAc
     public ModuleActivityRepository(ApplicationDbContext context) : base(context)
     {
     }
-    public async Task<ModuleActivity?> GetModuleActivityById(string moduleActivityId)
+    public async Task<ModuleActivity?> GetModuleActivityByIdAsync(string moduleActivityId)
     {
         return (await FindByConditionAsync(ma => ma.Id == moduleActivityId, trackChanges: false)).SingleOrDefault();
     }
-    public async Task<List<ModuleActivity>> GetAllModuleActivities()
+    public async Task<List<ModuleActivity>> GetAllModuleActivitiesAsync()
     {
         return (await FindAllAsync(trackChanges: false)).ToList();
     }
-    public async Task<List<ModuleActivity>> GetModuleActivitiesByModuleId(string moduleId)
+    public async Task<List<ModuleActivity>> GetModuleActivitiesByModuleIdAsync(string moduleId)
     {
         return (await FindByConditionAsync(ma => ma.ModuleId == moduleId, trackChanges: false)).ToList();
     }

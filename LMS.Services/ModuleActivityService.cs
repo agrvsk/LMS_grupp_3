@@ -19,17 +19,17 @@ public class ModuleActivityService : IModuleActivityService
     }
 
 
-    public async Task<ModuleActivity?> GetModuleActivityById(string moduleActivityId)
+    public async Task<ModuleActivity?> GetModuleActivityByIdAsync(string moduleActivityId)
     {
-        return (await uow.ModuleActivityRepository.GetModuleActivityById(moduleActivityId));
+        return (await uow.ModuleActivityRepository.GetModuleActivityByIdAsync(moduleActivityId));
     }
-    public async Task<List<ModuleActivity>> GetAllModuleActivities()
+    public async Task<List<ModuleActivity>> GetAllModuleActivitiesAsync()
     {
-        return (await uow.ModuleActivityRepository.GetAllModuleActivities());
+        return (await uow.ModuleActivityRepository.GetAllModuleActivitiesAsync());
     }
-    public async Task<List<ModuleActivity>> GetModuleActivitiesByModuleId(string moduleId)
+    public async Task<List<ModuleActivity>> GetModuleActivitiesByModuleIdAsync(string moduleId)
     {
-        return (await uow.ModuleActivityRepository.GetModuleActivitiesByModuleId(moduleId));
+        return (await uow.ModuleActivityRepository.GetModuleActivitiesByModuleIdAsync(moduleId));
     }
 
 

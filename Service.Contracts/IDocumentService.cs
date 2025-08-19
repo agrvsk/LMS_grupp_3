@@ -4,7 +4,7 @@ namespace Service.Contracts;
 
 public interface IDocumentService
 {
-    Task<List<Document>> GetAllDocuments();
-    Task<Document?> GetDocumentById(string documentId);
-    Task<List<Document>> GetDocumentsByParent(string parentId, string parentType);
+    Task<List<Document>> GetAllDocumentsAsync();
+    Task<Document?> GetDocumentByIdAsync(string documentId);
+    Task<List<Document>> GetDocumentsByParentAsync(string parentId, string parentType);
 }

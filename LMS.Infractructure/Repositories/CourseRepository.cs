@@ -15,11 +15,11 @@ public class CourseRepository : RepositoryBase<Course>, ICourseRepository
     {
     }
 
-    public async Task<Course?> GetCourseById(string courseId)
+    public async Task<Course?> GetCourseByIdAsync(string courseId)
     {
         return (await FindByConditionAsync(c => c.Id == courseId, trackChanges: false)).SingleOrDefault();
     }
-    public async Task<List<Course>> GetAllCourses()
+    public async Task<List<Course>> GetAllCoursesAsync()
     {
         return (await FindAllAsync(trackChanges: false)).ToList();
     }

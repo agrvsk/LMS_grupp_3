@@ -4,9 +4,9 @@ namespace Service.Contracts;
 
 public interface IUserService
 {
-    Task<List<ApplicationUser>> GetAllUsers();
-    Task<List<string>> GetRolesInUser(ApplicationUser user);
-    Task<ApplicationUser?> GetUserById(string userId);
-    Task<List<ApplicationUser>> GetUsersByCourseId(string courseId);
-    Task<List<ApplicationUser>> GetUsersByRole(string roleName);
+    Task<List<ApplicationUser>> GetAllUsersAsync();
+    Task<List<string>> GetRolesInUserAsync(ApplicationUser user);
+    Task<ApplicationUser?> GetUserByIdAsync(string userId);
+    Task<List<ApplicationUser>> GetUsersByCourseIdAsync(string courseId);
+    Task<List<ApplicationUser>> GetUsersByRoleAsync(string roleName);
 }

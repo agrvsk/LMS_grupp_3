@@ -5,10 +5,10 @@ namespace Domain.Contracts.Repositories;
 public interface IApplicationUserRepository: IRepositoryBase<ApplicationUser>
 {
 
-    Task<ApplicationUser?> GetUserById(string userId);
-    Task<List<ApplicationUser>> GetAllUsers();
-    Task<List<string>> GetRolesInUser(ApplicationUser user);
-    Task<List<ApplicationUser>> GetUsersByRole(string roleName);
-    Task<List<ApplicationUser>> GetUsersByCourseId(string courseId);
+    Task<ApplicationUser?> GetUserByIdAsync(string userId);
+    Task<List<ApplicationUser>> GetAllUsersAsync();
+    Task<List<string>> GetRolesInUserAsync(ApplicationUser user);
+    Task<List<ApplicationUser>> GetUsersByRoleAsync(string roleName);
+    Task<List<ApplicationUser>> GetUsersByCourseIdAsync(string courseId);
 
 }

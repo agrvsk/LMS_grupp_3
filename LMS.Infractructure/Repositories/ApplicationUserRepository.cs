@@ -22,17 +22,17 @@ public class ApplicationUserRepository:RepositoryBase<ApplicationUser>, IApplica
         this.context = context;
         _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
     }
-    public async Task<ApplicationUser?> GetUserById(string userId)
+    public async Task<ApplicationUser?> GetUserByIdAsync(string userId)
     {
         return await FindByConditionAsync(u => u.Id == userId, trackChanges: false)
             .ContinueWith(task => task.Result.SingleOrDefault());
     }
-    public async Task<List<ApplicationUser>> GetAllUsers()
+    public async Task<List<ApplicationUser>> GetAllUsersAsync()
     {
         return await FindAllAsync(trackChanges: false).ContinueWith(task => task.Result.ToList());
     }
 
-    public async Task<List<string>> GetRolesInUser(ApplicationUser user)
+    public async Task<List<string>> GetRolesInUserAsync(ApplicationUser user)
     {
         //return await FindByConditionAsync(r =>   == roleName, trackChanges: false)
         //    .ContinueWith(task => task.Result.ToList());
@@ -47,13 +47,13 @@ public class ApplicationUserRepository:RepositoryBase<ApplicationUser>, IApplica
         //return await FindByConditionAsync(u => u.Roles.Any(r => r.Name == roleName), trackChanges: false)
         //    .ContinueWith(task => task.Result.ToList());
     }
-    public async Task<List<ApplicationUser>> GetUsersByRole(string roleName)
+    public async Task<List<ApplicationUser>> GetUsersByRoleAsync(string roleName)
     {
         var usersInRole = await _userManager.GetUsersInRoleAsync(roleName);
         return usersInRole.ToList();
     }
 
-    public async Task<List<ApplicationUser>> GetUsersByCourseId(string courseId)
+    public async Task<List<ApplicationUser>> GetUsersByCourseIdAsync(string courseId)
     {
         return await FindByConditionAsync(c => c.CourseId == courseId, trackChanges: false)
             .ContinueWith(task => task.Result.ToList());

@@ -2,9 +2,9 @@
 namespace Domain.Contracts.Repositories;
 public interface ISubmissionRepository: IInternalRepositoryBase<Submission>
 {
-    Task<Submission?> GetSubmissionById(string submissionId);
-    Task<List<Submission>> GetAllSubmissions();
-    Task<List<Submission>> GetSubmissionsByDocumentId(string documentId);
-    Task<List<Submission>> GetSubmissionsByApplicationUserId(string userId);
+    Task<Submission?> GetSubmissionByIdAsync(string submissionId);
+    Task<List<Submission>> GetAllSubmissionsAsync();
+    Task<List<Submission>> GetSubmissionsByDocumentIdAsync(string documentId);
+    Task<List<Submission>> GetSubmissionsByApplicationUserIdAsync(string userId);
     
 }

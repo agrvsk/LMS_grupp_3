@@ -24,15 +24,15 @@ public class ModuleService : IModuleService
         return await uow.ModuleRepository.GetAllModulesAsync();
     }
 
-    public async Task<Module?> GetModuleById(string moduleId)
+    public async Task<Module?> GetModuleByIdAsync(string moduleId)
     {
-        return await uow.ModuleRepository.GetModuleById(moduleId);
+        return await uow.ModuleRepository.GetModuleByIdAsync(moduleId);
     }
 
-    public async Task<List<Module>> GetModulesByCourseId(string courseId)
+    public async Task<List<Module>> GetModulesByCourseIdAsync(string courseId)
     {
 
-        return await uow.ModuleRepository.GetModulesByCourseId(courseId);
+        return await uow.ModuleRepository.GetModulesByCourseIdAsync(courseId);
 
     }
 }

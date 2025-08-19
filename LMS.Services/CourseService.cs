@@ -19,13 +19,13 @@ public class CourseService : ICourseService
     }
 
 
-    public async Task<Course?> GetCourseById(string courseId)
+    public async Task<Course?> GetCourseByIdAsync(string courseId)
     {
-        return (await uow.CourseRepository.GetCourseById(courseId));
+        return (await uow.CourseRepository.GetCourseByIdAsync(courseId));
     }
-    public async Task<List<Course>> GetAllCourses()
+    public async Task<List<Course>> GetAllCoursesAsync()
     {
-        return (await uow.CourseRepository.GetAllCourses());
+        return (await uow.CourseRepository.GetAllCoursesAsync());
     }
 
 

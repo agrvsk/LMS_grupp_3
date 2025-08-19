@@ -18,17 +18,17 @@ public class DocumentService : IDocumentService
         this.uow = uow;
     }
 
-    public async Task<Document?> GetDocumentById(string documentId)
+    public async Task<Document?> GetDocumentByIdAsync(string documentId)
     {
-        return (await uow.DocumentRepository.GetDocumentById(documentId));
+        return (await uow.DocumentRepository.GetDocumentByIdAsync(documentId));
     }
-    public async Task<List<Document>> GetAllDocuments()
+    public async Task<List<Document>> GetAllDocumentsAsync()
     {
-        return (await uow.DocumentRepository.GetAllDocuments());
+        return (await uow.DocumentRepository.GetAllDocumentsAsync());
     }
-    public async Task<List<Document>> GetDocumentsByParent(string parentId, string parentType)
+    public async Task<List<Document>> GetDocumentsByParentAsync(string parentId, string parentType)
     {
-        return (await uow.DocumentRepository.GetDocumentsByParent(parentId, parentType));
+        return (await uow.DocumentRepository.GetDocumentsByParentAsync(parentId, parentType));
     }
 
 }

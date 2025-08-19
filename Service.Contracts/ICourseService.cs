@@ -4,6 +4,6 @@ namespace Service.Contracts;
 
 public interface ICourseService
 {
-    Task<List<Course>> GetAllCourses();
-    Task<Course?> GetCourseById(string courseId);
+    Task<List<Course>> GetAllCoursesAsync();
+    Task<Course?> GetCourseByIdAsync(string courseId);
 }

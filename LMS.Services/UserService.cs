@@ -22,18 +22,18 @@ public class UserService : IUserService
     }
 
 
-    public async Task<ApplicationUser?> GetUserById(string userId)
+    public async Task<ApplicationUser?> GetUserByIdAsync(string userId)
     {
-        return await GetUserById(userId);
+        return await uow.ApplicationUserRepository.GetUserByIdAsync(userId);
     }
-    public async Task<List<ApplicationUser>> GetAllUsers()
+    public async Task<List<ApplicationUser>> GetAllUsersAsync()
     {
-        return await GetAllUsers();
+        return await uow.ApplicationUserRepository.GetAllUsersAsync();
     }
 
-    public async Task<List<string>> GetRolesInUser(ApplicationUser user)
+    public async Task<List<string>> GetRolesInUserAsync(ApplicationUser user)
     {
-        return await uow.ApplicationUserRepository.GetRolesInUser(user);
+        return await uow.ApplicationUserRepository.GetRolesInUserAsync(user);
 
         //return await FindByConditionAsync(r =>   == roleName, trackChanges: false)
         //    .ContinueWith(task => task.Result.ToList());
@@ -48,15 +48,15 @@ public class UserService : IUserService
         //return await FindByConditionAsync(u => u.Roles.Any(r => r.Name == roleName), trackChanges: false)
         //    .ContinueWith(task => task.Result.ToList());
     }
-    public async Task<List<ApplicationUser>> GetUsersByRole(string roleName)
+    public async Task<List<ApplicationUser>> GetUsersByRoleAsync(string roleName)
     {
-        return await uow.ApplicationUserRepository.GetUsersByRole(roleName);
+        return await uow.ApplicationUserRepository.GetUsersByRoleAsync(roleName);
         //var usersInRole = await _userManager.GetUsersInRoleAsync(roleName);
         //return usersInRole.ToList();
     }
 
-    public async Task<List<ApplicationUser>> GetUsersByCourseId(string courseId)
+    public async Task<List<ApplicationUser>> GetUsersByCourseIdAsync(string courseId)
     {
-        return await uow.ApplicationUserRepository.GetUsersByCourseId(courseId);
+        return await uow.ApplicationUserRepository.GetUsersByCourseIdAsync(courseId);
     }
 }

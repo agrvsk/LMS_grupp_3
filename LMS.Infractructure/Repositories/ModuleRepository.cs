@@ -21,14 +21,14 @@ public class ModuleRepository : RepositoryBase<Module>, IModuleRepository
         return await FindAllAsync(trackChanges: false).ContinueWith(task => task.Result.ToList());
     }
 
-    public async Task<Module?> GetModuleById(string moduleId)
+    public async Task<Module?> GetModuleByIdAsync(string moduleId)
     {
 
         return await FindByConditionAsync(m => m.Id == moduleId, trackChanges: false)
             .ContinueWith(task => task.Result.SingleOrDefault());
     }
 
-    public async Task<List<Module>> GetModulesByCourseId(string courseId)
+    public async Task<List<Module>> GetModulesByCourseIdAsync(string courseId)
     {
         
         return await FindByConditionAsync(m => m.CourseId == courseId, trackChanges: false)

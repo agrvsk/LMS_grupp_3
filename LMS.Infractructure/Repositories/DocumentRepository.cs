@@ -15,15 +15,15 @@ public class DocumentRepository: RepositoryBase<Document>, IDocumentRepository
     public DocumentRepository(ApplicationDbContext context) : base(context)
     {
     }
-    public async Task<Document?> GetDocumentById(string documentId)
+    public async Task<Document?> GetDocumentByIdAsync(string documentId)
     {
         return (await FindByConditionAsync(d => d.Id == documentId, trackChanges: false)).SingleOrDefault();
     }
-    public async Task<List<Document>> GetAllDocuments()
+    public async Task<List<Document>> GetAllDocumentsAsync()
     {
         return (await FindAllAsync(trackChanges: false)).ToList();
     }
-    public async Task<List<Document>> GetDocumentsByParent(string parentId, string parentType)
+    public async Task<List<Document>> GetDocumentsByParentAsync(string parentId, string parentType)
     {
         return (await FindByConditionAsync(d => d.ParentId == parentId && d.ParentType==parentType, trackChanges: false)).ToList();
     }

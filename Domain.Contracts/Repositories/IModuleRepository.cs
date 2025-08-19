@@ -4,7 +4,7 @@ namespace Domain.Contracts.Repositories;
 public interface IModuleRepository: IRepositoryBase<Module>
 {
 
-    Task<Module?> GetModuleById(string moduleId);
+    Task<Module?> GetModuleByIdAsync(string moduleId);
     Task<List<Module>> GetAllModulesAsync();
-    Task<List<Module>> GetModulesByCourseId(string courseId);
+    Task<List<Module>> GetModulesByCourseIdAsync(string courseId);
 }
