@@ -1,0 +1,26 @@
+﻿<div class="container mt-4">
+	<div class="card shadow-sm">
+		<div class="card-body">
+			<h5 class="card-title">@Doc.Name</h5>
+			<h6 class="card-subtitle mb-2 text-muted">@Doc.UploadDate.ToString("g")</h6>
+		</div>
+	</div>
+</div>
+
+
+@code {
+	
+	class FakeDocument
+	{
+		public string Id { get; set; }
+		public string Name { get; set; }
+		public DateTime UploadDate { get; set; }
+	}
+	
+	FakeDocument Doc = new FakeDocument
+	{
+		Id = "1",
+		Name = "Sample Document",
+		UploadDate = DateTime.Now
+	};
+}

@@ -1,0 +1,44 @@
+﻿<div class="container mt-4">
+
+	<div class="card shadow-sm">
+		<div class="card-body">
+			<h5 class="card-title">
+				@Module.Name
+			</h5>
+			<h6 class="card-subtitle mb-2 text-muted">Course ID: @Module.Id</h6>
+			<p class="card-text">
+				@Module.Description
+			</p>
+			<ul class="list-group list-group-flush mt-3">
+				<li class="list-group-item">
+					<strong>Start Date:</strong> @Module.StartDate.ToString("MMMM dd, yyyy")
+				</li>
+				<li class="list-group-item">
+					<strong>End Date:</strong> @Module.EndDate.ToString("MMMM dd, yyyy")
+				</li>
+			</ul>
+		</div>
+		<a href="modules/@Module.Id" class="stretched-link"></a>
+	</div>
+
+</div>
+
+@code {
+
+	FakeModuleDto Module = new FakeModuleDto
+	{
+		Id = "C001",
+		Name = "Introduction to Blazor",
+		Description = "A comprehensive course on building web applications using Blazor.",
+		StartDate = DateTime.Now,
+		EndDate = DateTime.Now.AddMonths(3)
+	};
+	class FakeModuleDto
+	{
+		public string Id { get; set; }
+		public string Name { get; set; }
+		public string Description { get; set; }
+		public DateTime StartDate { get; set; }
+		public DateTime EndDate { get; set; }
+	}
+}

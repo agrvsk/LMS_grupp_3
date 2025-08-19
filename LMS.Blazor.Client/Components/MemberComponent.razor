@@ -1,0 +1,27 @@
+﻿<div class="container mt-4">
+	<div class="card shadow-sm">
+		<div class="card-body">
+			<h5 class="card-title">@Member.Name</h5>
+			<h6 class="card-subtitle mb-2 text-muted">@Member.Role</h6>
+			<p class="card-text">
+				<strong>Email:</strong> @Member.Email
+			</p>
+		</div>
+	</div>
+</div>
+
+@code {
+	FakeMember Member = new FakeMember
+		{
+			Name = "John Doe",
+			Email = "john.doe@gmail.com",
+			Role = "Student"
+		};
+
+	class FakeMember
+	{
+		public string Name { get; set; }
+		public string Email { get; set; }
+		public string Role { get; set; }
+	}
+}

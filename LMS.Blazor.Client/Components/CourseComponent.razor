@@ -1,0 +1,48 @@
+﻿@inject NavigationManager NavigationManager
+
+@* TODO: EDIT AND ADD PAGES *@
+
+<div class="container mt-4">
+
+	<div class="card shadow-sm">
+		<div class="card-body">
+			<h5 class="card-title">
+				@Course.Name
+			</h5>
+			<h6 class="card-subtitle mb-2 text-muted">Course ID: @Course.Id</h6>
+			<p class="card-text">
+				@Course.Description
+			</p>
+			<ul class="list-group list-group-flush mt-3">
+				<li class="list-group-item">
+					<strong>Start Date:</strong> @Course.StartDate.ToString("MMMM dd, yyyy")
+				</li>
+				<li class="list-group-item">
+					<strong>End Date:</strong> @Course.EndDate.ToString("MMMM dd, yyyy")
+				</li>
+			</ul>
+		</div>
+		<a href="courses/@Course.Id" class="stretched-link"></a>
+	</div>
+
+</div>
+
+@code {
+
+	FakeCourseDto Course = new FakeCourseDto
+	{
+		Id = "C001",
+		Name = "Introduction to Blazor",
+		Description = "A comprehensive course on building web applications using Blazor.",
+		StartDate = DateTime.Now,
+		EndDate = DateTime.Now.AddMonths(3)
+	};
+	class FakeCourseDto
+	{
+		public string Id { get; set; }
+		public string Name { get; set; }
+		public string Description { get; set; }
+		public DateTime StartDate { get; set; }
+		public DateTime EndDate { get; set; }
+	}
+}

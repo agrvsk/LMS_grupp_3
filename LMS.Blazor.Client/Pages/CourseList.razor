@@ -1,0 +1,20 @@
+﻿@page "/courses"
+@using Microsoft.AspNetCore.Authorization
+@rendermode InteractiveWebAssembly
+<h3>CourseList</h3>
+
+
+@attribute [Authorize]
+
+<AuthorizeView Roles="Teacher">
+    <Authorized>
+        <p>LIST ALL COURSES HERE PLS SENPAI</p>
+		<CourseComponent />
+        <CourseComponent />
+        <CourseComponent />
+        <CourseComponent />
+    </Authorized>
+</AuthorizeView>
+@code {
+	
+}
