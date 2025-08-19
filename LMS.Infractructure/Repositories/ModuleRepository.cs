@@ -11,7 +11,7 @@ namespace LMS.Infractructure.Repositories;
 
 public class ModuleRepository : RepositoryBase<Module>, IModuleRepository
 {
-    ModuleRepository(ApplicationDbContext context) : base(context)
+    public ModuleRepository(ApplicationDbContext context) : base(context)
     {
     }
 

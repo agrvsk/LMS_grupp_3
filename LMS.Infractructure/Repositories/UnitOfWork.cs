@@ -22,21 +22,34 @@ public class UnitOfWork : IUnitOfWork
 
 
     public UnitOfWork(ApplicationDbContext context
+
             , Lazy<ICourseRepository> aCourseRepository
             , Lazy<IModuleRepository> aModuleRepository
             , Lazy<IModuleActivityRepository> aModuleActivityRepository
             , Lazy<IApplicationUserRepository> aApplicationUserRepository
             , Lazy<ISubmissionRepository> aSsubmissionRepository
             , Lazy<IDocumentRepository> aDocumentRepository
+
         )
     {
         this.context = context ?? throw new ArgumentNullException(nameof(context));
+/*
+        courseRepository = new Lazy<ICourseRepository>(() => new CourseRepository(context));
+        moduleRepository = new Lazy<IModuleRepository>(() => new ModuleRepository(context));
+        moduleActivityRepository = new Lazy<IModuleActivityRepository>(() => new ModuleActivityRepository(context));
+        applicationUserRepository = new Lazy<IApplicationUserRepository>(() => new ApplicationUserRepository(context));
+        submissionRepository = new Lazy<ISubmissionRepository>(() => new SubmissionRepository(context));
+        documentRepository = new Lazy<IDocumentRepository>(() => new DocumentRepository(context));
+*/
+
+
         courseRepository = aCourseRepository;
         moduleRepository = aModuleRepository;
         moduleActivityRepository = aModuleActivityRepository;
         applicationUserRepository = aApplicationUserRepository;
         submissionRepository = aSsubmissionRepository;
         documentRepository = aDocumentRepository;
+
     }
 
     public async Task CompleteAsync() => await context.SaveChangesAsync();
