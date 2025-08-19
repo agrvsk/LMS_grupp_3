@@ -7,9 +7,9 @@ namespace Service.Contracts;
 public interface IModuleActivityService
 {
     Task<List<ModuleActivity>> GetAllModuleActivitiesAsync();
-    Task<List<ModuleActivity>> GetModuleActivitiesByModuleIdAsync(string moduleId);
-    Task<ModuleActivity?> GetModuleActivityByIdAsync(string moduleActivityId);
+    Task<List<ModuleActivity>> GetModuleActivitiesByModuleIdAsync(Guid moduleId);
+    Task<ModuleActivity?> GetModuleActivityByIdAsync(Guid moduleActivityId);
     Task<ModuleActivity> CreateActivityAsync(ModuleActivityCreateDto moduleActivity);
     Task<ModuleActivity> UpdateActivityAsync(ModuleActivityDto moduleActivity);
-    Task<bool> DeleteActivityAsync(string moduleActivityId);
+    Task<bool> DeleteActivityAsync(Guid moduleActivityId);
 }

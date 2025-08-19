@@ -22,7 +22,7 @@ public class DocumentService : IDocumentService
         this.mapper = mapper;
     }
 
-    public async Task<Document?> GetDocumentByIdAsync(string documentId)
+    public async Task<Document?> GetDocumentByIdAsync(Guid documentId)
     {
         return (await uow.DocumentRepository.GetDocumentByIdAsync(documentId));
     }
@@ -30,7 +30,7 @@ public class DocumentService : IDocumentService
     {
         return (await uow.DocumentRepository.GetAllDocumentsAsync());
     }
-    public async Task<List<Document>> GetDocumentsByParentAsync(string parentId, string parentType)
+    public async Task<List<Document>> GetDocumentsByParentAsync(Guid parentId, string parentType)
     {
         return (await uow.DocumentRepository.GetDocumentsByParentAsync(parentId, parentType));
     }
@@ -48,7 +48,7 @@ public class DocumentService : IDocumentService
         await uow.CompleteAsync();
         return document;
     }
-    public async Task<bool> DeleteDocumentAsync(string documentId)
+    public async Task<bool> DeleteDocumentAsync(Guid documentId)
     {
         var document = await uow.DocumentRepository.GetDocumentByIdAsync(documentId);
         if (document != null)

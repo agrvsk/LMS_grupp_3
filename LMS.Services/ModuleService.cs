@@ -28,12 +28,12 @@ public class ModuleService : IModuleService
         return await uow.ModuleRepository.GetAllModulesAsync();
     }
 
-    public async Task<Module?> GetModuleByIdAsync(string moduleId)
+    public async Task<Module?> GetModuleByIdAsync(Guid moduleId)
     {
         return await uow.ModuleRepository.GetModuleByIdAsync(moduleId);
     }
 
-    public async Task<List<Module>> GetModulesByCourseIdAsync(string courseId)
+    public async Task<List<Module>> GetModulesByCourseIdAsync(Guid courseId)
     {
 
         return await uow.ModuleRepository.GetModulesByCourseIdAsync(courseId);
@@ -53,7 +53,7 @@ public class ModuleService : IModuleService
         await uow.CompleteAsync();
         return module;
     }
-    public async Task<bool> DeleteModuleAsync(string moduleId)
+    public async Task<bool> DeleteModuleAsync(Guid moduleId)
     {
         var module = await uow.ModuleRepository.GetModuleByIdAsync(moduleId);
         if (module != null)

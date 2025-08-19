@@ -9,7 +9,7 @@ namespace Domain.Models.Entities;
 
 public class Module
 {
-    public string Id { get; set; }
+    public Guid Id { get; set; }
     [MaxLength(30)]
     [Required]
     public string Name { get; set; }
@@ -17,7 +17,7 @@ public class Module
     public DateTime StartDate { get; set; }
     public DateTime EndDate { get; set; }
 
-    public string CourseId { get; set; }
+    public Guid CourseId { get; set; }
 
     public List<ModuleActivity> ModuleActivities { get; set; } = new List<ModuleActivity>();
 }

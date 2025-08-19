@@ -21,21 +21,21 @@ public class SubmissionRepository : RepositoryBase<Submission>, ISubmissionRepos
         return await FindAllAsync(trackChanges: false).ContinueWith(task => task.Result.ToList());
     }
 
-    public async Task<Submission?> GetSubmissionByIdAsync(string submissionId)
+    public async Task<Submission?> GetSubmissionByIdAsync(Guid submissionId)
     {
         
         return await FindByConditionAsync(s => s.Id == submissionId, trackChanges: false)
             .ContinueWith(task => task.Result.SingleOrDefault());
     }
 
-    public async Task<List<Submission>> GetSubmissionsByApplicationUserIdAsync(string userId)
+    public async Task<List<Submission>> GetSubmissionsByApplicationUserIdAsync(Guid userId)
     {
         
         return await FindByConditionAsync(s => s.ApplicationUserId == userId, trackChanges: false)
             .ContinueWith(task => task.Result.ToList());
     }
 
-    public async Task<List<Submission>> GetSubmissionsByDocumentIdAsync(string documentId)
+    public async Task<List<Submission>> GetSubmissionsByDocumentIdAsync(Guid documentId)
     {
         
         return await FindByConditionAsync(s => s.DocumentId == documentId, trackChanges: false)

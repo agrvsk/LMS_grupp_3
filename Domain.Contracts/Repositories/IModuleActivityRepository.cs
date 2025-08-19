@@ -4,7 +4,7 @@ namespace Domain.Contracts.Repositories;
 
 public interface IModuleActivityRepository: IRepositoryBase<ModuleActivity>
 {
-    Task<ModuleActivity?> GetModuleActivityByIdAsync(string moduleActivityId);
+    Task<ModuleActivity?> GetModuleActivityByIdAsync(Guid moduleActivityId);
     Task<List<ModuleActivity>> GetAllModuleActivitiesAsync();
-    Task<List<ModuleActivity>> GetModuleActivitiesByModuleIdAsync(string moduleId);
+    Task<List<ModuleActivity>> GetModuleActivitiesByModuleIdAsync(Guid moduleId);
 }

@@ -23,7 +23,7 @@ namespace LMS.Presentation.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetCourseById(string id)
+        public async Task<IActionResult> GetCourseById(Guid id)
         {
             var course = await _serviceManager.CourseService.GetCourseByIdAsync(id);
             if (course == null)
@@ -45,7 +45,7 @@ namespace LMS.Presentation.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateCourse(string id, [FromBody] CourseDto courseDto)
+        public async Task<IActionResult> UpdateCourse(Guid id, [FromBody] CourseDto courseDto)
         {
             if (courseDto == null || id != courseDto.Id)
             {
@@ -60,7 +60,7 @@ namespace LMS.Presentation.Controllers
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteCourse(string id)
+        public async Task<IActionResult> DeleteCourse(Guid id)
         {
             var result = await _serviceManager.CourseService.DeleteCourseAsync(id);
             if (!result)

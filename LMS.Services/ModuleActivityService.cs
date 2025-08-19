@@ -23,7 +23,7 @@ public class ModuleActivityService : IModuleActivityService
     }
 
 
-    public async Task<ModuleActivity?> GetModuleActivityByIdAsync(string moduleActivityId)
+    public async Task<ModuleActivity?> GetModuleActivityByIdAsync(Guid moduleActivityId)
     {
         return (await uow.ModuleActivityRepository.GetModuleActivityByIdAsync(moduleActivityId));
     }
@@ -31,7 +31,7 @@ public class ModuleActivityService : IModuleActivityService
     {
         return (await uow.ModuleActivityRepository.GetAllModuleActivitiesAsync());
     }
-    public async Task<List<ModuleActivity>> GetModuleActivitiesByModuleIdAsync(string moduleId)
+    public async Task<List<ModuleActivity>> GetModuleActivitiesByModuleIdAsync(Guid moduleId)
     {
         return (await uow.ModuleActivityRepository.GetModuleActivitiesByModuleIdAsync(moduleId));
     }
@@ -52,7 +52,7 @@ public class ModuleActivityService : IModuleActivityService
         await uow.CompleteAsync();
         return existingActivity;
     }
-    public async Task<bool> DeleteActivityAsync(string moduleActivityId)
+    public async Task<bool> DeleteActivityAsync(Guid moduleActivityId)
     {
         var activity = await uow.ModuleActivityRepository.GetModuleActivityByIdAsync(moduleActivityId);
         if (activity == null)

@@ -24,7 +24,7 @@ namespace LMS.Presentation.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetDocumentById(string id)
+        public async Task<IActionResult> GetDocumentById(Guid id)
         {
             var document = await _serviceManager.DocumentService.GetDocumentByIdAsync(id);
             if (document == null)
@@ -46,7 +46,7 @@ namespace LMS.Presentation.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateDocument(string id, [FromBody] DocumentDto documentDto)
+        public async Task<IActionResult> UpdateDocument(Guid id, [FromBody] DocumentDto documentDto)
         {
             if (documentDto == null || id != documentDto.Id)
             {
@@ -61,7 +61,7 @@ namespace LMS.Presentation.Controllers
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteDocument(string id)
+        public async Task<IActionResult> DeleteDocument(Guid id)
         {
             var result = await _serviceManager.DocumentService.DeleteDocumentAsync(id);
             if (!result)

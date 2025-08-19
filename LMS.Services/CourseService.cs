@@ -23,7 +23,7 @@ public class CourseService : ICourseService
     }
 
 
-    public async Task<Course?> GetCourseByIdAsync(string courseId)
+    public async Task<Course?> GetCourseByIdAsync(Guid courseId)
     {
         return (await uow.CourseRepository.GetCourseByIdAsync(courseId));
     }
@@ -45,7 +45,7 @@ public class CourseService : ICourseService
         await uow.CompleteAsync();
         return course;
     }
-    public async Task<bool> DeleteCourseAsync(string courseId)
+    public async Task<bool> DeleteCourseAsync(Guid courseId)
     {
         var course = await uow.CourseRepository.GetCourseByIdAsync(courseId);
         if (course == null)

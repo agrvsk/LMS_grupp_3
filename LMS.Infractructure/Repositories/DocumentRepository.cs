@@ -15,7 +15,7 @@ public class DocumentRepository: RepositoryBase<Document>, IDocumentRepository
     public DocumentRepository(ApplicationDbContext context) : base(context)
     {
     }
-    public async Task<Document?> GetDocumentByIdAsync(string documentId)
+    public async Task<Document?> GetDocumentByIdAsync(Guid documentId)
     {
         return (await FindByConditionAsync(d => d.Id == documentId, trackChanges: false)).SingleOrDefault();
     }
@@ -23,7 +23,7 @@ public class DocumentRepository: RepositoryBase<Document>, IDocumentRepository
     {
         return (await FindAllAsync(trackChanges: false)).ToList();
     }
-    public async Task<List<Document>> GetDocumentsByParentAsync(string parentId, string parentType)
+    public async Task<List<Document>> GetDocumentsByParentAsync(Guid parentId, string parentType)
     {
         return (await FindByConditionAsync(d => d.ParentId == parentId && d.ParentType==parentType, trackChanges: false)).ToList();
     }

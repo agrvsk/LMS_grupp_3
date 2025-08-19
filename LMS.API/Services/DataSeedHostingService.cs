@@ -106,14 +106,16 @@ public class DataSeedHostingService : IHostedService
     private async Task AddCoursesAsync(int courseAmount, ApplicationDbContext context)
     {
         var faker = new Faker<Course>("sv")
-        .RuleFor(c => c.Name, f => $"{f.Company.CompanyName()} {f.Date.Future(1).Year}") // Ex: "Acme AB 2025"
+        .RuleFor(c => c.Name, f => $"bob") // Ex: "Acme AB 2025"
         .RuleFor(c => c.Description, f => f.Lorem.Sentence(8)) // Slumpmässig beskrivning
         .RuleFor(c => c.StartDate, f => f.Date.FutureOffset(1).DateTime) // Start om 0-1 år
         .RuleFor(c => c.EndDate, (f, c) => c.StartDate.AddMonths(f.Random.Int(3, 12))); // Slut 3-12 mån efter start
+        
+
 
         var courses = faker.Generate(courseAmount);
 
-        await context.Courses.AddRangeAsync(courses);
+        context.Courses.AddRange(courses);
         await context.SaveChangesAsync();
     }
 

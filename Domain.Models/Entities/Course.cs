@@ -9,8 +9,8 @@ namespace Domain.Models.Entities;
 
 public class Course
 {
-    public string? Id { get; set; }
-    [MaxLength(30)]
+    public Guid Id { get; set; }
+    [MaxLength(100)]
     [Required]
     public string Name { get; set; }
     public string Description { get; set; }

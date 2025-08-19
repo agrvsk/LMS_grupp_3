@@ -3,6 +3,6 @@ namespace Domain.Contracts.Repositories;
 
 public interface ICourseRepository : IRepositoryBase<Course>
 {
-    Task<Course?> GetCourseByIdAsync(string courseId);
+    Task<Course?> GetCourseByIdAsync(Guid courseId);
     Task<List<Course>> GetAllCoursesAsync();
 }

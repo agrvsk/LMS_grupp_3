@@ -5,7 +5,7 @@ namespace Service.Contracts;
 public interface ISubmissionService
 {
     Task<List<Submission>> GetAllSubmissionsAsync();
-    Task<Submission?> GetSubmissionByIdAsync(string submissionId);
-    Task<List<Submission>> GetSubmissionsByApplicationUserIdAsync(string userId);
-    Task<List<Submission>> GetSubmissionsByDocumentIdAsync(string documentId);
+    Task<Submission?> GetSubmissionByIdAsync(Guid submissionId);
+    Task<List<Submission>> GetSubmissionsByApplicationUserIdAsync(Guid userId);
+    Task<List<Submission>> GetSubmissionsByDocumentIdAsync(Guid documentId);
 }

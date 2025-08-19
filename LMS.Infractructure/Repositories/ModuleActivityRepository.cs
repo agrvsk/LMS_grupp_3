@@ -16,7 +16,7 @@ public class ModuleActivityRepository: RepositoryBase<ModuleActivity>, IModuleAc
     {
         _context = context;
     }
-    public async Task<ModuleActivity?> GetModuleActivityByIdAsync(string moduleActivityId)
+    public async Task<ModuleActivity?> GetModuleActivityByIdAsync(Guid moduleActivityId)
     {
         return (await FindByConditionAsync(ma => ma.Id == moduleActivityId, trackChanges: false)).SingleOrDefault();
     }
@@ -24,7 +24,7 @@ public class ModuleActivityRepository: RepositoryBase<ModuleActivity>, IModuleAc
     {
         return (await FindAllAsync(trackChanges: false)).ToList();
     }
-    public async Task<List<ModuleActivity>> GetModuleActivitiesByModuleIdAsync(string moduleId)
+    public async Task<List<ModuleActivity>> GetModuleActivitiesByModuleIdAsync(Guid moduleId)
     {
         return (await FindByConditionAsync(ma => ma.ModuleId == moduleId, trackChanges: false)).ToList();
     }

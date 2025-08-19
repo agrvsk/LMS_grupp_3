@@ -26,7 +26,7 @@ namespace LMS.Presentation.Controllers
             return Ok(activities);
         }
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetActivityById(string id)
+        public async Task<IActionResult> GetActivityById(Guid id)
         {
             var activity = await _serviceManager.ModuleActivityService.GetModuleActivityByIdAsync(id);
             if (activity == null)
@@ -42,7 +42,7 @@ namespace LMS.Presentation.Controllers
             return CreatedAtAction(nameof(GetActivityById), new { id = createdActivity.Id }, createdActivity);
         }
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateActivity(string id, [FromBody] ModuleActivityDto activityDto)
+        public async Task<IActionResult> UpdateActivity(Guid id, [FromBody] ModuleActivityDto activityDto)
         {
             if (activityDto == null || id != activityDto.Id)
                 return BadRequest("Activity data is invalid");
@@ -52,7 +52,7 @@ namespace LMS.Presentation.Controllers
             return Ok(updatedActivity);
         }
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteActivity(string id)
+        public async Task<IActionResult> DeleteActivity(Guid id)
         {
             var deleted = await _serviceManager.ModuleActivityService.DeleteActivityAsync(id);
             if (!deleted)

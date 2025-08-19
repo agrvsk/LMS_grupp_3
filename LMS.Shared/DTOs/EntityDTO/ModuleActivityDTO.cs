@@ -10,7 +10,7 @@ namespace LMS.Shared.DTOs.EntityDto
 {
     public record ModuleActivityDto
     {
-        public string Id { get; set; }
+        public Guid Id { get; set; }
         [MaxLength(30)]
         [Required]
         public string Name { get; set; }

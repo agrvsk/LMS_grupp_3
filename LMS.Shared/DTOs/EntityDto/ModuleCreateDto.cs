@@ -10,7 +10,6 @@ namespace LMS.Shared.DTOs.EntityDto
 {
     public record ModuleCreateDto
     {
-        public string Id { get; set; }
         [MaxLength(30)]
         [Required]
         public string Name { get; set; }

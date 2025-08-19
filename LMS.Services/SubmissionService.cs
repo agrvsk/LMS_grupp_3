@@ -24,19 +24,19 @@ public class SubmissionService : ISubmissionService
         return await uow.SubmissionRepository.GetAllSubmissionsAsync();
     }
 
-    public async Task<Submission?> GetSubmissionByIdAsync(string submissionId)
+    public async Task<Submission?> GetSubmissionByIdAsync(Guid submissionId)
     {
 
         return await uow.SubmissionRepository.GetSubmissionByIdAsync(submissionId);
     }
 
-    public async Task<List<Submission>> GetSubmissionsByApplicationUserIdAsync(string userId)
+    public async Task<List<Submission>> GetSubmissionsByApplicationUserIdAsync(Guid userId)
     {
 
         return await uow.SubmissionRepository.GetSubmissionsByApplicationUserIdAsync(userId);
     }
 
-    public async Task<List<Submission>> GetSubmissionsByDocumentIdAsync(string documentId)
+    public async Task<List<Submission>> GetSubmissionsByDocumentIdAsync(Guid documentId)
     {
 
         return await uow.SubmissionRepository.GetSubmissionsByDocumentIdAsync(documentId);
