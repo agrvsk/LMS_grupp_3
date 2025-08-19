@@ -105,7 +105,22 @@ public static class ServiceExtensions
         services.AddScoped<IServiceManager, ServiceManager>();
 
         services.AddScoped<IAuthService, AuthService>();
+        services.AddScoped<ICourseService, CourseService>();
+        services.AddScoped<IModuleActivityService, ModuleActivityService>();
+        services.AddScoped<IModuleService, ModuleService>();
+        services.AddScoped<IDocumentService, DocumentService>();
+        services.AddScoped<ISubmissionService, SubmissionService>();
+        services.AddScoped<IUserService, UserService>();
+
         services.AddScoped(provider => new Lazy<IAuthService>(() => provider.GetRequiredService<IAuthService>()));
+        services.AddLazy<ICourseService>();
+        services.AddLazy<IDocumentService>();
+        services.AddLazy<IModuleActivityService>();
+        services.AddLazy<IModuleService>();
+        services.AddLazy<ISubmissionService>();
+        services.AddLazy<IUserService>();
+
+
     }
 
 
