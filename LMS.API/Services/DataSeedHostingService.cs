@@ -1,5 +1,6 @@
 ﻿using Bogus;
 using LMS.Infractructure.Data;
+using LMS.Infractructure.Repositories;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -48,7 +49,9 @@ public class DataSeedHostingService : IHostedService
             await AddDemoUsersAsync();
             await AddUsersAsync(20);
             await AddCoursesAsync(5, context);
-            
+            await AddDocumentsAsync(context);
+
+
             logger.LogInformation("Seed complete");
         }
         catch (Exception ex)
@@ -101,7 +104,16 @@ public class DataSeedHostingService : IHostedService
             e.UserName = f.Person.Email;
         });
 
-        await AddUserToDb(faker.Generate(nrOfUsers));
+        var users = faker.Generate(nrOfUsers);
+        await AddUserToDb(users);
+
+        foreach (var user in users)
+        {
+            var roleResult = await userManager.AddToRoleAsync(user, StudentRole);
+            if (!roleResult.Succeeded)
+                throw new Exception(string.Join("\n", roleResult.Errors.Select(e => e.Description)));
+        }
+
     }
 
     private async Task AddCoursesAsync(int courseAmount, ApplicationDbContext context)
@@ -159,7 +171,82 @@ public class DataSeedHostingService : IHostedService
 
         
         context.Courses.AddRange(courses);
-        context.SaveChanges();
+        await context.SaveChangesAsync();
+    }
+
+    private async Task AddDocumentsAsync(ApplicationDbContext context)
+    {
+        Random rnd = new();
+        // Document faker
+        var documentFaker = new Faker<Document>("sv")
+            .RuleFor(d => d.Name, f => f.System.FileName())
+            .RuleFor(d => d.Description, f => f.Lorem.Sentence(6))
+            .RuleFor(d => d.UploadDate, f => f.Date.Recent(90)) // last 3 months
+            .RuleFor(d => d.FilePath, f => $"/uploads/{f.System.FileName()}")
+            .RuleFor(d => d.ParentType, f => "Submission")
+            .RuleFor(d => d.Uploader, f => new ApplicationUser
+            {
+                UserName = f.Internet.UserName(),
+                Email = f.Internet.Email(),
+            });
+
+        // Submission faker
+        var submissionFaker = new Faker<Submission>("sv")
+            .RuleFor(s => s.SubmissionDate, f => f.Date.Recent(30)); // last 30 days
+
+        // Attach documents to courses
+        foreach (var course in context.Courses)
+        {
+            var docs = documentFaker.Generate(rnd.Next(2, 4));
+            foreach (var doc in docs)
+            {
+                doc.ParentType = "Course";
+                doc.ParentId = course.Id; 
+            }
+            context.Documents.AddRange(docs);
+        }
+
+        // Attach documents to modules
+        foreach (var module in context.Modules)
+        {
+            var docs = documentFaker.Generate(rnd.Next(2,4));
+            foreach (var doc in docs)
+            {
+                doc.ParentType = "Module";
+                doc.ParentId = module.Id; 
+            }
+            context.Documents.AddRange(docs);
+        }
+
+        // Attach documents to activities
+        foreach (var activity in context.Activities)
+        {
+            var docs = documentFaker.Generate(rnd.Next(2, 4));
+            foreach (var doc in docs)
+            {
+                doc.ParentType = "Activity";
+                doc.ParentId = activity.Id;  
+            }
+            context.Documents.AddRange(docs);
+        }
+
+        // Create submissions
+        var allSubmissions = new List<Submission>();
+        ApplicationUserRepository repository = new(context, userManager);
+        var students = repository.GetUsersByRoleAsync(StudentRole).Result;
+        foreach (var student in students)
+        {
+            var submissions = submissionFaker.Generate(rnd.Next(1, 3));
+            foreach (var submission in submissions)
+            {
+               submission.ApplicationUserId = student.Id;
+               allSubmissions.Add(submission); 
+            }
+            
+        }
+
+        context.Submissions.AddRange(allSubmissions);
+        await context.SaveChangesAsync();
     }
 
     private async Task AddUserToDb(IEnumerable<ApplicationUser> users)
