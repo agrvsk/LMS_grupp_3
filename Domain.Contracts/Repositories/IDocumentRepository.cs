@@ -5,7 +5,7 @@ namespace Domain.Contracts.Repositories;
 
 public interface IDocumentRepository: IRepositoryBase<Document>
 {
-    Task<Document?> GetDocumentById(string documentId);
-    Task<List<Document>> GetAllDocuments();
-    Task<List<Document>> GetDocumentsByParent(string parentId, string parentType);
+    Task<Document?> GetDocumentByIdAsync(Guid documentId);
+    Task<List<Document>> GetAllDocumentsAsync();
+    Task<List<Document>> GetDocumentsByParentAsync(Guid parentId, string parentType);
 }

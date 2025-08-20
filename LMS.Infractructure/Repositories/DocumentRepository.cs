@@ -9,21 +9,21 @@ using LMS.Infractructure.Data;
 
 namespace LMS.Infractructure.Repositories;
 
-public class DocumentRopository: RepositoryBase<Document>, IDocumentRepository
+public class DocumentRepository: RepositoryBase<Document>, IDocumentRepository
 {
 
-    public DocumentRopository(ApplicationDbContext context) : base(context)
+    public DocumentRepository(ApplicationDbContext context) : base(context)
     {
     }
-    public async Task<Document?> GetDocumentById(string documentId)
+    public async Task<Document?> GetDocumentByIdAsync(Guid documentId)
     {
         return (await FindByConditionAsync(d => d.Id == documentId, trackChanges: false)).SingleOrDefault();
     }
-    public async Task<List<Document>> GetAllDocuments()
+    public async Task<List<Document>> GetAllDocumentsAsync()
     {
         return (await FindAllAsync(trackChanges: false)).ToList();
     }
-    public async Task<List<Document>> GetDocumentsByParent(string parentId, string parentType)
+    public async Task<List<Document>> GetDocumentsByParentAsync(Guid parentId, string parentType)
     {
         return (await FindByConditionAsync(d => d.ParentId == parentId && d.ParentType==parentType, trackChanges: false)).ToList();
     }

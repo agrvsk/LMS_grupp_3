@@ -8,8 +8,8 @@ namespace Domain.Models.Entities;
 
 public class Submission
 {
-    public string Id { get; set; }
+    public Guid Id { get; set; }
     public DateTime SubmissionDate { get; set; }
-    public string ApplicationUserId { get; set; } 
-    public string DocumentId { get; set; } 
+    public Guid ApplicationUserId { get; set; } 
+    public Guid DocumentId { get; set; } 
 }

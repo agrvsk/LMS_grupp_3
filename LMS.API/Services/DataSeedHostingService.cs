@@ -46,6 +46,7 @@ public class DataSeedHostingService : IHostedService
         {
             await AddRolesAsync([TeacherRole, StudentRole]);
             await AddDemoUsersAsync();
+            await AddCoursesAsync(5, context);
             await AddUsersAsync(20);
             logger.LogInformation("Seed complete");
         }
@@ -67,6 +68,7 @@ public class DataSeedHostingService : IHostedService
             if (!res.Succeeded) throw new Exception(string.Join("\n", res.Errors));
         }
     }
+
     private async Task AddDemoUsersAsync()
     {
         var teacher = new ApplicationUser
@@ -74,7 +76,7 @@ public class DataSeedHostingService : IHostedService
             UserName = "teacher@test.com",
             Email = "teacher@test.com"
         };
-        
+
         var student = new ApplicationUser
         {
             UserName = "student@test.com",
@@ -99,6 +101,22 @@ public class DataSeedHostingService : IHostedService
         });
 
         await AddUserToDb(faker.Generate(nrOfUsers));
+    }
+
+    private async Task AddCoursesAsync(int courseAmount, ApplicationDbContext context)
+    {
+        var faker = new Faker<Course>("sv")
+        .RuleFor(c => c.Name, f => $"bob") // Ex: "Acme AB 2025"
+        .RuleFor(c => c.Description, f => f.Lorem.Sentence(8)) // Slumpmässig beskrivning
+        .RuleFor(c => c.StartDate, f => f.Date.FutureOffset(1).DateTime) // Start om 0-1 år
+        .RuleFor(c => c.EndDate, (f, c) => c.StartDate.AddMonths(f.Random.Int(3, 12))); // Slut 3-12 mån efter start
+        
+
+
+        var courses = faker.Generate(courseAmount);
+
+        context.Courses.AddRange(courses);
+        await context.SaveChangesAsync();
     }
 
     private async Task AddUserToDb(IEnumerable<ApplicationUser> users)

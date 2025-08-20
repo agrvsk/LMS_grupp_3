@@ -15,30 +15,30 @@ public class SubmissionRepository : RepositoryBase<Submission>, ISubmissionRepos
     {
     }
 
-    public async Task<List<Submission>> GetAllSubmissions()
+    public async Task<List<Submission>> GetAllSubmissionsAsync()
     {
         
         return await FindAllAsync(trackChanges: false).ContinueWith(task => task.Result.ToList());
     }
 
-    public async Task<Submission?> GetSubmissionById(string submissionId)
+    public async Task<Submission?> GetSubmissionByIdAsync(Guid submissionId)
     {
         
         return await FindByConditionAsync(s => s.Id == submissionId, trackChanges: false)
             .ContinueWith(task => task.Result.SingleOrDefault());
     }
 
-    public Task<List<Submission>> GetSubmissionsByApplicationUserId(string userId)
+    public async Task<List<Submission>> GetSubmissionsByApplicationUserIdAsync(Guid userId)
     {
         
-        return FindByConditionAsync(s => s.ApplicationUserId == userId, trackChanges: false)
+        return await FindByConditionAsync(s => s.ApplicationUserId == userId, trackChanges: false)
             .ContinueWith(task => task.Result.ToList());
     }
 
-    public Task<List<Submission>> GetSubmissionsByDocumentId(string documentId)
+    public async Task<List<Submission>> GetSubmissionsByDocumentIdAsync(Guid documentId)
     {
         
-        return FindByConditionAsync(s => s.DocumentId == documentId, trackChanges: false)
+        return await FindByConditionAsync(s => s.DocumentId == documentId, trackChanges: false)
             .ContinueWith(task => task.Result.ToList());
     }
 }

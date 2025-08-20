@@ -81,7 +81,23 @@ public static class ServiceExtensions
 
     public static void AddRepositories(this IServiceCollection services)
     {
+
+        services.AddScoped<ICourseRepository, CourseRepository>();
+        services.AddScoped<IModuleRepository, ModuleRepository>();
+        services.AddScoped<IModuleActivityRepository, ModuleActivityRepository>();
+        services.AddScoped<IApplicationUserRepository, ApplicationUserRepository>();
+        services.AddScoped<ISubmissionRepository, SubmissionRepository>();
+        services.AddScoped<IDocumentRepository, DocumentRepository>();
+
+        services.AddLazy<ICourseRepository>();
+        services.AddLazy<IModuleRepository>();
+        services.AddLazy<IModuleActivityRepository>();
+        services.AddLazy<IApplicationUserRepository>();
+        services.AddLazy<ISubmissionRepository>();
+        services.AddLazy<IDocumentRepository>();
+        
         services.AddScoped<IUnitOfWork, UnitOfWork>();
+
     }
 
     public static void AddServiceLayer(this IServiceCollection services)
@@ -89,6 +105,33 @@ public static class ServiceExtensions
         services.AddScoped<IServiceManager, ServiceManager>();
 
         services.AddScoped<IAuthService, AuthService>();
+        services.AddScoped<ICourseService, CourseService>();
+        services.AddScoped<IModuleActivityService, ModuleActivityService>();
+        services.AddScoped<IModuleService, ModuleService>();
+        services.AddScoped<IDocumentService, DocumentService>();
+        services.AddScoped<ISubmissionService, SubmissionService>();
+        services.AddScoped<IUserService, UserService>();
+
         services.AddScoped(provider => new Lazy<IAuthService>(() => provider.GetRequiredService<IAuthService>()));
+        services.AddLazy<ICourseService>();
+        services.AddLazy<IDocumentService>();
+        services.AddLazy<IModuleActivityService>();
+        services.AddLazy<IModuleService>();
+        services.AddLazy<ISubmissionService>();
+        services.AddLazy<IUserService>();
+
+
+    }
+
+
+
+}
+
+public static class ServiceCollectionExtensions
+{
+    public static IServiceCollection AddLazy<TService>(this IServiceCollection services) where TService : class
+    {
+        return services.AddScoped(provider => new Lazy<TService>(() => provider.GetRequiredService<TService>()));
     }
 }
+
