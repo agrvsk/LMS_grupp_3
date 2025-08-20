@@ -17,8 +17,8 @@ public class UserService : IUserService
 
     public UserService(IUnitOfWork uow, UserManager<ApplicationUser> userManager)
     {
-        uow = uow;
-        userManager = userManager;
+        this.uow = uow;
+        this.userManager = userManager;
     }
 
 
