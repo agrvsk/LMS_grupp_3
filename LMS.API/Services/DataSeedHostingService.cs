@@ -46,8 +46,9 @@ public class DataSeedHostingService : IHostedService
         {
             await AddRolesAsync([TeacherRole, StudentRole]);
             await AddDemoUsersAsync();
-            await AddCoursesAsync(5, context);
             await AddUsersAsync(20);
+            await AddCoursesAsync(5, context);
+            
             logger.LogInformation("Seed complete");
         }
         catch (Exception ex)
@@ -128,7 +129,7 @@ public class DataSeedHostingService : IHostedService
             .RuleFor(m => m.ModuleActivities, (f, m) =>
             {
                 var activities = moduleActivityFaker.Generate(f.Random.Int(2, 5));
-                // EF/SQL will fill ModuleId when saved
+                
                 return activities;
             });
 
@@ -141,14 +142,22 @@ public class DataSeedHostingService : IHostedService
             .RuleFor(c => c.Modules, (f, c) =>
             {
                 var modules = moduleFaker.Generate(f.Random.Int(2, 4));
-                // EF/SQL will fill CourseId when saved
+                
                 return modules;
+            })
+            .RuleFor(c => c.Students, (f, c) =>
+            {
+                var students = context.Users
+                    .OrderBy(_ => Guid.NewGuid()) // Randomize order
+                    .Take(f.Random.Int(2, 4)) // Random number of students
+                    .ToList();
+                return students;
             });
 
-        courseAmount = 5; // how many courses you want
+        
         var courses = courseFaker.Generate(courseAmount);
 
-        // Add to context
+        
         context.Courses.AddRange(courses);
         context.SaveChanges();
     }
