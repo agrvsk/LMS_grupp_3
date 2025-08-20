@@ -1,6 +1,8 @@
 ﻿@page "/courses/{Id}"
+@using LMS.Blazor.Client.Services
 @using Microsoft.AspNetCore.Authorization
 @rendermode InteractiveWebAssembly
+@inject IApiService myApi
 
 @attribute [Authorize]
 
@@ -44,6 +46,12 @@
 </div>
 
 @code {
-	[SupplyParameterFromQuery]
-	[Parameter] public string Id { get; set; }
+    [SupplyParameterFromQuery]
+    [Parameter] public string Id { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        
+    }
+
 }

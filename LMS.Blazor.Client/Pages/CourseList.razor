@@ -1,6 +1,10 @@
 ﻿@page "/courses"
+@using LMS.Blazor.Client.Services
+@using LMS.Shared.DTOs.EntityDto
 @using Microsoft.AspNetCore.Authorization
 @rendermode InteractiveWebAssembly
+
+
 <h3>CourseList</h3>
 
 
@@ -15,6 +19,18 @@
         <CourseComponent />
     </Authorized>
 </AuthorizeView>
-@code {
-	
+@code 
+{
+    [Inject]
+    private IApiService myApi { get; set; } = default!;
+    private IEnumerable<CourseDto> Courses { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+    //    Loading = true;
+        Courses = (await myApi.CallApiAsync<IEnumerable<CourseDto>>()).ToList();
+    //    Loading = false;
+
+    }
+
 }
