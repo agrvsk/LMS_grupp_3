@@ -9,6 +9,6 @@ public interface IApplicationUserRepository: IRepositoryBase<ApplicationUser>
     Task<List<ApplicationUser>> GetAllUsersAsync();
     Task<List<string>> GetRolesInUserAsync(ApplicationUser user);
     Task<List<ApplicationUser>> GetUsersByRoleAsync(string roleName);
-    Task<List<ApplicationUser>> GetUsersByCourseIdAsync(string courseId);
+    Task<List<ApplicationUser>> GetUsersByCourseIdAsync(Guid courseId);
 
 }

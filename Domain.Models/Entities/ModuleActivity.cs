@@ -5,7 +5,7 @@ namespace Domain.Models.Entities;
 public class ModuleActivity
 {
     public Guid Id { get; set; }
-    [MaxLength(30)]
+    [MaxLength(100)]
     [Required]
     public string Name { get; set; }
     public string Description { get; set; }
