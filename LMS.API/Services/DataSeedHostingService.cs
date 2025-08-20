@@ -1,4 +1,5 @@
 ﻿using Bogus;
+using Domain.Models.Entities;
 using LMS.Infractructure.Data;
 using LMS.Infractructure.Repositories;
 using Microsoft.AspNetCore.Identity;
@@ -141,7 +142,7 @@ public class DataSeedHostingService : IHostedService
             .RuleFor(m => m.ModuleActivities, (f, m) =>
             {
                 var activities = moduleActivityFaker.Generate(f.Random.Int(2, 5));
-                
+
                 return activities;
             });
 
@@ -154,7 +155,7 @@ public class DataSeedHostingService : IHostedService
             .RuleFor(c => c.Modules, (f, c) =>
             {
                 var modules = moduleFaker.Generate(f.Random.Int(2, 4));
-                
+
                 return modules;
             })
             .RuleFor(c => c.Students, (f, c) =>
@@ -166,10 +167,10 @@ public class DataSeedHostingService : IHostedService
                 return students;
             });
 
-        
+
         var courses = courseFaker.Generate(courseAmount);
 
-        
+
         context.Courses.AddRange(courses);
         await context.SaveChangesAsync();
     }
@@ -192,7 +193,13 @@ public class DataSeedHostingService : IHostedService
 
         // Submission faker
         var submissionFaker = new Faker<Submission>("sv")
-            .RuleFor(s => s.SubmissionDate, f => f.Date.Recent(30)); // last 30 days
+            .RuleFor(s => s.SubmissionDate, f => f.Date.Recent(30)) // last 30 days
+            .RuleFor(s => s.SubmissionDocument, (f,s) =>
+            {
+                var doc = documentFaker.Generate();
+                doc.UploadDate = s.SubmissionDate;
+                return doc;
+            });
 
         // Attach documents to courses
         foreach (var course in context.Courses)
@@ -201,7 +208,7 @@ public class DataSeedHostingService : IHostedService
             foreach (var doc in docs)
             {
                 doc.ParentType = "Course";
-                doc.ParentId = course.Id; 
+                doc.ParentId = course.Id;
             }
             context.Documents.AddRange(docs);
         }
@@ -209,11 +216,11 @@ public class DataSeedHostingService : IHostedService
         // Attach documents to modules
         foreach (var module in context.Modules)
         {
-            var docs = documentFaker.Generate(rnd.Next(2,4));
+            var docs = documentFaker.Generate(rnd.Next(2, 4));
             foreach (var doc in docs)
             {
                 doc.ParentType = "Module";
-                doc.ParentId = module.Id; 
+                doc.ParentId = module.Id;
             }
             context.Documents.AddRange(docs);
         }
@@ -225,7 +232,7 @@ public class DataSeedHostingService : IHostedService
             foreach (var doc in docs)
             {
                 doc.ParentType = "Activity";
-                doc.ParentId = activity.Id;  
+                doc.ParentId = activity.Id;
             }
             context.Documents.AddRange(docs);
         }
@@ -236,13 +243,20 @@ public class DataSeedHostingService : IHostedService
         var students = repository.GetUsersByRoleAsync(StudentRole).Result;
         foreach (var student in students)
         {
-            var submissions = submissionFaker.Generate(rnd.Next(1, 3));
-            foreach (var submission in submissions)
+            var doc = documentFaker.Generate();
+            doc.Id = Guid.NewGuid();
+            var submission = new Submission
             {
-               submission.ApplicationUserId = student.Id;
-               allSubmissions.Add(submission); 
-            }
-            
+                SubmissionDocument = doc,
+                SubmissionDate = doc.UploadDate,
+                DocumentId = doc.Id,
+                ApplicationUserId = student.Id,
+                Id = Guid.NewGuid()
+            };
+            doc.ParentId = submission.Id;
+            submission.SubmissionDocument = doc;
+
+            allSubmissions.Add(submission);
         }
 
         context.Submissions.AddRange(allSubmissions);
