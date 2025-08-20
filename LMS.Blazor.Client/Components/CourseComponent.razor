@@ -1,4 +1,5 @@
-﻿@inject NavigationManager NavigationManager
+﻿@using LMS.Shared.DTOs.EntityDto
+@inject NavigationManager NavigationManager
 
 @* TODO: EDIT AND ADD PAGES *@
 
@@ -28,7 +29,13 @@
 </div>
 
 @code {
+	//[Parameter]
+	//public string CourseId { get; set; } = string.Empty;
+	[Parameter]
+	public CourseDto Course { get; set; }
 
+
+/*
 	FakeCourseDto Course = new FakeCourseDto
 	{
 		Id = "C001",
@@ -45,4 +52,5 @@
 		public DateTime StartDate { get; set; }
 		public DateTime EndDate { get; set; }
 	}
+*/
 }

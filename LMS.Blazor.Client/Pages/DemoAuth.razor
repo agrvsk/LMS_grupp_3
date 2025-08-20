@@ -2,6 +2,7 @@
 @rendermode InteractiveWebAssembly
 
 @using LMS.Blazor.Client.Services
+@using LMS.Shared.DTOs.EntityDto
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.Authorization
 @using System.Security.Claims
@@ -11,6 +12,8 @@
 <h1>Demo calling a protected endpoint in LMS.API</h1>
 
 <button class="btn btn-primary" @onclick="CallAPIAsync">Call API</button>
+<button class="btn btn-primary" @onclick="CallCourseAPIAsync">Call Course API</button>
+
 <AuthMessage/>
 
 <AuthorizeView Roles="Teacher">
@@ -50,10 +53,16 @@ else
     [Inject]
     private AuthenticationStateProvider AuthenticationStateProvider { get; set; } = default!;
 
-    private List<DemoAuthDto>? demo; 
+    private List<DemoAuthDto>? demo;
+    private List<CourseDto>? courses;
 
     private async Task CallAPIAsync()
     {
         demo = (await _apiService.CallApiAsync<IEnumerable<DemoAuthDto>>())?.ToList();
-    } 
+    }
+    private async Task CallCourseAPIAsync()
+    {
+        courses = (await _apiService.CallApiAsync<IEnumerable<CourseDto>>(""))?.ToList();
+		Console.WriteLine("Courses fetched: " + (courses?.Count ?? 0));
+    }
 }

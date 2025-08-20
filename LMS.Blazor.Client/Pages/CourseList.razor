@@ -3,34 +3,77 @@
 @using LMS.Shared.DTOs.EntityDto
 @using Microsoft.AspNetCore.Authorization
 @rendermode InteractiveWebAssembly
-
+@attribute [Authorize]
 
 <h3>CourseList</h3>
 
-
-@attribute [Authorize]
-
 <AuthorizeView Roles="Teacher">
     <Authorized>
-        <p>LIST ALL COURSES HERE PLS SENPAI</p>
-		<CourseComponent />
-        <CourseComponent />
-        <CourseComponent />
-        <CourseComponent />
+        @if (Loading)
+        {
+            <p>Loading courses...</p>
+        }
+        else
+        {
+            @if (Courses != null)
+            {
+                @foreach (var course in Courses)
+                {
+                    <CourseComponent Course=course />
+                }
+            }
+            else
+            {
+                <p>Not Loading courses?...</p>
+            }
+
+        }
     </Authorized>
 </AuthorizeView>
+
 @code 
 {
+    public bool Loading { get; set; } = true;
+
     [Inject]
     private IApiService myApi { get; set; } = default!;
-    private IEnumerable<CourseDto> Courses { get; set; }
+
+    [Inject]
+    private AuthenticationStateProvider Auth { get; set; } = default!;
+
+    private IEnumerable<CourseDto>? Courses { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
-    //    Loading = true;
-        Courses = (await myApi.CallApiAsync<IEnumerable<CourseDto>>()).ToList();
-    //    Loading = false;
+
+        var state = await Auth.GetAuthenticationStateAsync();
+
+        if (!(state.User.Identity?.IsAuthenticated) ?? false)
+        {
+            return;
+        }
+        await LoadCourse();
 
     }
+
+    private async Task LoadCourse()
+    {
+        try
+        {
+            Loading = true;
+
+            var response = await myApi.CallApiAsync<IEnumerable<CourseDto>>("courses");
+            Courses = response?.ToList();
+
+            Loading = false;
+
+        }
+        catch (Exception ex)
+        {
+            Loading = false;
+
+        }
+    }
+
 
 }
