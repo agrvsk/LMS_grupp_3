@@ -55,7 +55,7 @@ public class UserService : IUserService
         //return usersInRole.ToList();
     }
 
-    public async Task<List<ApplicationUser>> GetUsersByCourseIdAsync(string courseId)
+    public async Task<List<ApplicationUser>> GetUsersByCourseIdAsync(Guid courseId)
     {
         return await uow.ApplicationUserRepository.GetUsersByCourseIdAsync(courseId);
     }

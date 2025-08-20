@@ -105,18 +105,52 @@ public class DataSeedHostingService : IHostedService
 
     private async Task AddCoursesAsync(int courseAmount, ApplicationDbContext context)
     {
-        var faker = new Faker<Course>("sv")
-        .RuleFor(c => c.Name, f => $"bob") // Ex: "Acme AB 2025"
-        .RuleFor(c => c.Description, f => f.Lorem.Sentence(8)) // Slumpmässig beskrivning
-        .RuleFor(c => c.StartDate, f => f.Date.FutureOffset(1).DateTime) // Start om 0-1 år
-        .RuleFor(c => c.EndDate, (f, c) => c.StartDate.AddMonths(f.Random.Int(3, 12))); // Slut 3-12 mån efter start
-        
+        // ActivityType faker
+        var activityTypeFaker = new Faker<ActivityType>("sv")
+            .RuleFor(a => a.Name, f => f.PickRandom(new[] { "Lecture", "Seminar", "Assignment", "Exam", "Project" }));
 
+        var activityTypes = activityTypeFaker.Generate(5);
 
-        var courses = faker.Generate(courseAmount);
+        // ModuleActivity faker
+        var moduleActivityFaker = new Faker<ModuleActivity>("sv")
+            .RuleFor(ma => ma.Name, f => f.Commerce.ProductName())
+            .RuleFor(ma => ma.Description, f => f.Lorem.Sentence(6))
+            .RuleFor(ma => ma.StartDate, f => f.Date.FutureOffset(1).DateTime)
+            .RuleFor(ma => ma.EndDate, (f, ma) => ma.StartDate.AddDays(f.Random.Int(1, 30)))
+            .RuleFor(ma => ma.Type, f => f.PickRandom(activityTypes));
 
+        // Module faker
+        var moduleFaker = new Faker<Module>("sv")
+            .RuleFor(m => m.Name, f => f.Commerce.Department())
+            .RuleFor(m => m.Description, f => f.Lorem.Sentence(8))
+            .RuleFor(m => m.StartDate, f => f.Date.FutureOffset(1).DateTime)
+            .RuleFor(m => m.EndDate, (f, m) => m.StartDate.AddMonths(f.Random.Int(1, 6)))
+            .RuleFor(m => m.ModuleActivities, (f, m) =>
+            {
+                var activities = moduleActivityFaker.Generate(f.Random.Int(2, 5));
+                // EF/SQL will fill ModuleId when saved
+                return activities;
+            });
+
+        // Course faker
+        var courseFaker = new Faker<Course>("sv")
+            .RuleFor(c => c.Name, f => f.Company.CompanyName())
+            .RuleFor(c => c.Description, f => f.Lorem.Sentence(10))
+            .RuleFor(c => c.StartDate, f => f.Date.FutureOffset(1).DateTime)
+            .RuleFor(c => c.EndDate, (f, c) => c.StartDate.AddMonths(f.Random.Int(3, 12)))
+            .RuleFor(c => c.Modules, (f, c) =>
+            {
+                var modules = moduleFaker.Generate(f.Random.Int(2, 4));
+                // EF/SQL will fill CourseId when saved
+                return modules;
+            });
+
+        courseAmount = 5; // how many courses you want
+        var courses = courseFaker.Generate(courseAmount);
+
+        // Add to context
         context.Courses.AddRange(courses);
-        await context.SaveChangesAsync();
+        context.SaveChanges();
     }
 
     private async Task AddUserToDb(IEnumerable<ApplicationUser> users)

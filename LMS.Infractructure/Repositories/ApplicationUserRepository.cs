@@ -53,7 +53,7 @@ public class ApplicationUserRepository:RepositoryBase<ApplicationUser>, IApplica
         return usersInRole.ToList();
     }
 
-    public async Task<List<ApplicationUser>> GetUsersByCourseIdAsync(string courseId)
+    public async Task<List<ApplicationUser>> GetUsersByCourseIdAsync(Guid courseId)
     {
         return await FindByConditionAsync(c => c.CourseId == courseId, trackChanges: false)
             .ContinueWith(task => task.Result.ToList());
