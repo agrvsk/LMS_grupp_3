@@ -5,9 +5,9 @@ namespace Service.Contracts;
 
 public interface ICourseService
 {
-    Task<List<Course>> GetAllCoursesAsync();
+    Task<List<CourseDto>> GetAllCoursesAsync();
     Task<CourseDto?> GetCourseByIdAsync(Guid courseId);
     Task<Course> CreateCourseAsync(CourseCreateDto course);
-    Task<Course> UpdateCourseAsync(CourseDto course);
+    Task<bool> UpdateCourseAsync(CourseDto course);
     Task<bool> DeleteCourseAsync(Guid courseId);
 }

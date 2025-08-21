@@ -5,9 +5,9 @@ namespace Service.Contracts;
 
 public interface IDocumentService
 {
-    Task<List<Document>> GetAllDocumentsAsync();
-    Task<Document?> GetDocumentByIdAsync(Guid documentId);
-    Task<List<Document>> GetDocumentsByParentAsync(Guid parentId, string parentType);
+    Task<List<DocumentDto>> GetAllDocumentsAsync();
+    Task<DocumentDto?> GetDocumentByIdAsync(Guid documentId);
+    Task<List<DocumentDto>> GetDocumentsByParentAsync(Guid parentId, string parentType);
     Task<Document> CreateDocumentAsync(DocumentCreateDto document);
     Task<Document> UpdateDocumentAsync(DocumentDto document);
     Task<bool> DeleteDocumentAsync(Guid documentId);

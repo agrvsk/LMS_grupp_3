@@ -27,9 +27,11 @@ public class CourseService : ICourseService
     {
         return mapper.Map<CourseDto>(await uow.CourseRepository.GetCourseByIdAsync(courseId));
     }
-    public async Task<List<Course>> GetAllCoursesAsync()
+    public async Task<List<CourseDto>> GetAllCoursesAsync()
     {
-        return (await uow.CourseRepository.GetAllCoursesAsync());
+        var courses = await uow.CourseRepository.GetAllCoursesAsync();
+        var courseDtos = mapper.Map<List<CourseDto>>(courses);
+        return courseDtos;
     }
     public async Task<Course> CreateCourseAsync(CourseCreateDto courseDto)
     {
@@ -38,12 +40,12 @@ public class CourseService : ICourseService
         await uow.CompleteAsync();
         return course;
     }
-    public async Task<Course> UpdateCourseAsync(CourseDto courseDto)
+    public async Task<bool> UpdateCourseAsync(CourseDto courseDto)
     {
         var course = mapper.Map<Course>(courseDto);
         uow.CourseRepository.Update(course);
         await uow.CompleteAsync();
-        return course;
+        return true;
     }
     public async Task<bool> DeleteCourseAsync(Guid courseId)
     {

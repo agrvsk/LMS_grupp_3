@@ -23,14 +23,18 @@ public class ModuleService : IModuleService
     }
 
 
-    public async Task<List<Module>> GetAllModulesAsync()
+    public async Task<List<ModuleDto>> GetAllModulesAsync()
     {
-        return await uow.ModuleRepository.GetAllModulesAsync();
+        var modules = await uow.ModuleRepository.GetAllModulesAsync();
+        var moduleDtos = mapper.Map<List<ModuleDto>>(modules);
+        return moduleDtos;
     }
 
-    public async Task<Module?> GetModuleByIdAsync(Guid moduleId)
+    public async Task<ModuleDto?> GetModuleByIdAsync(Guid moduleId)
     {
-        return await uow.ModuleRepository.GetModuleByIdAsync(moduleId);
+        var module = await uow.ModuleRepository.GetModuleByIdAsync(moduleId);
+        var moduleDto = mapper.Map<ModuleDto>(module);
+        return moduleDto;
     }
 
     public async Task<List<ModuleDto>> GetModulesByCourseIdAsync(Guid courseId)

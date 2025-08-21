@@ -22,17 +22,23 @@ public class DocumentService : IDocumentService
         this.mapper = mapper;
     }
 
-    public async Task<Document?> GetDocumentByIdAsync(Guid documentId)
+    public async Task<DocumentDto?> GetDocumentByIdAsync(Guid documentId)
     {
-        return (await uow.DocumentRepository.GetDocumentByIdAsync(documentId));
+        var document = await uow.DocumentRepository.GetDocumentByIdAsync(documentId);
+        var documentDto = mapper.Map<DocumentDto>(document);
+        return documentDto;
     }
-    public async Task<List<Document>> GetAllDocumentsAsync()
+    public async Task<List<DocumentDto>> GetAllDocumentsAsync()
     {
-        return (await uow.DocumentRepository.GetAllDocumentsAsync());
+        var documents = await uow.DocumentRepository.GetAllDocumentsAsync();
+        var documentDtos = mapper.Map<List<DocumentDto>>(documents);
+        return documentDtos;
     }
-    public async Task<List<Document>> GetDocumentsByParentAsync(Guid parentId, string parentType)
+    public async Task<List<DocumentDto>> GetDocumentsByParentAsync(Guid parentId, string parentType)
     {
-        return (await uow.DocumentRepository.GetDocumentsByParentAsync(parentId, parentType));
+        var documents = await uow.DocumentRepository.GetDocumentsByParentAsync(parentId, parentType);
+        var documentDtos = mapper.Map<List<DocumentDto>>(documents);
+        return documentDtos;
     }
     public async Task<Document?> CreateDocumentAsync(DocumentCreateDto documentDto)
     {

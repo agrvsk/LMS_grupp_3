@@ -23,17 +23,24 @@ public class ModuleActivityService : IModuleActivityService
     }
 
 
-    public async Task<ModuleActivity?> GetModuleActivityByIdAsync(Guid moduleActivityId)
+    public async Task<ModuleActivityDto?> GetModuleActivityByIdAsync(Guid moduleActivityId)
     {
-        return (await uow.ModuleActivityRepository.GetModuleActivityByIdAsync(moduleActivityId));
+        var moduleActivity = await uow.ModuleActivityRepository.GetModuleActivityByIdAsync(moduleActivityId);
+        var moduleActivityDto = mapper.Map<ModuleActivityDto>(moduleActivity);
+
+        return moduleActivityDto;
     }
-    public async Task<List<ModuleActivity>> GetAllModuleActivitiesAsync()
+    public async Task<List<ModuleActivityDto>> GetAllModuleActivitiesAsync()
     {
-        return (await uow.ModuleActivityRepository.GetAllModuleActivitiesAsync());
+        var moduleActivities = await uow.ModuleActivityRepository.GetAllModuleActivitiesAsync();
+        var moduleActivityDtos = mapper.Map<List<ModuleActivityDto>>(moduleActivities);
+        return moduleActivityDtos;
     }
-    public async Task<List<ModuleActivity>> GetModuleActivitiesByModuleIdAsync(Guid moduleId)
+    public async Task<List<ModuleActivityDto>> GetModuleActivitiesByModuleIdAsync(Guid moduleId)
     {
-        return (await uow.ModuleActivityRepository.GetModuleActivitiesByModuleIdAsync(moduleId));
+        var moduleActivities = await uow.ModuleActivityRepository.GetModuleActivitiesByModuleIdAsync(moduleId);
+        var moduleActivityDtos = mapper.Map<List<ModuleActivityDto>>(moduleActivities);
+        return moduleActivityDtos;
     }
     public async Task<ModuleActivity> CreateActivityAsync(ModuleActivityCreateDto moduleActivity)
     {
