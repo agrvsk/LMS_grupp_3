@@ -24,6 +24,13 @@ namespace LMS.Presentation.Controllers
             var modules = await _serviceManager.ModuleService.GetAllModulesAsync();
             return Ok(modules);
         }
+        [HttpGet]
+        [Route("course/{courseId}")]
+        public async Task<IActionResult> GetModulesByCourseId(Guid courseId)
+        {
+            var modules = await _serviceManager.ModuleService.GetModulesByCourseIdAsync(courseId);
+            return Ok(modules);
+        }
         [HttpGet("{id}")]
         public async Task<IActionResult> GetModuleById(Guid id)
         {
