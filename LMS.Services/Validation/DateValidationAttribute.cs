@@ -62,14 +62,14 @@ public class DateValidationAttribute : ValidationAttribute
             return ValidationResult.Success;
             //success = OverlappingPeriods(min, max, courseSession.Course.StartDate, courseSession.Course.EndDate);
         }
-        else if (validationContext.ObjectInstance is ModuleActivity)
+        else if (validationContext.ObjectInstance is ModuleActivityDto)
         {
             
-            var moduleActivity = (ModuleActivity)validationContext.ObjectInstance;
+            var moduleActivity = (ModuleActivityDto)validationContext.ObjectInstance;
             min = moduleActivity.StartDate;
             max = moduleActivity.EndDate;
             if(! validateDates(min, max)) return new ValidationResult($"{message}");
-            List<ModuleActivity> activities = serviceManager.ModuleActivityService.GetModuleActivitiesByModuleIdAsync(moduleActivity.ModuleId).Result;
+            List<ModuleActivityDto> activities = serviceManager.ModuleActivityService.GetModuleActivitiesByModuleIdAsync(moduleActivity.Id).Result;
             foreach (var activity in activities)
             {
                 if (activity.Id != moduleActivity.Id) // Exclude the current activity from the check

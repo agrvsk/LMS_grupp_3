@@ -1,6 +1,7 @@
 ﻿using Domain.Contracts.Repositories;
 using LMS.Shared.DTOs.EntityDto;
 using LMS.Shared.DTOs.EntityDTO;
+using Service.Contracts;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace LMS.Services;
 
-public class ScheduleService
+public class ScheduleService : IScheduleService
 {
     private readonly IUnitOfWork uow;
     private readonly ServiceManager sm;
@@ -33,7 +34,7 @@ public class ScheduleService
             Modules = modules,
             ModuleActivities = moduleActivities
         };
-        
+
 
     }
 
