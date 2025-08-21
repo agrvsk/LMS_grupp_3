@@ -26,4 +26,22 @@ public class ClientApiService(IHttpClientFactory httpClientFactory, NavigationMa
         var demoDtos = await JsonSerializer.DeserializeAsync<T>(await response.Content.ReadAsStreamAsync(), _jsonSerializerOptions, CancellationToken.None) ?? default;
         return demoDtos;
     }
+    public async Task<T?> CallApiAsync<T>(string sRouting)
+    {
+        var requestMessage = new HttpRequestMessage(HttpMethod.Get, $"proxy?endpoint={sRouting}");
+        var response = await httpClient.SendAsync(requestMessage);
+
+        if (response.StatusCode == System.Net.HttpStatusCode.Forbidden
+           || response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+        {
+            navigationManager.NavigateTo("AccessDenied");
+        }
+
+        response.EnsureSuccessStatusCode();
+
+        var demoDtos = await JsonSerializer.DeserializeAsync<T>(await response.Content.ReadAsStreamAsync(), _jsonSerializerOptions, CancellationToken.None) ?? default;
+        return demoDtos;
+    }
+
+
 }
