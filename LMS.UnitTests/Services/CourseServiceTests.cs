@@ -126,7 +126,7 @@ namespace LMS.UnitTests.Services
             var result = await _service.UpdateCourseAsync(dto);
 
             // Verify that the mapper was called correctly
-            Assert.Equal(mappedCourse, result);
+            Assert.True(result);
 
             // Verify that the repository methods were called once
             MockCourseRepo.Verify(r => r.Update(mappedCourse), Times.Once);
