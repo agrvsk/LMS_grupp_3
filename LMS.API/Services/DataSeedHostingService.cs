@@ -184,7 +184,7 @@ public class DataSeedHostingService : IHostedService
             .RuleFor(d => d.Description, f => f.Lorem.Sentence(6))
             .RuleFor(d => d.UploadDate, f => f.Date.Recent(90)) // last 3 months
             .RuleFor(d => d.FilePath, f => $"/uploads/{f.System.FileName()}")
-            .RuleFor(d => d.ParentType, f => "Submission")
+            .RuleFor(d => d.ParentType, f => "submission")
             .RuleFor(d => d.Uploader, f => new ApplicationUser
             {
                 UserName = f.Internet.UserName(),
@@ -207,7 +207,7 @@ public class DataSeedHostingService : IHostedService
             var docs = documentFaker.Generate(rnd.Next(2, 4));
             foreach (var doc in docs)
             {
-                doc.ParentType = "Course";
+                doc.ParentType = "course";
                 doc.ParentId = course.Id;
             }
             context.Documents.AddRange(docs);
@@ -219,7 +219,7 @@ public class DataSeedHostingService : IHostedService
             var docs = documentFaker.Generate(rnd.Next(2, 4));
             foreach (var doc in docs)
             {
-                doc.ParentType = "Module";
+                doc.ParentType = "module";
                 doc.ParentId = module.Id;
             }
             context.Documents.AddRange(docs);
@@ -231,7 +231,7 @@ public class DataSeedHostingService : IHostedService
             var docs = documentFaker.Generate(rnd.Next(2, 4));
             foreach (var doc in docs)
             {
-                doc.ParentType = "Activity";
+                doc.ParentType = "activity";
                 doc.ParentId = activity.Id;
             }
             context.Documents.AddRange(docs);

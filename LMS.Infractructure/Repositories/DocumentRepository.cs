@@ -25,6 +25,6 @@ public class DocumentRepository: RepositoryBase<Document>, IDocumentRepository
     }
     public async Task<List<Document>> GetDocumentsByParentAsync(Guid parentId, string parentType)
     {
-        return (await FindByConditionAsync(d => d.ParentId == parentId && d.ParentType==parentType, trackChanges: false)).ToList();
+        return (await FindByConditionAsync(d => d.ParentId == parentId && d.ParentType.ToString().ToLower() == parentType.ToString().ToLower(), trackChanges: false)).ToList();
     }
 }

@@ -15,7 +15,10 @@
 			<div class="row">
 				<div class="col-12 col-lg-9">
 					<h4>Documents</h4> @* This line should probably be in the doc component *@
-					<DocumentComponent />
+					
+					
+						<DocumentComponent Documents = "@DocumentDtos"/>
+					
 				</div>
 			</div>
 		</div>
@@ -57,6 +60,7 @@
 	private ModuleDto? CurrentModule { get; set; }
 
     private IEnumerable<ModuleActivityDto>? ModuleActivities { get; set; }
+	private List<DocumentDto>? DocumentDtos { get; set; } = new List<DocumentDto>();
 
     protected override async Task OnInitializedAsync()
     {
@@ -82,6 +86,9 @@
 
 			var respAct = await myApi.CallApiAsync<IEnumerable<ModuleActivityDto>>($"activities/module/{Id}");
 			ModuleActivities = respAct?.ToList();
+
+			var respDocs = await myApi.CallApiAsync<IEnumerable<DocumentDto>>($"documents/Module/{Id}");
+			DocumentDtos = respDocs?.ToList();
 
 
 			Loading = false;

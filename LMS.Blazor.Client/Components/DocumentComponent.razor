@@ -1,4 +1,5 @@
-﻿<div class="container mt-4">
+﻿@using LMS.Shared.DTOs.EntityDto
+<div class="container mt-4">
 	<table class="table table-hover align-middle">
 		<thead>
 			<tr>
@@ -7,7 +8,14 @@
 			</tr>
 		</thead>
 		<tbody>
-			@foreach (var Doc in Documents)
+			@if (Documents == null || Documents.Count == 0)
+			{
+				<tr>
+					<td colspan="2" class="text-center">No documents available.</td>
+				</tr>
+				
+			}
+			else foreach (var Doc in Documents)
 			{
 				<tr>
 					<td>@Doc.Name</td>
@@ -21,26 +29,7 @@
 
 @code {
 	
-	List<FakeDocument> Documents = new List<FakeDocument>
-	{
-		new FakeDocument { Id = "1", Name = "Sample Document", UploadDate = DateTime.Now },
-		new FakeDocument { Id = "2", Name = "Another Document", UploadDate = DateTime.Now.AddDays(-1) },
-		new FakeDocument { Id = "3", Name = "Third Document", UploadDate = DateTime.Now.AddDays(-2) },
-		new FakeDocument { Id = "4", Name = "Fourth Document", UploadDate = DateTime.Now.AddDays(-3) },
-		new FakeDocument { Id = "5", Name = "Fifth Document", UploadDate = DateTime.Now.AddDays(-4) }
-	};
+	[Parameter]
+	public List<DocumentDto> Documents { get; set; }
 
-	class FakeDocument
-	{
-		public string Id { get; set; }
-		public string Name { get; set; }
-		public DateTime UploadDate { get; set; }
-	}
-	
-	FakeDocument Doc = new FakeDocument
-	{
-		Id = "1",
-		Name = "Sample Document",
-		UploadDate = DateTime.Now
-	};
 }
