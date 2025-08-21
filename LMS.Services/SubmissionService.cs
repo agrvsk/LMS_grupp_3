@@ -30,7 +30,7 @@ public class SubmissionService : ISubmissionService
         return await uow.SubmissionRepository.GetSubmissionByIdAsync(submissionId);
     }
 
-    public async Task<List<Submission>> GetSubmissionsByApplicationUserIdAsync(Guid userId)
+    public async Task<List<Submission>> GetSubmissionsByApplicationUserIdAsync(string userId)
     {
 
         return await uow.SubmissionRepository.GetSubmissionsByApplicationUserIdAsync(userId);

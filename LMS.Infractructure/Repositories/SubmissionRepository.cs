@@ -28,7 +28,7 @@ public class SubmissionRepository : RepositoryBase<Submission>, ISubmissionRepos
             .ContinueWith(task => task.Result.SingleOrDefault());
     }
 
-    public async Task<List<Submission>> GetSubmissionsByApplicationUserIdAsync(Guid userId)
+    public async Task<List<Submission>> GetSubmissionsByApplicationUserIdAsync(string userId)
     {
         
         return await FindByConditionAsync(s => s.ApplicationUserId == userId, trackChanges: false)
