@@ -11,10 +11,19 @@
         
         <div class="col-12 col-lg-3 border-start bg-light">
             <div class="p-3 sticky-top">
+                @if (Modules != null)
+                {
+                    @foreach (var module in Modules)
+                    {
+                        <ModuleComponent Module=module />
+                    }
+                }
+@* 
 				<ModuleComponent />
                 <ModuleComponent />
 				<ModuleComponent />
 				<ModuleComponent />
+ *@
             </div>
         </div>
         <!-- Main content area -->
@@ -33,13 +42,22 @@
         <!-- Sidebar area -->
         <div class="col-12 col-lg-3 border-start bg-light">
             <div class="p-3 sticky-top">
+                @if (Members != null)
+                {
+                    @foreach (var member in Members)
+                    {
+                        <ModuleComponent Member=member />
+                    }
+                }
+@* 
                 <MemberComponent />
                 <MemberComponent />
                 <MemberComponent />
                 <MemberComponent />
                 <MemberComponent />
                 <MemberComponent />
-            </div>
+
+ *@            </div>
         </div>
     </div>
     
@@ -86,11 +104,12 @@
             //Members = CurrentCourse?.MyMemberDtos; //C
 
 
-//          Modules = await myApi.CallApiAsync<IEnumerable<ModuleDto>>($"modules/{CurrentCourseId}");
-//          GetModulesByCourseId....saknas
+            var respModule = await myApi.CallApiAsync<IEnumerable<ModuleDto>>($"modules/course/{Id}");
+            Modules = respModule?.ToList();
 
-//          Members = await myApi.CallApiAsync<IEnumerable<UserDto>>($"users/{CurrentCourseId}");
-//          GetUsersByCourseId....saknas
+            var respMembers = await myApi.CallApiAsync<IEnumerable<UserDto>>($"users/course/{Id}");
+            Members = respMembers?.ToList();
+
 
 
         }
