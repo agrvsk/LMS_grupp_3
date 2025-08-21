@@ -45,7 +45,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-
+        Loading = true;
         var state = await Auth.GetAuthenticationStateAsync();
 
         if (!(state.User.Identity?.IsAuthenticated) ?? false)
@@ -53,24 +53,21 @@
             return;
         }
         await LoadCourse();
-
+        Loading = false;
     }
 
     private async Task LoadCourse()
     {
         try
         {
-            Loading = true;
 
             var response = await myApi.CallApiAsync<IEnumerable<CourseDto>>("courses");
             Courses = response?.ToList();
 
-            Loading = false;
 
         }
         catch (Exception ex)
         {
-            Loading = false;
 
         }
     }

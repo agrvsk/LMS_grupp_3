@@ -27,16 +27,17 @@
 @code {
 
 	[Parameter]
-	public ModuleDto Module { get; set; }
-	/*
-	FakeModuleDto Module = new FakeModuleDto
+	public ModuleDto Module { get; set; } = new ModuleDto
+	
+	//FakeModuleDto Module = new FakeModuleDto
 	{
-		Id = "C001",
+		Id = Guid.NewGuid(),
 		Name = "Introduction to Blazor",
 		Description = "A comprehensive course on building web applications using Blazor.",
 		StartDate = DateTime.Now,
 		EndDate = DateTime.Now.AddMonths(3)
 	};
+	/*
 	class FakeModuleDto
 	{
 		public string Id { get; set; }

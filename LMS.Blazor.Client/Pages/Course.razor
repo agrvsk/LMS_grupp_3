@@ -1,8 +1,8 @@
 ﻿@page "/courses/{Id}"
 @using LMS.Blazor.Client.Services
+@using LMS.Shared.DTOs.EntityDto
 @using Microsoft.AspNetCore.Authorization
 @rendermode InteractiveWebAssembly
-@inject IApiService myApi
 
 @attribute [Authorize]
 
@@ -19,7 +19,7 @@
         </div>
         <!-- Main content area -->
         <div class="col-12 col-lg-6">
-            <h3>Kurs @Id</h3> @* Later bind this to Course.Name *@
+            <h3>Kurs @CurrentCourse?.Name</h3> @* Later bind this to Course.Name *@
             <p>Main course details go here...</p>
             <div class="row">
                 <div class="col-12 col-lg-9">
@@ -49,9 +49,55 @@
     [SupplyParameterFromQuery]
     [Parameter] public string Id { get; set; }
 
+    public bool Loading { get; set; } = true;
+
+    [Inject]
+    private IApiService myApi { get; set; } = default!;
+
+    [Inject]
+    private AuthenticationStateProvider Auth { get; set; } = default!;
+
+    private CourseDto? CurrentCourse { get; set; }
+    private IEnumerable<ModuleDto>? Modules { get; set; }
+    private IEnumerable<UserDto>? Members { get; set; }
+
     protected override async Task OnInitializedAsync()
     {
-        
+        Loading = true;
+        var state = await Auth.GetAuthenticationStateAsync();
+
+        if (!(state.User.Identity?.IsAuthenticated) ?? false)
+        {
+            return;
+        }
+        await LoadCourse();
+        Loading = false;
+
+    }
+
+    private async Task LoadCourse()
+    {
+        try
+        {
+
+            var response = await myApi.CallApiAsync<IEnumerable<CourseDto>>($"courses/{Id}");
+            CurrentCourse = (CourseDto)response;
+            //Modules = CurrrentCourse.MyModuleDtos; //Could be something like...
+            //Members = CurrentCourse?.MyMemberDtos; //C
+
+
+//          Modules = await myApi.CallApiAsync<IEnumerable<ModuleDto>>($"modules/{CurrentCourseId}");
+//          GetModulesByCourseId....saknas
+
+//          Members = await myApi.CallApiAsync<IEnumerable<UserDto>>($"users/{CurrentCourseId}");
+//          GetUsersByCourseId....saknas
+
+
+        }
+        catch (Exception ex)
+        {
+
+        }
     }
 
 }
