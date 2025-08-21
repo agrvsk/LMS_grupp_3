@@ -1,4 +1,5 @@
 ﻿using Domain.Models.Entities;
+using LMS.Shared.DTOs.EntityDto;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
@@ -39,14 +40,14 @@ public class DateValidationAttribute : ValidationAttribute
             return ValidationResult.Success;
         }
 
-        if (validationContext.ObjectInstance is Module)
+        if (validationContext.ObjectInstance is ModuleDto)
         {
-            var module = (Module)validationContext.ObjectInstance;
+            var module = (ModuleDto)validationContext.ObjectInstance;
             min = module.StartDate;
             max = module.EndDate;
             
             if(!validateDates(min, max)) return new ValidationResult($"{message}") ;
-            List<Module> modules = serviceManager.ModuleService.GetModulesByCourseIdAsync(module.Id).Result ;
+            List<ModuleDto> modules = serviceManager.ModuleService.GetModulesByCourseIdAsync(module.Id).Result ;
             foreach (var mod in modules)
             {
                 if (mod.Id != module.Id) // Exclude the current module from the check
