@@ -33,10 +33,10 @@ public class ModuleService : IModuleService
         return await uow.ModuleRepository.GetModuleByIdAsync(moduleId);
     }
 
-    public async Task<List<Module>> GetModulesByCourseIdAsync(Guid courseId)
+    public async Task<List<ModuleDto>> GetModulesByCourseIdAsync(Guid courseId)
     {
 
-        return await uow.ModuleRepository.GetModulesByCourseIdAsync(courseId);
+        return mapper.Map<List<ModuleDto>>(await uow.ModuleRepository.GetModulesByCourseIdAsync(courseId));
 
     }
     public async Task<Module> CreateModuleAsync(ModuleCreateDto moduleDto)

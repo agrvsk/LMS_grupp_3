@@ -7,7 +7,7 @@ public interface IModuleService
 {
     Task<List<Module>> GetAllModulesAsync();
     Task<Module?> GetModuleByIdAsync(Guid moduleId);
-    Task<List<Module>> GetModulesByCourseIdAsync(Guid courseId);
+    Task<List<ModuleDto>> GetModulesByCourseIdAsync(Guid courseId);
     Task<Module> CreateModuleAsync(ModuleCreateDto module);
     Task<Module> UpdateModuleAsync(ModuleDto module);
     Task<bool> DeleteModuleAsync(Guid moduleId);

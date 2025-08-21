@@ -23,9 +23,9 @@ public class CourseService : ICourseService
     }
 
 
-    public async Task<Course?> GetCourseByIdAsync(Guid courseId)
+    public async Task<CourseDto?> GetCourseByIdAsync(Guid courseId)
     {
-        return (await uow.CourseRepository.GetCourseByIdAsync(courseId));
+        return mapper.Map<CourseDto>(await uow.CourseRepository.GetCourseByIdAsync(courseId));
     }
     public async Task<List<Course>> GetAllCoursesAsync()
     {

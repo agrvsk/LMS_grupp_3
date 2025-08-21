@@ -20,10 +20,21 @@ public class ScheduleService
         this.sm = sm;
         // Initialize any required services or dependencies here
     }
-    //public ScheduleDto GetSchedule(Guid coursId, DateTime start, DateTime end) {
-    
-    //        CourseDto course = sm.CourseService.GetCourseByIdAsync(coursId).Result;
+    public ScheduleDto GetSchedule(Guid coursId, DateTime start, DateTime end)
+    {
+        CourseDto course = sm.CourseService.GetCourseByIdAsync(coursId).Result;
+        List<ModuleDto> modules = sm.ModuleService.GetModulesByCourseIdAsync(coursId).Result.Where(m => m.EndDate <= start && m.StartDate >= end).ToList();
+        List<ModuleActivityDto> moduleActivities = modules.SelectMany(m => m.ModuleActivities.Where(a => a.StartDate <= start && a.EndDate >= end)).ToList();
+        return new ScheduleDto
+        {
+            StartDate = start,
+            EndDate = end,
+            Course = course,
+            Modules = modules,
+            ModuleActivities = moduleActivities
+        };
+        
 
-    //}
+    }
 
 }
