@@ -13,15 +13,18 @@ namespace LMS.UnitTests.Setups
     {
         protected readonly Mock<IUnitOfWork> MockUow;
         protected readonly Mock<ICourseRepository> MockCourseRepo;
+        protected readonly Mock<IModuleRepository> MockModuleRepo;
         protected readonly Mock<IMapper> MockMapper;
 
         protected ServiceTestBase() 
         {
             MockUow = new Mock<IUnitOfWork>();
             MockCourseRepo = new Mock<ICourseRepository>();
+            MockModuleRepo = new Mock<IModuleRepository>();
             MockMapper = new Mock<IMapper>();
 
             MockUow.SetupGet(u => u.CourseRepository).Returns(MockCourseRepo.Object);
+            MockUow.SetupGet(u => u.ModuleRepository).Returns(MockModuleRepo.Object);
         }
     }
 }
