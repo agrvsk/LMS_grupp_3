@@ -80,7 +80,7 @@
 			var response = await myApi.CallApiAsync<ModuleDto?>($"modules/{Id}");
 			CurrentModule = (ModuleDto)response;
 
-			var respAct = await myApi.CallApiAsync<IEnumerable<ModuleActivityDto>>("activities/module/{Id}");
+			var respAct = await myApi.CallApiAsync<IEnumerable<ModuleActivityDto>>($"activities/module/{Id}");
 			ModuleActivities = respAct?.ToList();
 
 

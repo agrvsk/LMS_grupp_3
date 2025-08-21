@@ -32,9 +32,11 @@ public class UserService : IUserService
         var userDto = mapper.Map<UserDto>(user);
         return userDto;
     }
-    public async Task<List<ApplicationUser>> GetAllUsersAsync()
+    public async Task<List<UserDto>> GetAllUsersAsync()
     {
-        return await uow.ApplicationUserRepository.GetAllUsersAsync();
+        var users = await uow.ApplicationUserRepository.GetAllUsersAsync();
+        var userDtos = mapper.Map<List<UserDto>>(users);
+        return userDtos;
     }
 
     public async Task<List<string>> GetRolesInUserAsync(ApplicationUser user)
