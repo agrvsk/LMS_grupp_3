@@ -46,7 +46,7 @@
                 {
                     @foreach (var member in Members)
                     {
-                        <ModuleComponent Member=member />
+                        <MemberComponent Member=member />
                     }
                 }
 @* 
@@ -98,7 +98,7 @@
         try
         {
 
-            var response = await myApi.CallApiAsync<IEnumerable<CourseDto>>($"courses/{Id}");
+            var response = await myApi.CallApiAsync<CourseDto>($"courses/{Id}");
             CurrentCourse = (CourseDto)response;
             //Modules = CurrrentCourse.MyModuleDtos; //Could be something like...
             //Members = CurrentCourse?.MyMemberDtos; //C
@@ -115,7 +115,7 @@
         }
         catch (Exception ex)
         {
-
+            Console.WriteLine("there was an error: " + ex.Message);
         }
     }
 
