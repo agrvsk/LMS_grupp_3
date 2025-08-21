@@ -10,6 +10,7 @@ public class Submission
 {
     public Guid Id { get; set; }
     public DateTime SubmissionDate { get; set; }
-    public Guid ApplicationUserId { get; set; } 
+    public string ApplicationUserId { get; set; } 
     public Guid DocumentId { get; set; } 
+    public Document? SubmissionDocument { get; set; }
 }

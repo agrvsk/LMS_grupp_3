@@ -16,7 +16,7 @@ public class Document
     public string? Description { get; set; }
     public DateTime UploadDate { get; set; }
     public string FilePath { get; set; }
-    public string ParentType { get; set; }// e.g., "Course", "Module", "Activity", "CourseSubmission", "ModuleSubmission", "ActivitySubmission"
+    public string ParentType { get; set; }// e.g., "Course", "Module", "Activity", "Submission", "Submission", "Submission"
     public Guid ParentId { get; set; }
 
     public ApplicationUser Uploader { get; set; }
