@@ -12,4 +12,5 @@ public class Submission
     public DateTime SubmissionDate { get; set; }
     public string ApplicationUserId { get; set; } 
     public Guid DocumentId { get; set; } 
+    public Document? SubmissionDocument { get; set; }
 }
