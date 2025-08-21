@@ -30,8 +30,16 @@ namespace LMS.UnitTests.Services
                 new() { Id = Guid.NewGuid(), Name = "TestModule" }
             };
 
+            var moduleDtos = new List<ModuleDto>
+            {
+                new() { Id = modules.First().Id, Name = "TestModule" }
+            };
+
             MockUow.Setup(u => u.ModuleRepository.GetAllModulesAsync())
                             .ReturnsAsync(modules);
+
+            MockMapper.Setup(m => m.Map<List<ModuleDto>>(modules))
+                            .Returns(moduleDtos);
 
             var result = await _service.GetAllModulesAsync();
 
@@ -43,8 +51,14 @@ namespace LMS.UnitTests.Services
         [Trait("ModuleService", "Get All Modules")]
         public async Task GetAllModulesAsync_NoModules_ReturnsEmptyList()
         {
+            var modules = new List<Module>();
+            var moduleDtos = new List<ModuleDto>();
+
             MockUow.Setup(u => u.ModuleRepository.GetAllModulesAsync())
                    .ReturnsAsync(new List<Module>());
+
+            MockMapper.Setup(m => m.Map<List<ModuleDto>>(modules))
+                            .Returns(moduleDtos);
 
             var result = await _service.GetAllModulesAsync();
 
@@ -57,10 +71,12 @@ namespace LMS.UnitTests.Services
         {
             var moduleId = Guid.NewGuid();
 
-            var module = new Module { Id = moduleId, Name = "ModuleTester" };
+            var moduledto = new ModuleDto { Id = moduleId, Name = "ModuleTester" };
 
-            MockUow.Setup(u => u.ModuleRepository.GetModuleByIdAsync(moduleId))
-                            .ReturnsAsync(module);
+            MockMapper.Setup(m => m.Map<ModuleDto>(It.IsAny<Module>()))
+                            .Returns(moduledto);
+            //MockUow.Setup(u => u.ModuleRepository.GetModuleByIdAsync(moduleId))
+            //                .ReturnsAsync(module);
 
             var result = await _service.GetModuleByIdAsync(moduleId);
 
@@ -93,8 +109,16 @@ namespace LMS.UnitTests.Services
                 new() { Id = Guid.NewGuid(), Name = "Course Module", CourseId = courseId }
             };
 
+            var moduleDtos = new List<ModuleDto>
+            {
+                new() { Id = modules.First().Id, Name = "Course Module" }
+            };
+
             MockUow.Setup(u => u.ModuleRepository.GetModulesByCourseIdAsync(courseId))
                    .ReturnsAsync(modules);
+
+            MockMapper.Setup(m => m.Map<List<ModuleDto>>(modules))
+                            .Returns(moduleDtos);
 
             var result = await _service.GetModulesByCourseIdAsync(courseId);
 
