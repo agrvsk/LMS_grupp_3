@@ -29,15 +29,21 @@ namespace LMS.UnitTests.Services
         {
             var courseId = Guid.NewGuid();
             var course = new Course { Id = courseId, Name = "TestCourse" };
+            var courseDto = new CourseDto { Id = courseId, Name = "TestCourse" };
 
             MockCourseRepo
                 .Setup(r => r.GetCourseByIdAsync(courseId))
                 .ReturnsAsync(course);
 
+            MockMapper
+                .Setup(m => m.Map<CourseDto>(course))
+                .Returns(courseDto);
+
             var result = await _service.GetCourseByIdAsync(courseId);
 
             Assert.NotNull(result);
             Assert.Equal(courseId, result.Id);
+            Assert.Equal("TestCourse", result.Name);
         }
 
         [Fact]
@@ -49,6 +55,10 @@ namespace LMS.UnitTests.Services
             MockCourseRepo
                 .Setup(r => r.GetCourseByIdAsync(courseId))
                 .ReturnsAsync((Course?)null);
+
+            MockMapper
+                .Setup(m => m.Map<CourseDto>(It.IsAny<Course>()))
+                .Returns((CourseDto?)null);
 
             var result = await _service.GetCourseByIdAsync(courseId);
 
@@ -63,23 +73,42 @@ namespace LMS.UnitTests.Services
         {
             var courses = new List<Course>
             {
-                new Course { Id = Guid.NewGuid(), Name = "Course1" },
-                new Course { Id = Guid.NewGuid(), Name = "Course2" }
+                new Course { Id = Guid.NewGuid(), Name = "TestCourse" },
+                new Course { Id = Guid.NewGuid(), Name = "CourseTest" }
+            };
+
+            var courseDtos = new List<CourseDto>
+            {
+                new CourseDto { Id = courses[0].Id, Name = "TestCourse" },
+                new CourseDto { Id = courses[1].Id, Name = "CourseTest" }
             };
 
             MockCourseRepo.Setup(r => r.GetAllCoursesAsync()).ReturnsAsync(courses);
+
+            MockMapper
+                .Setup(m => m.Map<List<CourseDto>>(courses))
+                .Returns(courseDtos);
 
             var result = await _service.GetAllCoursesAsync();
 
             Assert.NotNull(result);
             Assert.Equal(2, result.Count);
+            Assert.Contains(result, r => r.Name == "TestCourse");
+            Assert.Contains(result, r => r.Name == "CourseTest");
         }
 
         [Fact]
         [Trait("CourseService", "Get All Courses")]
         public async Task GetAllCoursesAsync_NoCourses_ReturnsEmptyList()
         {
-            MockCourseRepo.Setup(r => r.GetAllCoursesAsync()).ReturnsAsync(new List<Course>());
+            var emptyCourses = new List<Course>();
+            var emptyDtos = new List<CourseDto>();
+
+            MockCourseRepo.Setup(r => r.GetAllCoursesAsync()).ReturnsAsync(emptyCourses);
+
+            MockMapper
+                .Setup(m => m.Map<List<CourseDto>>(emptyCourses))
+                .Returns(emptyDtos);
 
             var result = await _service.GetAllCoursesAsync();
 
