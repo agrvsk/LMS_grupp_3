@@ -33,6 +33,13 @@ namespace LMS.Presentation.Controllers
             }
             return Ok(document);
         }
+        [Route("{parentType}/{parentId}")]
+        [HttpGet]
+        public async Task<IActionResult> GetDocumentsByParent(string parentType, Guid parentId)
+        {
+            var documents = await _serviceManager.DocumentService.GetDocumentsByParentAsync(parentId, parentType);
+            return Ok(documents);
+        }
 
         [HttpPost]
         public async Task<IActionResult> CreateDocument([FromBody] DocumentCreateDto documentDto)

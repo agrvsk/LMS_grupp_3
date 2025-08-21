@@ -18,12 +18,7 @@
                         <ModuleComponent Module=module />
                     }
                 }
-@* 
-				<ModuleComponent />
-                <ModuleComponent />
-				<ModuleComponent />
-				<ModuleComponent />
- *@
+
             </div>
         </div>
         <!-- Main content area -->
@@ -33,7 +28,7 @@
             <div class="row">
                 <div class="col-12 col-lg-9">
 					<h4>Dokument</h4> @* This line should probably be in the doc component *@
-                    <DocumentComponent />
+                    <DocumentComponent Documents="@DocumentDtos"/>
     
                 </div>
             </div>
@@ -49,15 +44,7 @@
                         <MemberComponent Member=member />
                     }
                 }
-@* 
-                <MemberComponent />
-                <MemberComponent />
-                <MemberComponent />
-                <MemberComponent />
-                <MemberComponent />
-                <MemberComponent />
-
- *@            </div>
+            </div>
         </div>
     </div>
     
@@ -78,6 +65,7 @@
     private CourseDto? CurrentCourse { get; set; }
     private IEnumerable<ModuleDto>? Modules { get; set; }
     private IEnumerable<UserDto>? Members { get; set; }
+	private List<DocumentDto> DocumentDtos { get; set; } = new List<DocumentDto>();
 
     protected override async Task OnInitializedAsync()
     {
@@ -109,6 +97,9 @@
 
             var respMembers = await myApi.CallApiAsync<IEnumerable<UserDto>>($"users/course/{Id}");
             Members = respMembers?.ToList();
+
+			var respDocs = await myApi.CallApiAsync<IEnumerable<DocumentDto>>($"documents/course/{Id}");
+			DocumentDtos = respDocs?.ToList() ?? new List<DocumentDto>();
 
 
 
