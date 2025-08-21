@@ -24,6 +24,12 @@ namespace LMS.Presentation.Controllers
             var users = await _serviceManager.UserService.GetAllUsersAsync();
             return Ok(users);
         }
+        [HttpGet("course/{courseId}")]
+        public async Task<IActionResult> GetUsersByCourseId(Guid courseId)
+        {
+            var users = await _serviceManager.UserService.GetUsersByCourseIdAsync(courseId);
+            return Ok(users);
+        }
         [HttpGet("{id}")]
         public async Task<IActionResult> GetUserById(string id)
         {
