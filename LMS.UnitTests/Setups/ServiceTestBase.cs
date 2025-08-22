@@ -11,20 +11,28 @@ namespace LMS.UnitTests.Setups
 {
     public abstract class ServiceTestBase
     {
+        protected readonly Mock<IMapper> MockMapper;
         protected readonly Mock<IUnitOfWork> MockUow;
+
         protected readonly Mock<ICourseRepository> MockCourseRepo;
         protected readonly Mock<IModuleRepository> MockModuleRepo;
-        protected readonly Mock<IMapper> MockMapper;
+        protected readonly Mock<IDocumentRepository> MockDocumentRepo;
+
 
         protected ServiceTestBase() 
         {
+            MockMapper = new Mock<IMapper>();
             MockUow = new Mock<IUnitOfWork>();
+
             MockCourseRepo = new Mock<ICourseRepository>();
             MockModuleRepo = new Mock<IModuleRepository>();
-            MockMapper = new Mock<IMapper>();
+            MockDocumentRepo = new Mock<IDocumentRepository>();
+            
+
 
             MockUow.SetupGet(u => u.CourseRepository).Returns(MockCourseRepo.Object);
             MockUow.SetupGet(u => u.ModuleRepository).Returns(MockModuleRepo.Object);
+            MockUow.SetupGet(u => u.DocumentRepository).Returns(MockDocumentRepo.Object);
         }
     }
 }
