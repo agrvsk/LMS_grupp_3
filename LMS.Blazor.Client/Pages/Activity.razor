@@ -1,0 +1,82 @@
+﻿@page "/activities/{Id}"
+@using LMS.Blazor.Client.Services
+@using LMS.Shared.DTOs.EntityDto
+@using Microsoft.AspNetCore.Authorization
+@rendermode InteractiveWebAssembly
+
+@attribute [Authorize]
+
+<div class="container-fluid">
+	<div class="row">
+		<!-- Main content area -->
+		<div class="col-12 col-lg-9">
+			<h3>Module @CurrentActivity?.Name</h3>
+			<p>Main module details go here...</p>
+			<div class="row">
+				<div class="col-12 col-lg-9">
+					<h4>Documents</h4> @* This line should probably be in the doc component *@
+
+					<DocumentComponent Documents="@DocumentDtos" />
+
+				</div>
+			</div>
+		</div>
+		<!-- Sidebar area -->
+		<div class="col-12 col-lg-3 border-start bg-light">
+			<div class="p-3 sticky-top">
+				
+			</div>
+		</div>
+	</div>
+</div>
+
+@code {
+	[SupplyParameterFromQuery]
+	[Parameter]
+	public string Id { get; set; }
+	public bool Loading { get; set; } = true;
+	[Inject]
+	private IApiService myApi { get; set; } = default!;
+	[Inject]
+	AuthenticationStateProvider Auth { get; set; } = default!;
+
+	private List<DocumentDto>? DocumentDtos { get; set; }
+	private ModuleActivityDto CurrentActivity { get; set; }
+
+	protected override async Task OnInitializedAsync()
+	{
+
+		var state = await Auth.GetAuthenticationStateAsync();
+
+		if (!(state.User.Identity?.IsAuthenticated) ?? false)
+		{
+			return;
+		}
+		await LoadModule();
+
+	}
+
+	private async Task LoadModule()
+	{
+		try
+		{
+			Loading = true;
+
+			var respActivity = await myApi.CallApiAsync<ModuleActivityDto>($"activities/{Id}");
+			CurrentActivity = respActivity;
+
+			var respDocs = await myApi.CallApiAsync<List<DocumentDto>>($"documents/activity/{Id}");
+			DocumentDtos = respDocs?.ToList();
+
+
+			Loading = false;
+
+		}
+		catch (Exception ex)
+		{
+			Loading = false;
+
+		}
+	}
+
+}
