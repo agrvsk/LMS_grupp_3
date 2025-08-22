@@ -85,17 +85,17 @@
         try
         {
 
-            var response = await myApi.CallApiAsync<CourseDto>($"courses/{Id}");
+            var response = await myApi.CallApiGetAsync<CourseDto>($"courses/{Id}");
             CurrentCourse = (CourseDto)response;
 
 
-            var respModule = await myApi.CallApiAsync<IEnumerable<ModuleDto>>($"modules/course/{Id}");
+            var respModule = await myApi.CallApiGetAsync<IEnumerable<ModuleDto>>($"modules/course/{Id}");
             Modules = respModule?.ToList();
 
-            var respMembers = await myApi.CallApiAsync<IEnumerable<UserDto>>($"users/course/{Id}");
+            var respMembers = await myApi.CallApiGetAsync<IEnumerable<UserDto>>($"users/course/{Id}");
             Members = respMembers?.ToList();
 
-			var respDocs = await myApi.CallApiAsync<IEnumerable<DocumentDto>>($"documents/course/{Id}");
+			var respDocs = await myApi.CallApiGetAsync<IEnumerable<DocumentDto>>($"documents/course/{Id}");
 			DocumentDtos = respDocs?.ToList() ?? new List<DocumentDto>();
 
 

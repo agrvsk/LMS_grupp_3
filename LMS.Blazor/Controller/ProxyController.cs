@@ -19,7 +19,7 @@ public class ProxyController(IHttpClientFactory httpClientFactory, ITokenStorage
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
         if (userId == null)
-            return Unauthorized();
+            return Unauthorized("Test");
 
         var accessToken = await _tokenService.GetAccessTokenAsync(userId);
 

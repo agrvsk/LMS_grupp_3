@@ -27,6 +27,7 @@
             }
 
         }
+<CourseAddComponent />
 
 @code 
 {
@@ -42,13 +43,13 @@
 
     protected override async Task OnInitializedAsync()
     {
-        Loading = true;
-        var state = await Auth.GetAuthenticationStateAsync();
+        // Loading = true;
+        // var state = await Auth.GetAuthenticationStateAsync();
 
-        if (!(state.User.Identity?.IsAuthenticated) ?? false)
-        {
-            return;
-        }
+        // if (!(state.User.Identity?.IsAuthenticated) ?? false)
+        // {
+        //     return;
+        // }
         await LoadCourse();
         Loading = false;
     }
@@ -58,7 +59,7 @@
         try
         {
 
-            var response = await myApi.CallApiAsync<IEnumerable<CourseDto>>("courses");
+            var response = await myApi.CallApiGetAsync<IEnumerable<CourseDto>>("courses");
             Courses = response?.ToList();
 
 

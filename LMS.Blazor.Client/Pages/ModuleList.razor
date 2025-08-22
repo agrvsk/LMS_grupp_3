@@ -60,7 +60,7 @@ else
         {
             Loading = true;
 
-            var response = await myApi.CallApiAsync<IEnumerable<ModuleDto>>("modules");
+            var response = await myApi.CallApiGetAsync<IEnumerable<ModuleDto>>("modules");
             Modules = response?.ToList();
 
             Loading = false;

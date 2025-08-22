@@ -58,11 +58,11 @@ else
 
     private async Task CallAPIAsync()
     {
-        demo = (await _apiService.CallApiAsync<IEnumerable<DemoAuthDto>>("api/demoauth"))?.ToList();
+        demo = (await _apiService.CallApiGetAsync<IEnumerable<DemoAuthDto>>("api/demoauth"))?.ToList();
     }
     private async Task CallCourseAPIAsync()
     {
-        courses = (await _apiService.CallApiAsync<IEnumerable<CourseDto>>(""))?.ToList();
+        courses = (await _apiService.CallApiGetAsync<IEnumerable<CourseDto>>(""))?.ToList();
 		Console.WriteLine("Courses fetched: " + (courses?.Count ?? 0));
     }
 }

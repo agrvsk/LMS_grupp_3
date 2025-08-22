@@ -81,13 +81,13 @@
 		{
 			Loading = true;
 
-			var response = await myApi.CallApiAsync<ModuleDto?>($"modules/{Id}");
+			var response = await myApi.CallApiGetAsync<ModuleDto?>($"modules/{Id}");
 			CurrentModule = (ModuleDto)response;
 
-			var respAct = await myApi.CallApiAsync<IEnumerable<ModuleActivityDto>>($"activities/module/{Id}");
+			var respAct = await myApi.CallApiGetAsync<IEnumerable<ModuleActivityDto>>($"activities/module/{Id}");
 			ModuleActivities = respAct?.ToList();
 
-			var respDocs = await myApi.CallApiAsync<IEnumerable<DocumentDto>>($"documents/Module/{Id}");
+			var respDocs = await myApi.CallApiGetAsync<IEnumerable<DocumentDto>>($"documents/Module/{Id}");
 			DocumentDtos = respDocs?.ToList();
 
 

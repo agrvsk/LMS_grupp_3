@@ -62,10 +62,10 @@
 		{
 			Loading = true;
 
-			var respActivity = await myApi.CallApiAsync<ModuleActivityDto>($"activities/{Id}");
+			var respActivity = await myApi.CallApiGetAsync<ModuleActivityDto>($"activities/{Id}");
 			CurrentActivity = respActivity;
 
-			var respDocs = await myApi.CallApiAsync<List<DocumentDto>>($"documents/activity/{Id}");
+			var respDocs = await myApi.CallApiGetAsync<List<DocumentDto>>($"documents/activity/{Id}");
 			DocumentDtos = respDocs?.ToList();
 
 

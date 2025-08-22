@@ -10,7 +10,7 @@ public class ClientApiService(IHttpClientFactory httpClientFactory, NavigationMa
     private readonly JsonSerializerOptions _jsonSerializerOptions = new()
     { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
 
-    public async Task<T?> CallApiAsync<T>(string endpoint, CancellationToken ct = default)
+    public async Task<T?> CallApiGetAsync<T>(string endpoint, CancellationToken ct = default)
     {
         await authReady.WaitAsync();
 
@@ -28,21 +28,27 @@ public class ClientApiService(IHttpClientFactory httpClientFactory, NavigationMa
         var demoDtos = await JsonSerializer.DeserializeAsync<T>(await response.Content.ReadAsStreamAsync(), _jsonSerializerOptions, CancellationToken.None) ?? default;
         return demoDtos;
     }
-    public async Task<T?> CallApiAsync<T>(string sRouting)
+    public async Task<TResponse?> CallApiPostAsync<TRequest, TResponse>(string endpoint, TRequest data, CancellationToken ct = default)
     {
-        var requestMessage = new HttpRequestMessage(HttpMethod.Get, $"proxy?endpoint={sRouting}");
-        var response = await httpClient.SendAsync(requestMessage);
+        await authReady.WaitAsync();
 
-        if (response.StatusCode == System.Net.HttpStatusCode.Forbidden
-           || response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+        var requestMessage = new HttpRequestMessage(HttpMethod.Post, $"proxy?endpoint={endpoint}")
         {
-            navigationManager.NavigateTo("AccessDenied");
-        }
+            Content = new StringContent(JsonSerializer.Serialize(data, _jsonSerializerOptions), System.Text.Encoding.UTF8, "application/json")
+        };
+
+        var response = await httpClient.SendAsync(requestMessage, ct);
 
         response.EnsureSuccessStatusCode();
 
-        var demoDtos = await JsonSerializer.DeserializeAsync<T>(await response.Content.ReadAsStreamAsync(), _jsonSerializerOptions, CancellationToken.None) ?? default;
-        return demoDtos;
+        // Deserialize response
+        var result = await JsonSerializer.DeserializeAsync<TResponse>(
+            await response.Content.ReadAsStreamAsync(),
+            _jsonSerializerOptions,
+            CancellationToken.None
+        );
+
+        return result;
     }
 
 

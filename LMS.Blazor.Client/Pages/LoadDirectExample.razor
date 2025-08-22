@@ -30,7 +30,7 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        var response = await _apiService.CallApiAsync<IEnumerable<DemoAuthDto>>("api/demoauth");
+        var response = await _apiService.CallApiGetAsync<IEnumerable<DemoAuthDto>>("api/demoauth");
         dtos = response?.ToList();
     }
 }
