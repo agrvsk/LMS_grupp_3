@@ -32,12 +32,13 @@ public class ClientApiService(IHttpClientFactory httpClientFactory, NavigationMa
     {
         await authReady.WaitAsync();
 
-        var requestMessage = new HttpRequestMessage(HttpMethod.Post, $"proxy?endpoint={endpoint}")
-        {
-            Content = new StringContent(JsonSerializer.Serialize(data, _jsonSerializerOptions), System.Text.Encoding.UTF8, "application/json")
-        };
+        var json = JsonSerializer.Serialize(data, _jsonSerializerOptions);
 
-        var response = await httpClient.SendAsync(requestMessage, ct);
+        var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
+
+        var response = await httpClient.PostAsync($"proxy?endpoint={endpoint}", content, ct);
+
+
 
         response.EnsureSuccessStatusCode();
 

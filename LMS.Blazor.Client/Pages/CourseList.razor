@@ -8,67 +8,52 @@
 <h3>CourseList</h3>
 
 
-        @if (Loading)
-        {
-            <p>Loading courses...</p>
-        }
-        else
-        {
-            @if (Courses != null)
-            {
-                @foreach (var course in Courses)
-                {
-                    <CourseComponent Course=course />
-                }
-            }
-            else
-            {
-                <p>Loading courses...</p>
-            }
+@if (Loading)
+{
+	<p>Loading courses...</p>
+}
+else
+{
+	@if (Courses != null)
+	{
+		@foreach (var course in Courses)
+		{
+			<CourseComponent Course=course />
+		}
+	}
+	else
+	{
+		<p>Loading courses...</p>
+	}
 
-        }
+}
 <CourseAddComponent />
 
-@code 
+@code
 {
-    public bool Loading { get; set; } = true;
+	public bool Loading { get; set; } = true;
 
-    [Inject]
-    private IApiService myApi { get; set; } = default!;
+	[Inject]
+	private IApiService myApi { get; set; } = default!;
 
-    [Inject]
-    private AuthenticationStateProvider Auth { get; set; } = default!;
+	[Inject]
+	private AuthenticationStateProvider Auth { get; set; } = default!;
 
-    private IEnumerable<CourseDto>? Courses { get; set; }
+	private IEnumerable<CourseDto>? Courses { get; set; }
 
-    protected override async Task OnInitializedAsync()
-    {
-        // Loading = true;
-        // var state = await Auth.GetAuthenticationStateAsync();
+	protected override async Task OnInitializedAsync()
+	{
+		await LoadCourse();
+		Loading = false;
+	}
 
-        // if (!(state.User.Identity?.IsAuthenticated) ?? false)
-        // {
-        //     return;
-        // }
-        await LoadCourse();
-        Loading = false;
-    }
+	private async Task LoadCourse()
+	{
 
-    private async Task LoadCourse()
-    {
-        try
-        {
+		var response = await myApi.CallApiGetAsync<IEnumerable<CourseDto>>("courses");
+		Courses = response?.ToList();
 
-            var response = await myApi.CallApiGetAsync<IEnumerable<CourseDto>>("courses");
-            Courses = response?.ToList();
-
-
-        }
-        catch (Exception ex)
-        {
-
-        }
-    }
+	}
 
 
 }

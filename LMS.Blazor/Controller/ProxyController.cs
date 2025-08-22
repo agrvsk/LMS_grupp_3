@@ -49,6 +49,12 @@ public class ProxyController(IHttpClientFactory httpClientFactory, ITokenStorage
         if (method != HttpMethod.Get && Request.ContentLength > 0)
         {
             requestMessage.Content = new StreamContent(Request.Body);
+
+            if (!string.IsNullOrEmpty(Request.ContentType))
+            {
+                requestMessage.Content.Headers.ContentType =
+                    MediaTypeHeaderValue.Parse(Request.ContentType);
+            }
         }
 
         foreach (var header in Request.Headers)
