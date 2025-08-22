@@ -38,6 +38,7 @@ public class CourseService : ICourseService
         var course= mapper.Map<Course>(courseDto);
         uow.CourseRepository.Create(course);
         await uow.CompleteAsync();
+
         return course;
     }
     public async Task<bool> UpdateCourseAsync(CourseDto courseDto)

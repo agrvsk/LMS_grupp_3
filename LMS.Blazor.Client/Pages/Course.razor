@@ -8,33 +8,32 @@
 
 <div class="container-fluid">
     <div class="row">
-        
-        <div class="col-12 col-lg-3 border-start bg-light">
-            <div class="p-3 sticky-top">
-                @if (Modules != null)
-                {
-                    @foreach (var module in Modules)
-                    {
-                        <ModuleComponent Module=module />
-                    }
-                }
+        <!-- L Sidebar area -->
+        <div class="col-12 col-lg-3 border-end bg-light">
+            <div >
+                <DocumentComponent Documents="@DocumentDtos" />
 
             </div>
         </div>
         <!-- Main content area -->
         <div class="col-12 col-lg-6">
-            <h3>Kurs @CurrentCourse?.Name</h3> @* Later bind this to Course.Name *@
+            <h3>Kurs @CurrentCourse?.Name</h3>
             <p>@CurrentCourse?.Description</p>
             <div class="row">
                 <div class="col-12 col-lg-9">
-					<h4>Dokument</h4> @* This line should probably be in the doc component *@
-                    <DocumentComponent Documents="@DocumentDtos"/>
+                    @if (Modules != null)
+                    {
+                        @foreach (var module in Modules)
+                        {
+                            <ModuleComponent Module=module />
+                        }
+                    }
     
                 </div>
             </div>
         </div>
 
-        <!-- Sidebar area -->
+        <!-- R Sidebar area -->
         <div class="col-12 col-lg-3 border-start bg-light">
             <div class="p-3 sticky-top">
                 @if (Members != null)
@@ -88,8 +87,6 @@
 
             var response = await myApi.CallApiAsync<CourseDto>($"courses/{Id}");
             CurrentCourse = (CourseDto)response;
-            //Modules = CurrrentCourse.MyModuleDtos; //Could be something like...
-            //Members = CurrentCourse?.MyMemberDtos; //C
 
 
             var respModule = await myApi.CallApiAsync<IEnumerable<ModuleDto>>($"modules/course/{Id}");

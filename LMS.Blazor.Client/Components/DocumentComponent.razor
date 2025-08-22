@@ -1,9 +1,12 @@
 ﻿@using LMS.Shared.DTOs.EntityDto
 <div class="container mt-4">
-	<table class="table table-hover align-middle">
+	<h4 style="text-align: center">Documents</h4>
+	<table class="table table-hover table-sm align-middle" style="table-layout: fixed; width: 100%;">
 		<thead>
+			
 			<tr>
-				<th scope="col">Document Name</th>
+				<th scope="col">Name</th>
+				<th scope="col">Uploader</th>
 				<th scope="col">Uploaded</th>
 			</tr>
 		</thead>
@@ -13,13 +16,18 @@
 				<tr>
 					<td colspan="2" class="text-center">No documents available.</td>
 				</tr>
-				
+
 			}
 			else foreach (var Doc in Documents)
-			{
-				<tr>
-					<td>@Doc.Name</td>
-					<td>@Doc.UploadDate.ToString("g")</td>
+				{
+					<tr>
+						@{
+							var DocName = Doc.Name.Length > 11 ? Doc.Name.Substring(0,10) + "..." : Doc.Name;
+						}
+					
+					<td>@DocName</td>
+					<td>Name N.</td>
+					<td>@Doc.UploadDate.ToString("m")</td>
 				</tr>
 			}
 		</tbody>
@@ -28,7 +36,7 @@
 
 
 @code {
-	
+
 	[Parameter]
 	public List<DocumentDto> Documents { get; set; }
 
