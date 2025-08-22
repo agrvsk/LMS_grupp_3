@@ -10,8 +10,8 @@
 	<div class="row">
 		<!-- Main content area -->
 		<div class="col-12 col-lg-9">
-			<h3>Module @Id</h3> @* Later bind this to Module.Name *@
-			<p>Main module details go here...</p>
+			<h3>Module @CurrentModule?.Name</h3> @* Later bind this to Module.Name *@
+			<p>@CurrentModule?.Description</p>
 			<div class="row">
 				<div class="col-12 col-lg-9">
 					<h4>Documents</h4> @* This line should probably be in the doc component *@
