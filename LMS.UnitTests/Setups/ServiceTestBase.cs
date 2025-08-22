@@ -16,7 +16,9 @@ namespace LMS.UnitTests.Setups
 
         protected readonly Mock<ICourseRepository> MockCourseRepo;
         protected readonly Mock<IModuleRepository> MockModuleRepo;
+        protected readonly Mock<IModuleActivityRepository> MockModuleActivityRepo;
         protected readonly Mock<IDocumentRepository> MockDocumentRepo;
+        
 
 
         protected ServiceTestBase() 
@@ -24,15 +26,18 @@ namespace LMS.UnitTests.Setups
             MockMapper = new Mock<IMapper>();
             MockUow = new Mock<IUnitOfWork>();
 
-            MockCourseRepo = new Mock<ICourseRepository>();
+            // Initialize all repository mocks
+            MockModuleActivityRepo = new Mock<IModuleActivityRepository>();
             MockModuleRepo = new Mock<IModuleRepository>();
+            MockCourseRepo = new Mock<ICourseRepository>();            
             MockDocumentRepo = new Mock<IDocumentRepository>();
-            
 
-
-            MockUow.SetupGet(u => u.CourseRepository).Returns(MockCourseRepo.Object);
+            // Setup the UnitOfWork to return the repository mocks
+            MockUow.SetupGet(u => u.ModuleActivityRepository).Returns(MockModuleActivityRepo.Object);
             MockUow.SetupGet(u => u.ModuleRepository).Returns(MockModuleRepo.Object);
+            MockUow.SetupGet(u => u.CourseRepository).Returns(MockCourseRepo.Object);            
             MockUow.SetupGet(u => u.DocumentRepository).Returns(MockDocumentRepo.Object);
+            
         }
     }
 }
