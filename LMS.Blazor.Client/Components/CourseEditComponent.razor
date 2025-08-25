@@ -1,0 +1,90 @@
+﻿@using LMS.Blazor.Client.Services
+@using LMS.Shared.DTOs.EntityDto
+<div class="container mt-4 border-primary">
+	<EditForm class="form m-1 border-primary" Model="@CourseUpdDto" OnValidSubmit="@HandleValidSubmit" FormName="EditCourse">
+		<DataAnnotationsValidator />
+		<ValidationSummary />
+
+		<div>
+			<p>@CourseUpdDto.Id</p>
+		</div>
+		<div>
+			<label for="name" class="form-label">Name</label>
+			<InputText class="form-control" @bind-Value="@CourseUpdDto.Name" id="name" placeholder="Name" />
+			<ValidationMessage For="@(() => CourseUpdDto.Name)" />
+		</div>
+		<div>
+			<label for="description" class="form-label">Description</label>
+			<InputText class="form-control" @bind-Value="@CourseUpdDto.Description" id="description" placeholder="Description" />
+			<ValidationMessage For="@(() => CourseUpdDto.Description)" />
+		</div>
+		<div>
+			<label for="startDate" class="form-label">StartDate</label>
+			<InputDate class="form-control" @bind-Value="@CourseUpdDto.StartDate" id="startDate" placeholder="StartDate" />
+			<ValidationMessage For="@(() => CourseUpdDto.StartDate)" />
+		</div>
+		<div>
+			<label for="endDate" class="form-label">EndDate</label>
+			<InputDate class="form-control" @bind-Value="@CourseUpdDto.EndDate" id="endDate" placeholder="EndDate" />
+			<ValidationMessage For="@(() => CourseUpdDto.EndDate)" />
+		</div>
+
+
+		<button type="cancel" class="btn btn-primary mt-2" @onclick="StopEditing">Cancel</button>
+		<button type="submit" class="btn btn-primary mt-2">Save</button>
+
+
+	</EditForm>
+
+</div>
+
+
+@code {
+	[Inject]
+	private IApiService myApi { get; set; } = default!;
+
+	[Parameter]
+	public CourseDto CourseDto { get; set; }
+
+	//[Parameter]
+	//public Guid currentCourseId { get; set; }
+
+	[Parameter]
+	public EventCallback<CourseDto> OnEditDone { get; set; }
+
+	public CourseUpdateDto CourseUpdDto { get; set; }
+
+	protected override async Task OnInitializedAsync()
+	{
+		//await base.OnInitializedAsync();
+		CourseUpdDto = new CourseUpdateDto
+		{
+			Id = CourseDto.Id,
+			Name = CourseDto.Name,
+			Description = CourseDto.Description,
+			StartDate = CourseDto.StartDate,
+			EndDate = CourseDto.EndDate
+		};
+
+
+	}
+
+
+	private async Task StopEditing()
+	{
+		await OnEditDone.InvokeAsync(CourseDto);
+	}
+
+
+
+
+
+	private async Task HandleValidSubmit()
+	{
+		CourseDto = await myApi.CallApiPutAsync<CourseUpdateDto, CourseDto>($"courses/{CourseUpdDto.Id}", CourseUpdDto);
+		Console.WriteLine($"Course '{CourseUpdDto.Name}' saved successfully!");
+		StopEditing();
+	}
+
+
+}

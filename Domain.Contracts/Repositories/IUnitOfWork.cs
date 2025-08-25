@@ -8,6 +8,7 @@ public interface IUnitOfWork
     public IApplicationUserRepository ApplicationUserRepository { get;  }
     public ISubmissionRepository SubmissionRepository { get;  }
     public IDocumentRepository DocumentRepository { get; }
+    public IActivityTypeRepository ActivityTypeRepository { get; }
 
     Task CompleteAsync();
 }

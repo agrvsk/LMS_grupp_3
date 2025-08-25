@@ -14,12 +14,14 @@
 }
 else
 {
+	<CourseAddComponent/>
 	@if (Courses != null)
 	{
 		@foreach (var course in Courses)
 		{
 			<CourseComponent Course=course />
 		}
+		
 	}
 	else
 	{
@@ -27,11 +29,12 @@ else
 	}
 
 }
-<CourseAddComponent />
 
 @code
 {
 	public bool Loading { get; set; } = true;
+
+	private bool isAdding = false;
 
 	[Inject]
 	private IApiService myApi { get; set; } = default!;
@@ -53,6 +56,11 @@ else
 		var response = await myApi.CallApiGetAsync<IEnumerable<CourseDto>>("courses");
 		Courses = response?.ToList();
 
+	}
+
+	private void ToggleAddCourse()
+	{
+		isAdding = !isAdding;
 	}
 
 
