@@ -50,12 +50,13 @@ public class ModuleService : IModuleService
         await uow.CompleteAsync();
         return module;
     }
-    public async Task<Module> UpdateModuleAsync(ModuleDto moduleDto)
+    public async Task<ModuleDto> UpdateModuleAsync(ModuleUpdateDto moduleupdateDto)
     {
-        var module = mapper.Map<Module>(moduleDto);
+        var module = mapper.Map<Module>(moduleupdateDto);
         uow.ModuleRepository.Update(module);
         await uow.CompleteAsync();
-        return module;
+        var moduleDto = mapper.Map<ModuleDto>(module);
+        return moduleDto;
     }
     public async Task<bool> DeleteModuleAsync(Guid moduleId)
     {
