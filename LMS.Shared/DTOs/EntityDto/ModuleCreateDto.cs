@@ -16,6 +16,7 @@ namespace LMS.Shared.DTOs.EntityDto
         public string Description { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
+        public Guid CourseId { get; set; }
 
         public List<ModuleActivityDto> ModuleActivities { get; set; } = new List<ModuleActivityDto>();
     }

@@ -15,5 +15,6 @@ namespace LMS.Shared.DTOs.EntityDto
         public string Description { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
+        public List<ModuleCreateDto> Modules { get; set; } = new List<ModuleCreateDto>();
     }
 }

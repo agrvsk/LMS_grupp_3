@@ -50,7 +50,7 @@ else
 						<InputDate id="activityEndDate" class="form-control" @bind-Value="Activity.EndDate" />
 						<ValidationMessage For="@(() => Activity.EndDate)" />
 					</div>
-					<button type="submit" class="btn btn-primary" @onclick=Toggle>Add</button> <button type="button" class="btn btn-primary" @onclick=Toggle>Cancel</button>
+					<button type="submit" class="btn btn-primary">Add</button> <button type="button" class="btn btn-primary" @onclick=Toggle>Cancel</button>
 				</EditForm>
 			</div>
 		</div>
@@ -73,8 +73,7 @@ else
 	{
 		Activity.ModuleId = ModuleId;
 		var newCourseDto = await myApi.CallApiPostAsync<ModuleActivityCreateDto, ModuleActivityDto>("activities", Activity);
-
-		Console.WriteLine($"Course '{Activity.Name}' saved successfully!");
+		Toggle();
 	}
 
 	protected override async Task OnInitializedAsync()
