@@ -28,7 +28,8 @@
  
             <div class="row">
                 <div class="col-12 col-lg-9">
-                    @if (Modules != null)
+					<ModuleAddComponent CourseId=Id/>
+					@if (Modules != null)
                     {
                         @foreach (var module in Modules)
                         {
@@ -62,12 +63,6 @@
 	</div>
 
 </div>
-@* 
-    <!-- ParentComponent.razor -->
-<ChildComponent OnMessageSent="HandleMessage" />
-
-<p>@messageFromChild</p>
-*@
 
 @code {
 	[SupplyParameterFromQuery]
