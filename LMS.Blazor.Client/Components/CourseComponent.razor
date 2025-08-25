@@ -1,12 +1,12 @@
 ﻿@using LMS.Shared.DTOs.EntityDto
 @inject NavigationManager NavigationManager
 
-@* TODO: EDIT AND ADD PAGES *@
 
 <div class="container mt-4">
 
-	<div class="card shadow-sm">
+	<div class="card shadow-sm card-hover">
 		<div class="card-body">
+
 			<h5 class="card-title">
 				@Course.Name
 			</h5>
@@ -29,28 +29,9 @@
 </div>
 
 @code {
-	//[Parameter]
-	//public string CourseId { get; set; } = string.Empty;
+	
 	[Parameter]
 	public CourseDto Course { get; set; }
 
 
-/*
-	FakeCourseDto Course = new FakeCourseDto
-	{
-		Id = "C001",
-		Name = "Introduction to Blazor",
-		Description = "A comprehensive course on building web applications using Blazor.",
-		StartDate = DateTime.Now,
-		EndDate = DateTime.Now.AddMonths(3)
-	};
-	class FakeCourseDto
-	{
-		public string Id { get; set; }
-		public string Name { get; set; }
-		public string Description { get; set; }
-		public DateTime StartDate { get; set; }
-		public DateTime EndDate { get; set; }
-	}
-*/
 }
