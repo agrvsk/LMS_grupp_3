@@ -19,6 +19,13 @@
         <div class="col-12 col-lg-6">
             <h3>Kurs @CurrentCourse?.Name</h3>
             <p>@CurrentCourse?.Description</p>
+
+            <button type="cancel" class="btn btn-primary" @onclick="EditCourse">Change course</button>
+
+            @if(isEditingCourse){
+                <CourseEditComponent CourseDto="@CurrentCourse" OnEditDone="Refresh" />
+            }
+ 
             <div class="row">
                 <div class="col-12 col-lg-9">
                     @if (Modules != null)
@@ -28,7 +35,6 @@
                             @if (isEditingModule && CurrentModuleGuid == module.Id)
                             {
                                 <ModuleEditComponent OnEditDone="StopEditing" Module=module currentCourseId="@CurrentCourse.Id" />
-
                             }
                             else
                             {
@@ -64,11 +70,17 @@
 *@
 
 @code {
-        [SupplyParameterFromQuery]
-        [Parameter] public string Id { get; set; }
+    [SupplyParameterFromQuery]
+    [Parameter] public string Id { get; set; }
 
+    private bool isEditingCourse { get; set; } = false;
     private bool isEditingModule { get; set; } = false;
     private Guid? CurrentModuleGuid { get; set; } = null!;
+
+    private void EditCourse()
+    {
+        isEditingCourse = !isEditingCourse;
+    }
 
     private void StopEditing(ModuleDto dto)
     {
@@ -117,6 +129,19 @@
         Loading = false;
 
     }
+    private void Refresh(CourseDto dto)
+    {
+        isEditingCourse = false;
+        if (CurrentCourse != null && CurrentCourse.Id == dto.Id)
+        {
+            CurrentCourse.Name = dto.Name;
+            CurrentCourse.Description = dto.Description;
+            CurrentCourse.StartDate = dto.StartDate;
+            CurrentCourse.EndDate = dto.EndDate;
+        }
+		isEditingCourse = false;
+        StateHasChanged();
+	}
 
     private async Task LoadCourse()
     {
