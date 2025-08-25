@@ -48,11 +48,11 @@ namespace LMS.Presentation.Controllers
             return CreatedAtAction(nameof(GetModuleById), new { id = createdModule.Id }, createdModule);
         }
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateModule(Guid id, [FromBody] ModuleDto moduleDto)
+        public async Task<IActionResult> UpdateModule(Guid id, [FromBody] ModuleUpdateDto moduleUpdDto)
         {
-            if (moduleDto == null || id != moduleDto.Id)
+            if (moduleUpdDto == null || id != moduleUpdDto.Id)
                 return BadRequest("Module data is invalid");
-            var updatedModule = await _serviceManager.ModuleService.UpdateModuleAsync(moduleDto);
+            var updatedModule = await _serviceManager.ModuleService.UpdateModuleAsync(moduleUpdDto);
             if (updatedModule == null)
                 return NotFound();
             return Ok(updatedModule);

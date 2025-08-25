@@ -20,15 +20,27 @@
 			</ul>
 		</div>
 		<a href="modules/@Module.Id" class="stretched-link"></a>
+
 	</div>
+	<button @onclick="StartEditing">Edit</button>
 
 </div>
 
 @code {
 
 	[Parameter]
-	public ModuleDto Module { get; set; }/* = new ModuleDto
-	
+	public ModuleDto Module { get; set; }
+	[Parameter]
+	public EventCallback<Guid> OnMessageSent { get; set; }
+
+
+
+
+    private async Task StartEditing()
+    {
+        await OnMessageSent.InvokeAsync(Module.Id);
+    }
+	/* = new ModuleDto
 	//FakeModuleDto Module = new FakeModuleDto
 	{
 		Id = Guid.NewGuid(),

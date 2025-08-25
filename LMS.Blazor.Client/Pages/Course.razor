@@ -25,7 +25,15 @@
                     {
                         @foreach (var module in Modules)
                         {
-                            <ModuleComponent Module=module />
+                            @if (isEditingModule && CurrentModuleGuid == module.Id)
+                            {
+                                <ModuleEditComponent OnMessageSent="StopEditing" Module=module />
+
+                            }
+                            else
+                            {
+                                <ModuleComponent OnMessageSent="StartEditing" Module=module />
+                            }
                         }
                     }
     
@@ -48,10 +56,30 @@
     </div>
     
 </div>
+@* 
+    <!-- ParentComponent.razor -->
+<ChildComponent OnMessageSent="HandleMessage" />
+
+<p>@messageFromChild</p>
+*@
 
 @code {
     [SupplyParameterFromQuery]
     [Parameter] public string Id { get; set; }
+
+    private bool isEditingModule { get; set; } = false;
+    private Guid? CurrentModuleGuid { get; set; } = null!;
+
+    private void StopEditing()
+    {
+        isEditingModule = false;
+        CurrentModuleGuid = null;
+    }
+    private void StartEditing(Guid myId)
+    {
+        isEditingModule = true;
+        CurrentModuleGuid = myId;
+    }
 
     public bool Loading { get; set; } = true;
 
