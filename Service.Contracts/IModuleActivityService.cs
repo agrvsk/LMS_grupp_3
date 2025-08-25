@@ -12,5 +12,4 @@ public interface IModuleActivityService
     Task<ModuleActivity> CreateActivityAsync(ModuleActivityCreateDto moduleActivity);
     Task<ModuleActivity> UpdateActivityAsync(ModuleActivityDto moduleActivity);
     Task<bool> DeleteActivityAsync(Guid moduleActivityId);
-    Task<List<ActivityTypeDto>> GetActivityTypesAsync();
 }

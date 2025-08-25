@@ -50,7 +50,7 @@ else
 						<InputDate id="activityEndDate" class="form-control" @bind-Value="Activity.EndDate" />
 						<ValidationMessage For="@(() => Activity.EndDate)" />
 					</div>
-					<button type="submit" class="btn btn-primary">Add</button> <button type="button" class="btn btn-primary" @onclick=Toggle>Cancel</button>
+					<button type="submit" class="btn btn-primary" @onclick=Toggle>Add</button> <button type="button" class="btn btn-primary" @onclick=Toggle>Cancel</button>
 				</EditForm>
 			</div>
 		</div>
@@ -59,6 +59,9 @@ else
 
 
 @code {
+	[Parameter]
+	public Guid ModuleId { get; set; }
+	
 	public ModuleActivityCreateDto Activity { get; set; } = new ModuleActivityCreateDto();
 	public List<ActivityTypeDto> Types { get; set; }
 	private bool isAdding = false;
@@ -68,12 +71,16 @@ else
 
 	private async Task HandleValidSubmit()
 	{
+		Activity.ModuleId = ModuleId;
 		var newCourseDto = await myApi.CallApiPostAsync<ModuleActivityCreateDto, ModuleActivityDto>("activities", Activity);
 
 		Console.WriteLine($"Course '{Activity.Name}' saved successfully!");
 	}
 
-
+	protected override async Task OnInitializedAsync()
+	{
+		Types = (await myApi.CallApiGetAsync<List<ActivityTypeDto>>("activity-types"));
+	}
 
 	private void Toggle() => isAdding = !isAdding;
 }

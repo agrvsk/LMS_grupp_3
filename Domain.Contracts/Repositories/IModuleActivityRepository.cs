@@ -7,5 +7,4 @@ public interface IModuleActivityRepository: IRepositoryBase<ModuleActivity>
     Task<ModuleActivity?> GetModuleActivityByIdAsync(Guid moduleActivityId);
     Task<List<ModuleActivity>> GetAllModuleActivitiesAsync();
     Task<List<ModuleActivity>> GetModuleActivitiesByModuleIdAsync(Guid moduleId);
-    Task<List<ActivityType>> GetActivityTypesAsync();
 }

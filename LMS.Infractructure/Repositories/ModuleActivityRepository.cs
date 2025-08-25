@@ -28,9 +28,4 @@ public class ModuleActivityRepository: RepositoryBase<ModuleActivity>, IModuleAc
     {
         return (await FindByConditionAsync(ma => ma.ModuleId == moduleId, trackChanges: false)).ToList();
     }
-
-    public async Task<List<ActivityType>> GetActivityTypesAsync()
-    {
-        return (await _context.ActivityTypes.ToList();
-    }
 }

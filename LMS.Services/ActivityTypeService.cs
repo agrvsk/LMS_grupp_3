@@ -19,11 +19,11 @@ namespace LMS.Services
             this.uow = uow;
             this.mapper = mapper;
         }
-        public Task<List<ActivityTypeDto>> GetAllActivityTypesAsync()
+        public async Task<List<ActivityTypeDto>> GetAllActivityTypesAsync()
         {
-            var activityTypes = uow.ActivityTypeRepository.GetAllActivityTypesAsync();
+            var activityTypes = await uow.ActivityTypeRepository.GetAllActivityTypesAsync();
             var activityTypeDtos = mapper.Map<List<ActivityTypeDto>>(activityTypes);
-            return Task.FromResult(activityTypeDtos);
+            return activityTypeDtos;
         }
     }
 }

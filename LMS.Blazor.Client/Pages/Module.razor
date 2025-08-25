@@ -1,4 +1,4 @@
-﻿@page "/modules/{Id}"
+﻿@page "/modules/{Id:guid}"
 @using LMS.Blazor.Client.Services
 @using LMS.Shared.DTOs.EntityDto
 @using Microsoft.AspNetCore.Authorization
@@ -10,7 +10,7 @@
 	<div class="row">
 		<!-- Main content area -->
 		<div class="col-12 col-lg-9">
-			<h3>Module @CurrentModule?.Name</h3> @* Later bind this to Module.Name *@
+			<h3>Module @CurrentModule?.Name</h3>
 			<p>@CurrentModule?.Description</p>
 			<div class="row">
 				<div class="col-12 col-lg-9">
@@ -27,19 +27,13 @@
 			<div class="p-3 sticky-top">
 				@if (ModuleActivities != null)
 				{
-					<ActivityAddComponent/>
+					<ActivityAddComponent ModuleId=Id/>
 					@foreach (var moduleact in ModuleActivities)
 					{
 						<ActivityComponent Activity=moduleact />
 					}
 				}
-@* 
-				<ActivityComponent />
-				<ActivityComponent />
-				<ActivityComponent />
-				<ActivityComponent />
-				<ActivityComponent />
- *@
+
 			</div>
 		</div>
 	</div>
@@ -48,7 +42,7 @@
 @code {
 	[SupplyParameterFromQuery]
 	[Parameter]
-	public string Id { get; set; }
+	public Guid Id { get; set; }
 
 	public bool Loading { get; set; } = true;
 
