@@ -27,7 +27,7 @@
                         {
                             @if (isEditingModule && CurrentModuleGuid == module.Id)
                             {
-                                <ModuleEditComponent OnMessageSent="StopEditing" Module=module />
+                                <ModuleEditComponent OnEditDone="StopEditing" Module=module currentCourseId="@CurrentCourse.Id" />
 
                             }
                             else
@@ -64,16 +64,26 @@
 *@
 
 @code {
-    [SupplyParameterFromQuery]
-    [Parameter] public string Id { get; set; }
+        [SupplyParameterFromQuery]
+        [Parameter] public string Id { get; set; }
 
     private bool isEditingModule { get; set; } = false;
     private Guid? CurrentModuleGuid { get; set; } = null!;
 
-    private void StopEditing()
+    private void StopEditing(ModuleDto dto)
     {
         isEditingModule = false;
         CurrentModuleGuid = null;
+
+        //Försök till instant refresh
+        ModuleDto? x = Modules.SingleOrDefault(o => o.Id == dto.Id);
+        if (x != null)
+        {
+            x.Name = dto.Name;
+            x.StartDate = dto.StartDate;
+            x.EndDate = dto.EndDate;
+        }
+        StateHasChanged();
     }
     private void StartEditing(Guid myId)
     {

@@ -33,9 +33,12 @@
 
 	[Parameter]
 	public ModuleDto Module { get; set; }
-	
+
 	[Parameter]
-	public EventCallback<bool> OnMessageSent { get; set; }
+	public Guid currentCourseId { get; set; }
+
+	[Parameter]
+	public EventCallback<ModuleDto> OnEditDone { get; set; }
 
 	public ModuleUpdateDto ModuleUpdDto { get; set; }
 
@@ -45,7 +48,8 @@
 		ModuleUpdDto = new ModuleUpdateDto
 		{
 			Id = Module.Id,
-//			CourseId = Module.CourseId,
+			//			CourseId = Guid.Parse( currentCourseId ),
+			CourseId = currentCourseId,
 			Name = Module.Name,
 			Description = Module.Description,
 			StartDate = Module.StartDate,
@@ -58,7 +62,7 @@
 
 	private async Task StopEditing()
 	{
-		await OnMessageSent.InvokeAsync(false);
+		await OnEditDone.InvokeAsync(Module);
 	}
 
 
@@ -67,9 +71,7 @@
 
 	private async Task HandleValidSubmit()
 	{
-		//var updatedCourseDto = 
-		await myApi.CallApiPutAsync<ModuleUpdateDto, ModuleDto>($"modules/{Module.Id}", ModuleUpdDto);
-
+		Module = await myApi.CallApiPutAsync<ModuleUpdateDto, ModuleDto>($"modules/{Module.Id}", ModuleUpdDto);
 		Console.WriteLine($"Course '{ModuleUpdDto.Name}' saved successfully!");
 		StopEditing();
 	}
