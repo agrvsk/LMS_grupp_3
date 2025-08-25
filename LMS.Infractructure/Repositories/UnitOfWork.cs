@@ -12,6 +12,7 @@ public class UnitOfWork : IUnitOfWork
     private readonly Lazy<IApplicationUserRepository> applicationUserRepository;
     private readonly Lazy<ISubmissionRepository> submissionRepository;
     private readonly Lazy<IDocumentRepository> documentRepository;
+    private readonly Lazy<IActivityTypeRepository> activityTypeRepository;
 
     public ICourseRepository CourseRepository { get => courseRepository.Value;  }
     public IModuleRepository ModuleRepository { get => moduleRepository.Value;  }
@@ -31,6 +32,10 @@ public class UnitOfWork : IUnitOfWork
     {
         get => documentRepository.Value;
     }
+    public IActivityTypeRepository ActivityTypeRepository
+    {
+        get => activityTypeRepository.Value;
+    }
 
 
     public UnitOfWork(ApplicationDbContext context
@@ -41,6 +46,7 @@ public class UnitOfWork : IUnitOfWork
             , Lazy<IApplicationUserRepository> aApplicationUserRepository
             , Lazy<ISubmissionRepository> aSsubmissionRepository
             , Lazy<IDocumentRepository> aDocumentRepository
+            , Lazy<IActivityTypeRepository> aActivityTypeRepository
 
         )
     {
@@ -61,6 +67,7 @@ public class UnitOfWork : IUnitOfWork
         applicationUserRepository = aApplicationUserRepository;
         submissionRepository = aSsubmissionRepository;
         documentRepository = aDocumentRepository;
+        activityTypeRepository = aActivityTypeRepository;
 
     }
 

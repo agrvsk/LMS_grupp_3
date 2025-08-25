@@ -9,5 +9,6 @@ public interface IServiceManager
     IModuleService ModuleService { get; }
     ISubmissionService SubmissionService { get; }
     IUserService UserService { get; }
+    IActivityTypeService ActivityTypeService { get; }
 
 }

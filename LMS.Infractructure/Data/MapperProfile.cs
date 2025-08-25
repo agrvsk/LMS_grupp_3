@@ -21,5 +21,6 @@ public class MapperProfile : Profile
         CreateMap<CourseCreateDto, Course>().ReverseMap();
         CreateMap<DocumentDto, Document>().ReverseMap();
         CreateMap<DocumentCreateDto, Document>().ReverseMap();
+        CreateMap<ActivityTypeDto, ActivityType>().ReverseMap();
     }
 }

@@ -27,6 +27,7 @@
 			<div class="p-3 sticky-top">
 				@if (ModuleActivities != null)
 				{
+					<ActivityAddComponent/>
 					@foreach (var moduleact in ModuleActivities)
 					{
 						<ActivityComponent Activity=moduleact />

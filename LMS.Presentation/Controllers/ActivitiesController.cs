@@ -40,6 +40,7 @@ namespace LMS.Presentation.Controllers
                 return NotFound();
             return Ok(activity);
         }
+
         [HttpPost]
         public async Task<IActionResult> CreateActivity([FromBody] ModuleActivityCreateDto activityDto)
         {

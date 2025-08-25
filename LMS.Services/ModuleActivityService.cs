@@ -69,5 +69,12 @@ public class ModuleActivityService : IModuleActivityService
         return true;
     }
 
+    public async Task<List<ActivityTypeDto>> GetActivityTypesAsync()
+    {
+        var activityTypes = await uow.ModuleActivityRepository.GetActivityTypesAsync();
+        var activityTypeDtos = mapper.Map<List<ActivityTypeDto>>(activityTypes);
+        return activityTypeDtos;
+    }
+
 
 }

@@ -11,6 +11,7 @@ public class ModuleActivity
     public string Description { get; set; }
     public DateTime StartDate { get; set; }
     public DateTime EndDate { get; set; }
+    public int ActivityTypeId { get; set; }
     public ActivityType Type { get; set; }
     public Guid ModuleId { get; set; }
 
