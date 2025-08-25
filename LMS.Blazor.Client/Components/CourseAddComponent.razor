@@ -35,10 +35,19 @@
 	[Inject]
 	private IApiService myApi { get; set; } = default!;
 
+    // Added EventCallback to notify parent component when a new course is added
+	[Parameter]
+    public EventCallback<CourseDto> OnCourseAdded { get; set; }
+
 	private async Task HandleValidSubmit()
 	{
 		var newCourseDto =  await myApi.CallApiPostAsync<CourseCreateDto, CourseDto>("courses", Course);
 
 		Console.WriteLine($"Course '{Course.Name}' saved successfully!");
+
+		// Added to notify parent component
+        await OnCourseAdded.InvokeAsync(newCourseDto);
+
+        Course = new CourseCreateDto();
 	}
 }
