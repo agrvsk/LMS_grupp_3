@@ -41,12 +41,13 @@ public class CourseService : ICourseService
 
         return course;
     }
-    public async Task<bool> UpdateCourseAsync(CourseDto courseDto)
+    public async Task<CourseDto> UpdateCourseAsync(CourseUpdateDto courseUpdDto)
     {
-        var course = mapper.Map<Course>(courseDto);
+        var course = mapper.Map<Course>(courseUpdDto);
         uow.CourseRepository.Update(course);
         await uow.CompleteAsync();
-        return true;
+        return mapper.Map<CourseDto>(course);
+//        return true;
     }
     public async Task<bool> DeleteCourseAsync(Guid courseId)
     {

@@ -45,7 +45,7 @@ namespace LMS.Presentation.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateCourse(Guid id, [FromBody] CourseDto courseDto)
+        public async Task<IActionResult> UpdateCourse(Guid id, [FromBody] CourseUpdateDto courseDto)
         {
             if (courseDto == null || id != courseDto.Id)
             {

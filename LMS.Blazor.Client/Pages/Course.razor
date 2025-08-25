@@ -13,34 +13,39 @@
 			<div>
 				<DocumentComponent Documents="@DocumentDtos" />
 
-			</div>
-		</div>
-		<!-- Main content area -->
-		<div class="col-12 col-lg-6">
-			<h3>Kurs @CurrentCourse?.Name</h3>
-			<p>@CurrentCourse?.Description</p>
-			<div class="row">
-				<div class="col-12 col-lg-9">
-					<ModuleAddComponent CourseId=Id />
-					@if (Modules != null)
-					{
-						@foreach (var module in Modules)
-						{
-							@if (isEditingModule && CurrentModuleGuid == module.Id)
-							{
-								<ModuleEditComponent OnEditDone="StopEditing" Module=module currentCourseId="@CurrentCourse.Id" />
+            </div>
+        </div>
+        <!-- Main content area -->
+        <div class="col-12 col-lg-6">
+            <h3>Kurs @CurrentCourse?.Name</h3>
+            <p>@CurrentCourse?.Description</p>
 
-							}
-							else
-							{
-								<ModuleComponent OnMessageSent="StartEditing" Module=module />
-							}
-						}
-					}
+            <button type="cancel" class="btn btn-primary" @onclick="EditCourse">Change course</button>
 
-				</div>
-			</div>
-		</div>
+            @if(isEditingCourse){
+                <CourseEditComponent CourseDto="@CurrentCourse" OnEditDone="Refresh" />
+            }
+ 
+            <div class="row">
+                <div class="col-12 col-lg-9">
+                    @if (Modules != null)
+                    {
+                        @foreach (var module in Modules)
+                        {
+                            @if (isEditingModule && CurrentModuleGuid == module.Id)
+                            {
+                                <ModuleEditComponent OnEditDone="StopEditing" Module=module currentCourseId="@CurrentCourse.Id" />
+                            }
+                            else
+                            {
+                                <ModuleComponent OnMessageSent="StartEditing" Module=module />
+                            }
+                        }
+                    }
+    
+                </div>
+            </div>
+        </div>
 
 		<!-- R Sidebar area -->
 		<div class="col-12 col-lg-3 border-start bg-light">
@@ -68,13 +73,19 @@
 	[SupplyParameterFromQuery]
 	[Parameter] public Guid Id { get; set; }
 
-	private bool isEditingModule { get; set; } = false;
-	private Guid? CurrentModuleGuid { get; set; } = null!;
+    private bool isEditingCourse { get; set; } = false;
+    private bool isEditingModule { get; set; } = false;
+    private Guid? CurrentModuleGuid { get; set; } = null!;
 
-	private void StopEditing(ModuleDto dto)
-	{
-		isEditingModule = false;
-		CurrentModuleGuid = null;
+    private void EditCourse()
+    {
+        isEditingCourse = !isEditingCourse;
+    }
+
+    private void StopEditing(ModuleDto dto)
+    {
+        isEditingModule = false;
+        CurrentModuleGuid = null;
 
 		//Försök till instant refresh
 		ModuleDto? x = Modules.SingleOrDefault(o => o.Id == dto.Id);
@@ -117,6 +128,19 @@
 		await LoadCourse();
 		Loading = false;
 
+    }
+    private void Refresh(CourseDto dto)
+    {
+        isEditingCourse = false;
+        if (CurrentCourse != null && CurrentCourse.Id == dto.Id)
+        {
+            CurrentCourse.Name = dto.Name;
+            CurrentCourse.Description = dto.Description;
+            CurrentCourse.StartDate = dto.StartDate;
+            CurrentCourse.EndDate = dto.EndDate;
+        }
+		isEditingCourse = false;
+        StateHasChanged();
 	}
 
 	private async Task LoadCourse()
