@@ -88,6 +88,7 @@ public static class ServiceExtensions
         services.AddScoped<IApplicationUserRepository, ApplicationUserRepository>();
         services.AddScoped<ISubmissionRepository, SubmissionRepository>();
         services.AddScoped<IDocumentRepository, DocumentRepository>();
+        services.AddScoped<IActivityTypeRepository, ActivityTypeRepository>();
 
         services.AddLazy<ICourseRepository>();
         services.AddLazy<IModuleRepository>();
@@ -95,7 +96,8 @@ public static class ServiceExtensions
         services.AddLazy<IApplicationUserRepository>();
         services.AddLazy<ISubmissionRepository>();
         services.AddLazy<IDocumentRepository>();
-        
+        services.AddLazy<IActivityTypeRepository>();
+
         services.AddScoped<IUnitOfWork, UnitOfWork>();
 
     }
@@ -111,6 +113,7 @@ public static class ServiceExtensions
         services.AddScoped<IDocumentService, DocumentService>();
         services.AddScoped<ISubmissionService, SubmissionService>();
         services.AddScoped<IUserService, UserService>();
+        services.AddScoped<IActivityTypeService, ActivityTypeService>();
 
         services.AddScoped(provider => new Lazy<IAuthService>(() => provider.GetRequiredService<IAuthService>()));
         services.AddLazy<ICourseService>();
@@ -119,6 +122,7 @@ public static class ServiceExtensions
         services.AddLazy<IModuleService>();
         services.AddLazy<ISubmissionService>();
         services.AddLazy<IUserService>();
+        services.AddLazy<IActivityTypeService>();
 
 
     }

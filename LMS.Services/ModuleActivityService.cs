@@ -69,5 +69,4 @@ public class ModuleActivityService : IModuleActivityService
         return true;
     }
 
-
 }

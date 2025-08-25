@@ -25,21 +25,32 @@ else
 						<ValidationMessage For="@(() => Activity.Name)" />
 					</div>
 					<div class="mb-3">
+						<label for="category" class="form-label">Category</label>
+						<InputSelect id="category" class="form-select" @bind-Value="Activity.ActivityTypeId">
+							<option value="">-- Select Category --</option>
+							@foreach (var type in Types)
+							{
+								<option value="@type.Id">@type.Name</option>
+							}
+						</InputSelect>
+						<ValidationMessage For="@(() => Activity.ActivityTypeId)" />
+					</div>
+					<div class="mb-3">
 						<label for="activityDescription" class="form-label">Description</label>
 						<InputTextArea id="courseDescription" class="form-control" @bind-Value="Activity.Description" />
 						<ValidationMessage For="@(() => Activity.Description)" />
 					</div>
 					<div class="mb-3">
-						<label for="activityStartDate" class="form-label">Start Date</label>
+						<label for="activityStartDate" class="form-label">Start Time</label>
 						<InputDate id="activityStartDate" class="form-control" @bind-Value="Activity.StartDate" />
 						<ValidationMessage For="@(() => Activity.StartDate)" />
 					</div>
 					<div class="mb-3">
-						<label for="courseEndDate" class="form-label">End Date</label>
+						<label for="courseEndDate" class="form-label">End Time</label>
 						<InputDate id="activityEndDate" class="form-control" @bind-Value="Activity.EndDate" />
 						<ValidationMessage For="@(() => Activity.EndDate)" />
 					</div>
-					<button type="submit" class="btn btn-primary">Add</button> <button type="button" class="btn btn-primary" @onclick=Toggle>Cancel</button>
+					<button type="submit" class="btn btn-primary" @onclick=Toggle>Add</button> <button type="button" class="btn btn-primary" @onclick=Toggle>Cancel</button>
 				</EditForm>
 			</div>
 		</div>
@@ -48,7 +59,11 @@ else
 
 
 @code {
+	[Parameter]
+	public Guid ModuleId { get; set; }
+	
 	public ModuleActivityCreateDto Activity { get; set; } = new ModuleActivityCreateDto();
+	public List<ActivityTypeDto> Types { get; set; }
 	private bool isAdding = false;
 
 	[Inject]
@@ -56,9 +71,15 @@ else
 
 	private async Task HandleValidSubmit()
 	{
-		var newCourseDto = await myApi.CallApiPostAsync<ModuleActivityCreateDto, ModuleActivityDto>("courses", Activity);
+		Activity.ModuleId = ModuleId;
+		var newCourseDto = await myApi.CallApiPostAsync<ModuleActivityCreateDto, ModuleActivityDto>("activities", Activity);
 
 		Console.WriteLine($"Course '{Activity.Name}' saved successfully!");
+	}
+
+	protected override async Task OnInitializedAsync()
+	{
+		Types = (await myApi.CallApiGetAsync<List<ActivityTypeDto>>("activity-types"));
 	}
 
 	private void Toggle() => isAdding = !isAdding;
