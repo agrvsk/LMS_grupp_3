@@ -21,11 +21,16 @@ public class ScheduleService : IScheduleService
         this.sm = sm;
         // Initialize any required services or dependencies here
     }
-    public ScheduleDto GetSchedule(Guid coursId, DateTime start, DateTime end)
+    public ScheduleDto GetSchedule(Guid courseId, DateTime start, DateTime end)
     {
-        CourseDto course = sm.CourseService.GetCourseByIdAsync(coursId).Result;
-        List<ModuleDto> modules = sm.ModuleService.GetModulesByCourseIdAsync(coursId).Result.Where(m => m.EndDate <= start && m.StartDate >= end).ToList();
-        List<ModuleActivityDto> moduleActivities = modules.SelectMany(m => m.ModuleActivities.Where(a => a.StartDate <= start && a.EndDate >= end)).ToList();
+        CourseDto course = sm.CourseService.GetCourseByIdAsync(courseId).Result;
+        List<ModuleDto> modules = sm.ModuleService
+            .GetModulesByCourseIdAsync(courseId).Result
+            .Where(m => m.StartDate <= end && m.EndDate >= start)
+            .ToList();
+        List<ModuleActivityDto> moduleActivities = modules.SelectMany(m => m.ModuleActivities
+        .Where(a => a.StartDate <= end && a.EndDate >= start))
+            .ToList();
         return new ScheduleDto
         {
             StartDate = start,

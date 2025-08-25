@@ -41,6 +41,7 @@ namespace LMS.UnitTests.Setups
         protected readonly Mock<IDocumentService> MockDocumentService;
         protected readonly Mock<IModuleActivityService> MockModuleActivityService;
         protected readonly Mock<IModuleService> MockModuleService;
+        protected readonly Mock<IScheduleService> MockScheduleService;
         protected readonly Mock<ISubmissionService> MockSubmissionService;
         protected readonly Mock<IUserService> MockUserService;
 
@@ -58,7 +59,7 @@ namespace LMS.UnitTests.Setups
             MockCourseRepo = new Mock<ICourseRepository>();
             MockDocumentRepo = new Mock<IDocumentRepository>();
             MockModuleActivityRepo = new Mock<IModuleActivityRepository>();
-            MockModuleRepo = new Mock<IModuleRepository>();
+            MockModuleRepo = new Mock<IModuleRepository>();            
             MockSubmissionRepo = new Mock<ISubmissionRepository>();
 
             // Setup the UnitOfWork to return the repository mocks
@@ -66,7 +67,7 @@ namespace LMS.UnitTests.Setups
             MockUow.SetupGet(u => u.CourseRepository).Returns(MockCourseRepo.Object);
             MockUow.SetupGet(u => u.DocumentRepository).Returns(MockDocumentRepo.Object);
             MockUow.SetupGet(u => u.ModuleActivityRepository).Returns(MockModuleActivityRepo.Object);
-            MockUow.SetupGet(u => u.ModuleRepository).Returns(MockModuleRepo.Object);
+            MockUow.SetupGet(u => u.ModuleRepository).Returns(MockModuleRepo.Object);            
             MockUow.SetupGet(u => u.SubmissionRepository).Returns(MockSubmissionRepo.Object);
 
             // Setup UnitOfWork CompleteAsync to return a completed task
@@ -112,9 +113,10 @@ namespace LMS.UnitTests.Setups
             MockCourseService = new Mock<ICourseService>();
             MockDocumentService = new Mock<IDocumentService>();
             MockModuleActivityService = new Mock<IModuleActivityService>();
-            MockModuleService = new Mock<IModuleService>();
+            MockModuleService = new Mock<IModuleService>();            
             MockSubmissionService = new Mock<ISubmissionService>();
             MockUserService = new Mock<IUserService>();
+            
 
             // Initialize the ServiceManager with the service mocks
             ServiceManager = new ServiceManager(
