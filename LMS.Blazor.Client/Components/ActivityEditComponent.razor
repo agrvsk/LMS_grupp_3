@@ -2,6 +2,9 @@
 @using LMS.Shared.DTOs.EntityDto
 
 <div class="container mt-4">
+	@if(ActivityUpdDto == null)
+	{}
+	else{
 	<EditForm class="form" Model="@ActivityUpdDto" OnValidSubmit="@HandleValidSubmit" FormName="EditActivity">
 		<DataAnnotationsValidator />
 		<ValidationSummary />
@@ -16,7 +19,7 @@
 		<div>
 			<label for="description" class="form-label">Description</label>
 			<InputText class="form-control" @bind-Value="@ActivityUpdDto.Description" id="description" placeholder="Description" />
-			<ValidationMessage For="@(() => ActivityUpdDto.Name)" />
+			<ValidationMessage For="@(() => ActivityUpdDto.Description)" />
 		</div>
 		<div>
 			<label for="start" class="form-label">StartDate</label>
@@ -37,7 +40,7 @@
 					<option value="@type.Id">@type.Name</option>
 				}
 			</InputSelect>
-			<ValidationMessage For="@(() => Activity.ActivityTypeId)" />
+			<ValidationMessage For="@(() => ActivityUpdDto.ActivityTypeId)" />
 		</div>
 @* 
 		<div>
@@ -56,7 +59,7 @@
 		<button type="submit" class="btn btn-primary">Save</button>
 
 
-	</EditForm>
+	</EditForm>}
 
 </div>
 
@@ -74,12 +77,12 @@
 	[Parameter]
 	public EventCallback<ModuleActivityDto> OnEditDone { get; set; }
 
-	public ModuleActivityUpdateDto ActivityUpdDto { get; set; }
-	public List<ActivityTypeDto> Types { get; set; }
+	public ModuleActivityUpdateDto ActivityUpdDto { get; set; } = new ModuleActivityUpdateDto();
+	public List<ActivityTypeDto> Types { get; set; } = new List<ActivityTypeDto>();
 
 	protected override async Task OnInitializedAsync()
 	{
-		Types = (await myApi.CallApiGetAsync<List<ActivityTypeDto>>("activity-types"));
+		
 
 		//await base.OnInitializedAsync();
 		ActivityUpdDto = new ModuleActivityUpdateDto
@@ -94,6 +97,7 @@
 			ModuleId = currentModuleId
 
 		};
+		Types = (await myApi.CallApiGetAsync<List<ActivityTypeDto>>("activity-types"));
 	}
 
 	private async Task StopEditing()
