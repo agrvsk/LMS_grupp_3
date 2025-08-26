@@ -36,6 +36,7 @@ namespace LMS.UnitTests.Setups
         protected readonly IOptions<JwtSettings> JwtOptions;
 
         // Service Mocks
+        protected readonly Mock<IActivityTypeService> MockActivityTypeService;
         protected readonly Mock<IAuthService> MockAuthService;
         protected readonly Mock<ICourseService> MockCourseService;
         protected readonly Mock<IDocumentService> MockDocumentService;
@@ -109,6 +110,7 @@ namespace LMS.UnitTests.Setups
 
 
             // Initialize all service mocks
+            MockActivityTypeService = new Mock<IActivityTypeService>();
             MockAuthService = new Mock<IAuthService>();
             MockCourseService = new Mock<ICourseService>();
             MockDocumentService = new Mock<IDocumentService>();
@@ -126,7 +128,8 @@ namespace LMS.UnitTests.Setups
                 new Lazy<IModuleActivityService>(() => MockModuleActivityService.Object),
                 new Lazy<IModuleService>(() => MockModuleService.Object),
                 new Lazy<ISubmissionService>(() => MockSubmissionService.Object),
-                new Lazy<IUserService>(() => MockUserService.Object)
+                new Lazy<IUserService>(() => MockUserService.Object),
+                new Lazy<IActivityTypeService>(() => MockActivityTypeService.Object)
                 );
 
         }

@@ -13,6 +13,7 @@ namespace LMS.UnitTests.Services
     public class ScheduleServiceTests : ServiceTestBase
     {
         private readonly ScheduleService _service;
+
         public ScheduleServiceTests() 
         { 
             _service = new ScheduleService(MockUow.Object, ServiceManager);
