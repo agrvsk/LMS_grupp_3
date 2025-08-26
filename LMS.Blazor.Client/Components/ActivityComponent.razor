@@ -10,6 +10,7 @@
 		</div>
 		<a href="activities/@Activity.Id" class="stretched-link"></a>
 	</div>
+	<button @onclick="StartEditing">Edit</button>
 
 </div>
 
@@ -17,4 +18,11 @@
 	[Parameter]
 	public ModuleActivityDto Activity { get; set; }
 
+	[Parameter]
+	public EventCallback<Guid> OnMessageSent { get; set; }
+
+	private async Task StartEditing()
+	{
+		await OnMessageSent.InvokeAsync(Activity.Id);
+	}
 }

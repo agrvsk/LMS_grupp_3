@@ -30,7 +30,14 @@
 					<ActivityAddComponent ModuleId=Id/>
 					@foreach (var moduleact in ModuleActivities)
 					{
-						<ActivityComponent Activity=moduleact />
+						@if (isEditingActivity && CurrentActivityGuid == moduleact.Id)
+						{
+							<ActivityEditComponent OnEditDone="StopActivityEditing" Activity=moduleact currentModuleId="@CurrentModule.Id" />
+						}
+						else
+						{
+							<ActivityComponent OnMessageSent="StartActivityEditing" Activity=moduleact />
+						}				
 					}
 				}
 
@@ -44,31 +51,34 @@
 	[Parameter]
 	public Guid Id { get; set; }
 
+	private bool isEditingActivity { get; set; } = false;
+	private Guid? CurrentActivityGuid { get; set; } = null!;
+
 	public bool Loading { get; set; } = true;
 
-    [Inject]
-    private IApiService myApi { get; set; } = default!;
+	[Inject]
+	private IApiService myApi { get; set; } = default!;
 
-    [Inject]
-    private AuthenticationStateProvider Auth { get; set; } = default!;
+	[Inject]
+	private AuthenticationStateProvider Auth { get; set; } = default!;
 
 	private ModuleDto? CurrentModule { get; set; }
 
-    private IEnumerable<ModuleActivityDto>? ModuleActivities { get; set; }
+	private IEnumerable<ModuleActivityDto>? ModuleActivities { get; set; }
 	private List<DocumentDto>? DocumentDtos { get; set; } = new List<DocumentDto>();
 
-    protected override async Task OnInitializedAsync()
-    {
+	protected override async Task OnInitializedAsync()
+	{
 
-        var state = await Auth.GetAuthenticationStateAsync();
+		var state = await Auth.GetAuthenticationStateAsync();
 
-        if (!(state.User.Identity?.IsAuthenticated) ?? false)
-        {
-            return;
-        }
-        await LoadModule();
+		if (!(state.User.Identity?.IsAuthenticated) ?? false)
+		{
+			return;
+		}
+		await LoadModule();
 
-    }
+	}
 
 	private async Task LoadModule()
 	{
@@ -95,5 +105,30 @@
 
 		}
 	}
+
+	private void StartActivityEditing(Guid myId)
+	{
+		isEditingActivity = true;
+		CurrentActivityGuid = myId;
+	}
+	private void StopActivityEditing(ModuleActivityDto dto)
+	{
+		isEditingActivity = false;
+		CurrentActivityGuid = null;
+
+		//Försök till instant refresh
+		ModuleActivityDto? x = ModuleActivities.SingleOrDefault(o => o.Id == dto.Id);
+		if (x != null)
+		{
+			x.Name = dto.Name;
+			x.Description = dto.Description;
+			x.StartDate = dto.StartDate;
+			x.EndDate = dto.EndDate;
+			//x.ActivityTypeId = dto.ActivityTypeId
+			//x.ModuleId = dto.ModuleId;
+		}
+		StateHasChanged();
+	}
+
 
 }

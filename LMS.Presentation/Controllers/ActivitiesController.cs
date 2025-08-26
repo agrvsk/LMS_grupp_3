@@ -50,7 +50,7 @@ namespace LMS.Presentation.Controllers
             return CreatedAtAction(nameof(GetActivityById), new { id = createdActivity.Id }, createdActivity);
         }
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateActivity(Guid id, [FromBody] ModuleActivityDto activityDto)
+        public async Task<IActionResult> UpdateActivity(Guid id, [FromBody] ModuleActivityUpdateDto activityDto)
         {
             if (activityDto == null || id != activityDto.Id)
                 return BadRequest("Activity data is invalid");

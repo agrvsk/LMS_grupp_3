@@ -1,0 +1,115 @@
+﻿@using LMS.Blazor.Client.Services
+@using LMS.Shared.DTOs.EntityDto
+
+<div class="container mt-4">
+	@if(ActivityUpdDto == null)
+	{}
+	else{
+	<EditForm class="form" Model="@ActivityUpdDto" OnValidSubmit="@HandleValidSubmit" FormName="EditActivity">
+		<DataAnnotationsValidator />
+		<ValidationSummary />
+		<div>
+			<p>@ActivityUpdDto.Id</p>
+		</div>
+		<div>
+			<label for="name" class="form-label">Name</label>
+			<InputText class="form-control" @bind-Value="@ActivityUpdDto.Name" id="name" placeholder="Name" />
+			<ValidationMessage For="@(() => ActivityUpdDto.Name)" />
+		</div>
+		<div>
+			<label for="description" class="form-label">Description</label>
+			<InputText class="form-control" @bind-Value="@ActivityUpdDto.Description" id="description" placeholder="Description" />
+			<ValidationMessage For="@(() => ActivityUpdDto.Description)" />
+		</div>
+		<div>
+			<label for="start" class="form-label">StartDate</label>
+			<InputDate class="form-control" @bind-Value="@ActivityUpdDto.StartDate" id="start" placeholder="StartDate" />
+			<ValidationMessage For="@(() => ActivityUpdDto.StartDate)" />
+		</div>
+		<div>
+			<label for="end" class="form-label">EndDate</label>
+			<InputDate class="form-control" @bind-Value="@ActivityUpdDto.EndDate" id="end" placeholder="EndDate" />
+			<ValidationMessage For="@(() => ActivityUpdDto.EndDate)" />
+		</div>
+		<div>
+			<label for="category" class="form-label">Category</label>
+			<InputSelect id="category" class="form-select" @bind-Value="@ActivityUpdDto.ActivityTypeId">
+ 				<option value="">-- Select Category --</option>
+ 				@foreach (var type in Types)
+				{
+					<option value="@type.Id">@type.Name</option>
+				}
+			</InputSelect>
+			<ValidationMessage For="@(() => ActivityUpdDto.ActivityTypeId)" />
+		</div>
+@* 
+		<div>
+			<label for="typeid" class="form-label">ActivityTypeId</label>
+			<InputNumber class="form-control" @bind-Value="@ActivityUpdDto.ActivityTypeId" id="typeid" placeholder="ActivityTypeId" />
+			<ValidationMessage For="@(() => ActivityUpdDto.ActivityTypeId)" />
+		</div>
+
+		<div>
+			<label for="type" class="form-label">Type</label>
+			<InputText class="form-control" @bind-Value="@ActivityUpdDto.Type" id="type" placeholder="Type" />
+			<ValidationMessage For="@(() => ActivityUpdDto.Type)" />
+		</div>
+ *@
+		<button type="cancel" class="btn btn-primary" @onclick="StopEditing">Cancel</button>
+		<button type="submit" class="btn btn-primary">Save</button>
+
+
+	</EditForm>}
+
+</div>
+
+@code {
+
+	[Inject]
+	private IApiService myApi { get; set; } = default!;
+
+	[Parameter]
+	public ModuleActivityDto Activity { get; set; }
+
+	[Parameter]
+	public Guid currentModuleId { get; set; }
+
+	[Parameter]
+	public EventCallback<ModuleActivityDto> OnEditDone { get; set; }
+
+	public ModuleActivityUpdateDto ActivityUpdDto { get; set; } = new ModuleActivityUpdateDto();
+	public List<ActivityTypeDto> Types { get; set; } = new List<ActivityTypeDto>();
+
+	protected override async Task OnInitializedAsync()
+	{
+		
+
+		//await base.OnInitializedAsync();
+		ActivityUpdDto = new ModuleActivityUpdateDto
+		{
+			Id = Activity.Id,
+			Name = Activity.Name,
+			Description = Activity.Description,
+			StartDate = Activity.StartDate,
+			EndDate = Activity.EndDate,
+			ActivityTypeId = Activity.ActivityTypeId,
+//			Type = Activity.Type,
+			ModuleId = currentModuleId
+
+		};
+		Types = (await myApi.CallApiGetAsync<List<ActivityTypeDto>>("activity-types"));
+	}
+
+	private async Task StopEditing()
+	{
+		await OnEditDone.InvokeAsync(Activity);
+	}
+
+	private async Task HandleValidSubmit()
+	{
+		Activity = await myApi.CallApiPutAsync<ModuleActivityUpdateDto, ModuleActivityDto>($"activities/{Activity.Id}", ActivityUpdDto);
+		Console.WriteLine($"Course '{ActivityUpdDto.Name}' saved successfully!");
+		StopEditing();
+	}
+
+}

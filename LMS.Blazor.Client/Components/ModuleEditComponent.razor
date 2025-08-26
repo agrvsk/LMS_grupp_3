@@ -17,7 +17,7 @@
 		</div>
 		<div>
 			<InputDate class="form-control" @bind-Value="@ModuleUpdDto.EndDate" id="End" placeholder="End" />
-			<ValidationMessage For="@(() => ModuleUpdDto.Name)" />
+			<ValidationMessage For="@(() => ModuleUpdDto.EndDate)" />
 		</div>
 		<button type="cancel" class="btn btn-primary" @onclick="StopEditing">Cancel</button>
 		<button type="submit" class="btn btn-primary">Save</button>
