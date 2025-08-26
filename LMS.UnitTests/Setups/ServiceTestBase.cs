@@ -22,6 +22,7 @@ namespace LMS.UnitTests.Setups
         protected readonly Mock<IUnitOfWork> MockUow;
 
         // Repository Mocks
+        protected readonly Mock<IActivityTypeRepository> MockActivityTypeRepo;
         protected readonly Mock<IApplicationUserRepository> MockApplicationUserRepo;
         protected readonly Mock<ICourseRepository> MockCourseRepo;
         protected readonly Mock<IDocumentRepository> MockDocumentRepo;
@@ -56,6 +57,7 @@ namespace LMS.UnitTests.Setups
             MockUow = new Mock<IUnitOfWork>();
 
             // Initialize repository mocks
+            MockActivityTypeRepo = new Mock<IActivityTypeRepository>();
             MockApplicationUserRepo = new Mock<IApplicationUserRepository>();
             MockCourseRepo = new Mock<ICourseRepository>();
             MockDocumentRepo = new Mock<IDocumentRepository>();
@@ -64,6 +66,7 @@ namespace LMS.UnitTests.Setups
             MockSubmissionRepo = new Mock<ISubmissionRepository>();
 
             // Setup the UnitOfWork to return the repository mocks
+            MockUow.SetupGet(u => u.ActivityTypeRepository).Returns(MockActivityTypeRepo.Object);
             MockUow.SetupGet(u => u.ApplicationUserRepository).Returns(MockApplicationUserRepo.Object);
             MockUow.SetupGet(u => u.CourseRepository).Returns(MockCourseRepo.Object);
             MockUow.SetupGet(u => u.DocumentRepository).Returns(MockDocumentRepo.Object);
