@@ -16,8 +16,7 @@ namespace LMS.UnitTests.Services
         private readonly DocumentService _service;
 
         public DocumentServiceTests()
-        {
-            MockUow.Setup(u => u.CompleteAsync()).Returns(Task.CompletedTask);
+        {            
             _service = new DocumentService(MockUow.Object, MockMapper.Object);
         }
 

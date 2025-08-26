@@ -22,6 +22,7 @@ namespace LMS.UnitTests.Setups
         protected readonly Mock<IUnitOfWork> MockUow;
 
         // Repository Mocks
+        protected readonly Mock<IActivityTypeRepository> MockActivityTypeRepo;
         protected readonly Mock<IApplicationUserRepository> MockApplicationUserRepo;
         protected readonly Mock<ICourseRepository> MockCourseRepo;
         protected readonly Mock<IDocumentRepository> MockDocumentRepo;
@@ -36,6 +37,7 @@ namespace LMS.UnitTests.Setups
         protected readonly IOptions<JwtSettings> JwtOptions;
 
         // Service Mocks
+        protected readonly Mock<IActivityTypeService> MockActivityTypeService;
         protected readonly Mock<IAuthService> MockAuthService;
         protected readonly Mock<ICourseService> MockCourseService;
         protected readonly Mock<IDocumentService> MockDocumentService;
@@ -55,6 +57,7 @@ namespace LMS.UnitTests.Setups
             MockUow = new Mock<IUnitOfWork>();
 
             // Initialize repository mocks
+            MockActivityTypeRepo = new Mock<IActivityTypeRepository>();
             MockApplicationUserRepo = new Mock<IApplicationUserRepository>();
             MockCourseRepo = new Mock<ICourseRepository>();
             MockDocumentRepo = new Mock<IDocumentRepository>();
@@ -63,6 +66,7 @@ namespace LMS.UnitTests.Setups
             MockSubmissionRepo = new Mock<ISubmissionRepository>();
 
             // Setup the UnitOfWork to return the repository mocks
+            MockUow.SetupGet(u => u.ActivityTypeRepository).Returns(MockActivityTypeRepo.Object);
             MockUow.SetupGet(u => u.ApplicationUserRepository).Returns(MockApplicationUserRepo.Object);
             MockUow.SetupGet(u => u.CourseRepository).Returns(MockCourseRepo.Object);
             MockUow.SetupGet(u => u.DocumentRepository).Returns(MockDocumentRepo.Object);
@@ -109,6 +113,7 @@ namespace LMS.UnitTests.Setups
 
 
             // Initialize all service mocks
+            MockActivityTypeService = new Mock<IActivityTypeService>();
             MockAuthService = new Mock<IAuthService>();
             MockCourseService = new Mock<ICourseService>();
             MockDocumentService = new Mock<IDocumentService>();
@@ -126,7 +131,8 @@ namespace LMS.UnitTests.Setups
                 new Lazy<IModuleActivityService>(() => MockModuleActivityService.Object),
                 new Lazy<IModuleService>(() => MockModuleService.Object),
                 new Lazy<ISubmissionService>(() => MockSubmissionService.Object),
-                new Lazy<IUserService>(() => MockUserService.Object)
+                new Lazy<IUserService>(() => MockUserService.Object),
+                new Lazy<IActivityTypeService>(() => MockActivityTypeService.Object)
                 );
 
         }
