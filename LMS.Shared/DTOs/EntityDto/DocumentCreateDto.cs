@@ -10,15 +10,13 @@ namespace LMS.Shared.DTOs.EntityDto
 {
     public record DocumentCreateDto
     {
-        [MaxLength(30)]
         [Required]
         public string Name { get; set; }
         public string? Description { get; set; }
-        public DateTime UploadDate { get; set; }
         public string FilePath { get; set; }
 
-        public ApplicationUser Uploader { get; set; }
-        public string ParentType { get; set; }// e.g., "Course", "Module", "Activity", "CourseSubmission", "ModuleSubmission", "ActivitySubmission"
-        public string ParentId { get; set; }
+        public UserDto Uploader { get; set; }
+        public string ParentType { get; set; }
+        public Guid ParentId { get; set; }
     }
 }

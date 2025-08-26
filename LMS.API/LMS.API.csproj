@@ -32,4 +32,11 @@
     <ProjectReference Include="..\LMS.Services\LMS.Services.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Uploads\Activities\" />
+    <Folder Include="Uploads\Courses\" />
+    <Folder Include="Uploads\Modules\" />
+    <Folder Include="Uploads\Submissions\" />
+  </ItemGroup>
+
 </Project>
