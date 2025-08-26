@@ -1,4 +1,5 @@
 ﻿using LMS.Shared.DTOs.EntityDto;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Service.Contracts;
 
@@ -42,13 +43,15 @@ namespace LMS.Presentation.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateDocument([FromBody] DocumentCreateDto documentDto)
+        public async Task<IActionResult> CreateDocument([FromForm] DocumentCreateDto documentDto, IFormFile file)
         {
-            if (documentDto == null)
+            if (documentDto == null || file == null || file.Length == 0)
             {
                 return BadRequest("Document data is null");
             }
-            var createdDocument = await _serviceManager.DocumentService.CreateDocumentAsync(documentDto);
+
+            using var stream = file.OpenReadStream();
+            var createdDocument = await _serviceManager.DocumentService.CreateDocumentAsync(documentDto, stream);
             return CreatedAtAction(nameof(GetDocumentById), new { id = createdDocument.Id }, createdDocument);
         }
 

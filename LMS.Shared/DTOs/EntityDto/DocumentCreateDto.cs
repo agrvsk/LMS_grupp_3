@@ -13,9 +13,8 @@ namespace LMS.Shared.DTOs.EntityDto
         [Required]
         public string Name { get; set; }
         public string? Description { get; set; }
-        public string FilePath { get; set; }
 
-        public UserDto Uploader { get; set; }
+        public string UploaderId { get; set; }
         public string ParentType { get; set; }
         public Guid ParentId { get; set; }
     }

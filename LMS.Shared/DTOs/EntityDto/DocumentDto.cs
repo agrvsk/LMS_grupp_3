@@ -16,7 +16,7 @@ namespace LMS.Shared.DTOs.EntityDto
         public string? Description { get; set; }
         public DateTime UploadDate { get; set; }
         public string FilePath { get; set; }
-
-        public UserDto Uploader { get; set; }
+        public string UploaderId { get; set; }
+        public string UploaderName { get; set; }
     }
 }

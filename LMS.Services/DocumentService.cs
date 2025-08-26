@@ -15,11 +15,13 @@ public class DocumentService : IDocumentService
 {
     private readonly IUnitOfWork uow;
     private readonly IMapper mapper;
+    private readonly IFileHandlerService fileHandlerService;
 
-    public DocumentService(IUnitOfWork uow, IMapper mapper)
+    public DocumentService(IUnitOfWork uow, IMapper mapper, IFileHandlerService fileHandlerService)
     {
         this.uow = uow;
         this.mapper = mapper;
+        this.fileHandlerService = fileHandlerService;
     }
 
     public async Task<DocumentDto?> GetDocumentByIdAsync(Guid documentId)
@@ -40,12 +42,18 @@ public class DocumentService : IDocumentService
         var documentDtos = mapper.Map<List<DocumentDto>>(documents);
         return documentDtos;
     }
-    public async Task<Document?> CreateDocumentAsync(DocumentCreateDto documentDto)
+    public async Task<DocumentDto> CreateDocumentAsync(DocumentCreateDto documentDto, Stream fileStream)
     {
         var document = mapper.Map<Document>(documentDto);
+        document.Id = Guid.NewGuid();
+        document.UploadDate = DateTime.UtcNow;
+
+        var filePath = await fileHandlerService.UploadFileAsync(fileStream, $"{documentDto.Name}_{document.Id}", $"Uploads/{document.ParentType}");
+        document.FilePath = filePath;
+
         uow.DocumentRepository.Create(document);
         await uow.CompleteAsync();
-        return document;
+        return mapper.Map<DocumentDto>(document);
     }
     public async Task<Document?> UpdateDocumentAsync(DocumentDto documentDto)
     {
