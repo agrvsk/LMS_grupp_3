@@ -49,7 +49,7 @@ public class ModuleActivityService : IModuleActivityService
         await uow.CompleteAsync();
         return activity;
     }
-    public async Task<ModuleActivity> UpdateActivityAsync(ModuleActivityDto moduleActivity)
+    public async Task<ModuleActivityDto> UpdateActivityAsync(ModuleActivityUpdateDto moduleActivity)
     {
         var existingActivity = await uow.ModuleActivityRepository.GetModuleActivityByIdAsync(moduleActivity.Id);
         if (existingActivity == null)
@@ -57,7 +57,7 @@ public class ModuleActivityService : IModuleActivityService
         mapper.Map(moduleActivity, existingActivity);
         uow.ModuleActivityRepository.Update(existingActivity);
         await uow.CompleteAsync();
-        return existingActivity;
+        return (mapper.Map<ModuleActivityDto>(existingActivity));
     }
     public async Task<bool> DeleteActivityAsync(Guid moduleActivityId)
     {

@@ -143,7 +143,7 @@ namespace LMS.UnitTests.Services
         [Trait("CourseService", "Update Course")]
         public async Task UpdateCourseAsync_ValidDto_CallsUpdatesAndSaves()
         {
-            var dto = new CourseDto { Id = Guid.NewGuid(), Name = "Updated" };
+            var dto = new CourseUpdateDto { Id = Guid.NewGuid(), Name = "Updated" };
             var mappedCourse = new Course { Id = dto.Id, Name = dto.Name };
 
             MockMapper
@@ -155,7 +155,8 @@ namespace LMS.UnitTests.Services
             var result = await _service.UpdateCourseAsync(dto);
 
             // Verify that the mapper was called correctly
-            Assert.True(result);
+            Assert.NotNull(result);
+            Assert.Equal("Updated", result.Name);
 
             // Verify that the repository methods were called once
             MockCourseRepo.Verify(r => r.Update(mappedCourse), Times.Once);

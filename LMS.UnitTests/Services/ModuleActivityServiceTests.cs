@@ -166,7 +166,7 @@ namespace LMS.UnitTests.Services
         [Trait("ModuleActivityService", "Update")]
         public async Task UpdateActivityAsync_ActivityExists_UpdatesAndReturnsEntity()
         {
-            var dto = new ModuleActivityDto { Id = Guid.NewGuid(), Name = "UpdatedActivity" };
+            var dto = new ModuleActivityUpdateDto { Id = Guid.NewGuid(), Name = "UpdatedActivity" };
             var existing = new ModuleActivity { Id = dto.Id, Name = "OldName" };
 
             MockModuleActivityRepo
@@ -189,7 +189,7 @@ namespace LMS.UnitTests.Services
         [Trait("ModuleActivityService", "Update")]
         public async Task UpdateActivityAsync_ActivityDoesNotExist_ReturnsNull()
         {
-            var dto = new ModuleActivityDto { Id = Guid.NewGuid(), Name = "DoesNotExist" };
+            var dto = new ModuleActivityUpdateDto { Id = Guid.NewGuid(), Name = "DoesNotExist" };
 
             MockModuleActivityRepo
                 .Setup(r => r.GetModuleActivityByIdAsync(dto.Id))
