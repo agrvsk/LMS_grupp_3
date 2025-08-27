@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace LMS.Shared.DTOs.EntityDto
 {
-    public record DocumentCreateDto
+    public class DocumentCreateDto
     {
         public string Name { get; set; }
         public string? Description { get; set; }

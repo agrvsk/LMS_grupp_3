@@ -45,6 +45,7 @@ namespace LMS.Presentation.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateDocument([FromForm] DocumentCreateDto documentDto)
         {
+            Console.WriteLine(documentDto);
             if (documentDto == null)
             {
                 return BadRequest("Document data is null");
