@@ -43,14 +43,14 @@ namespace LMS.Presentation.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateDocument([FromForm] DocumentCreateDto documentDto, IFormFile file)
+        public async Task<IActionResult> CreateDocument([FromForm] DocumentCreateDto documentDto)
         {
-            if (documentDto == null || file == null || file.Length == 0)
+            if (documentDto == null)
             {
                 return BadRequest("Document data is null");
             }
 
-            using var stream = file.OpenReadStream();
+            using var stream = documentDto.File.OpenReadStream();
             var createdDocument = await _serviceManager.DocumentService.CreateDocumentAsync(documentDto, stream);
             return CreatedAtAction(nameof(GetDocumentById), new { id = createdDocument.Id }, createdDocument);
         }

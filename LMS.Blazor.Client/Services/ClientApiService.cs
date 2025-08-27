@@ -56,7 +56,7 @@ public class ClientApiService(IHttpClientFactory httpClientFactory, NavigationMa
         await authReady.WaitAsync();
         var response = await httpClient.PostAsync($"proxy?endpoint={endpoint}", data, ct);
         response.EnsureSuccessStatusCode();
-        // Deserialize response
+        
         var result = await JsonSerializer.DeserializeAsync<TResponse>(
             await response.Content.ReadAsStreamAsync(),
             _jsonSerializerOptions,
