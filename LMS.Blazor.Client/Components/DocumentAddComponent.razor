@@ -1,0 +1,65 @@
+﻿@using LMS.Blazor.Client.Models
+
+<EditForm Model="@DocumentInfo" OnValidSubmit=OnFileSubmit>
+	<DataAnnotationsValidator />
+	<ValidationSummary />
+	<div class="form-group">
+		<label for="document">Document</label>
+		<InputFile id="document" class="form-control" onchange="OnFileSelected" />
+	</div>
+	<div class="form-group">
+		<label for="description">Description</label>
+		<InputTextArea id="description" class="form-control" @bind-Value="DocumentInfo.Description" />
+	</div>
+	<button type="submit" class="btn btn-primary">Add Document</button>
+</EditForm>
+
+@code {
+	
+	[Parameter]
+	public Guid ParentId { get; set; }
+	[Parameter]
+	public string ParentType { get; set; }
+	[Parameter]
+	public string UploaderId { get; set; } // This should be set to the actual uploader's ID
+
+	[Inject]
+	IApiService ApiService { get; set; }
+
+	private DocumentInfo DocumentInfo = new ();
+
+	private void OnFileSelected(InputFileChangeEventArgs e)
+	{
+		DocumentInfo.File = e.File;
+	}
+
+	private async Task OnFileSubmit()
+	{
+		
+		
+		if (DocumentInfo.File == null)
+			return;
+
+		using var content = new MultipartFormDataContent();
+
+		var stream = DocumentInfo.File.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024); // Limit to 10 MB
+		content.Add(new StreamContent(stream), "file", DocumentInfo.File.Name);
+		content.Add(new StringContent(DocumentInfo.Description ?? string.Empty), "description");
+		content.Add(new StringContent(ParentId.ToString()), "parentId");
+		content.Add(new StringContent(ParentType), "parentType");
+		content.Add(new StringContent(UploaderId), "uploaderId");
+
+		var response = await ApiService.CallApiPostMultipartAsync<DocumentDto>("/documents", content);
+
+		if(response != null)
+		{
+			// Handle success (e.g., show a message, clear the form, etc.)
+			Console.WriteLine("Document uploaded successfully.");
+		}
+		else
+		{
+			// Handle error (e.g., show an error message)
+			Console.WriteLine("Error uploading document");
+		}
+	}
+}

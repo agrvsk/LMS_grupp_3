@@ -51,6 +51,19 @@ public class ClientApiService(IHttpClientFactory httpClientFactory, NavigationMa
 
         return result;
     }
+    public async Task<TResponse?> CallApiPostMultipartAsync<TResponse>(string endpoint, MultipartFormDataContent data, CancellationToken ct = default)
+    {
+        await authReady.WaitAsync();
+        var response = await httpClient.PostAsync($"proxy?endpoint={endpoint}", data, ct);
+        response.EnsureSuccessStatusCode();
+        // Deserialize response
+        var result = await JsonSerializer.DeserializeAsync<TResponse>(
+            await response.Content.ReadAsStreamAsync(),
+            _jsonSerializerOptions,
+            CancellationToken.None
+        );
+        return result;
+    }
 
     public async Task<TResponse?> CallApiPutAsync<TRequest, TResponse>(string endpoint, TRequest data, CancellationToken ct = default)
     {
