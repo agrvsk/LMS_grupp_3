@@ -35,7 +35,9 @@
   <ItemGroup>
     <Folder Include="Uploads\Activities\" />
     <Folder Include="Uploads\Courses\" />
+    <Folder Include="Uploads\Course\" />
     <Folder Include="Uploads\Modules\" />
+    <Folder Include="Uploads\Module\" />
     <Folder Include="Uploads\Submissions\" />
   </ItemGroup>
 

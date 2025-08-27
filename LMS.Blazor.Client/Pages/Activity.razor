@@ -1,4 +1,4 @@
-﻿@page "/activities/{Id}"
+﻿@page "/activities/{Id:guid}"
 @using LMS.Blazor.Client.Services
 @using LMS.Shared.DTOs.EntityDto
 @using Microsoft.AspNetCore.Authorization
@@ -17,6 +17,7 @@
 					<h4>Documents</h4> @* This line should probably be in the doc component *@
 
 					<DocumentComponent Documents="@DocumentDtos" />
+					<DocumentAddComponent ParentId=Id ParentType="Activity" />
 
 				</div>
 			</div>
@@ -33,7 +34,7 @@
 @code {
 	[SupplyParameterFromQuery]
 	[Parameter]
-	public string Id { get; set; }
+	public Guid Id { get; set; }
 	public bool Loading { get; set; } = true;
 	[Inject]
 	private IApiService myApi { get; set; } = default!;
