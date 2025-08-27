@@ -10,7 +10,7 @@ namespace LMS.Shared.DTOs.EntityDto;
 public record CourseUpdateDto
 {
     public Guid Id { get; set; }
-    [MaxLength(30)]
+    [MaxLength(100)]
     [Required]
     public string Name { get; set; }
     [Required]
