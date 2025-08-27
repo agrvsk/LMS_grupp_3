@@ -31,6 +31,22 @@ namespace LMS.Presentation.Controllers
             var modules = await _serviceManager.ModuleService.GetModulesByCourseIdAsync(courseId);
             return Ok(modules);
         }
+
+        [HttpGet("course/{courseId}/today/{idag}")]
+        public async Task<IActionResult> GetActivitiesByCourseIdAsync(Guid courseId, DateTime idag)
+        {
+            var modules = await _serviceManager.ModuleService.GetActivitiesByCourseIdAsync(courseId, idag);
+            return Ok(modules);
+        }
+
+        [HttpGet("today/{idag}")]
+        public async Task<IActionResult> GetAllActivitiesByDateAsync(DateTime idag)
+        {
+            var modules = await _serviceManager.ModuleService.GetAllActivitiesByDateAsync(idag);
+            return Ok(modules);
+        }
+
+
         [HttpGet("{id}")]
         public async Task<IActionResult> GetModuleById(Guid id)
         {

@@ -1,0 +1,128 @@
+﻿@rendermode InteractiveWebAssembly
+
+<AuthorizeView Roles="Teacher,Student">
+    <Authorized>
+        @if (isTeacher)
+        {
+            <h3>Teacher Panel</h3>
+            <h2>Dagens aktiviteter</h2>
+            @if (Modules != null && Modules.Count() > 0)
+            {
+                foreach(ModuleDto item in Modules )
+                {
+                    <p>@item.Name - @item.StartDate - @item.EndDate</p>
+                    foreach (ModuleActivityDto activityDto in item.ModuleActivities)
+                    {
+                        <p>@activityDto.Name - @activityDto.StartDate - @activityDto.EndDate</p>
+                    }
+                }
+            }
+        }
+        else if (isStudent)
+        {
+            <h3>Student Dashboard</h3>
+            <h2>Dagens aktiviteter</h2>
+            @if (Modules != null && Modules.Count() > 0)
+            {
+                foreach (ModuleDto item in Modules)
+                {
+                    <p>@item.Name - @item.StartDate - @item.EndDate</p>
+                    foreach (ModuleActivityDto activityDto in item.ModuleActivities)
+                    {
+                        <p>@activityDto.Name - @activityDto.StartDate - @activityDto.EndDate</p>
+                    }
+                }
+            }
+        }
+    </Authorized>
+    <NotAuthorized>
+        <h3>You are not authorized - please log in.</h3>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code 
+{
+    [Inject]
+    private IApiService myApi { get; set; } = default!;
+    [Inject]
+    AuthenticationStateProvider AuthenticationStateProvider { get; set; } = default!;
+
+    private IEnumerable<ModuleDto>? Modules { get; set; }
+    //  private IEnumerable<UserDto>? Members { get; set; }
+
+    private bool isTeacher;
+    private bool isStudent;
+    private bool isLoading;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (!user.Identity.IsAuthenticated) return;
+
+        string? courseIdAsString = user.FindFirst("CourseId")?.Value;
+        //user.Claims.ToList();
+
+        isLoading = true;
+
+        // if (!(authState.User.Identity?.IsAuthenticated) ?? false)
+        // {
+        //     return;
+        // }
+
+        isTeacher = user.IsInRole("Teacher");
+        isStudent = user.IsInRole("Student");
+
+        await LoadActivities(courseIdAsString);
+
+        isLoading = false;
+    }
+
+
+    private async Task LoadActivities(string? courseIdAsString)
+    {
+        try
+        {
+            DateTime idag = DateTime.Now;
+            if (isStudent )
+            {
+                if (courseIdAsString != null && courseIdAsString.Length > 0)
+                {
+                    if (Guid.TryParse(courseIdAsString, out var courseId))
+                    {
+                        Console.WriteLine(courseId);
+                        Modules = await myApi.CallApiGetAsync<IEnumerable<ModuleDto>>($"modules/course/{courseId}/today/{idag}");
+                    }
+
+                }
+
+            }
+            else if(isTeacher)
+            {
+                Modules = await myApi.CallApiGetAsync<IEnumerable<ModuleDto>>($"modules/today/{idag}");
+            }
+            //          Modules = await myApi.CallApiGetAsync<IEnumerable<ModuleDto>>($"today/{courseId}");
+            //var response = await myApi.CallApiGetAsync<CourseDto>($"courses/{Id}");
+            //CurrentCourse = (CourseDto)response;
+
+/*
+            var respModule = await myApi.CallApiGetAsync<IEnumerable<ModuleDto>>($"modules/course/{Id}");
+            Modules = respModule?.ToList();
+
+            var respMembers = await myApi.CallApiGetAsync<IEnumerable<UserDto>>($"users/course/{Id}");
+            Members = respMembers?.ToList();
+
+            var respDocs = await myApi.CallApiGetAsync<IEnumerable<DocumentDto>>($"documents/course/{Id}");
+            DocumentDtos = respDocs?.ToList() ?? new List<DocumentDto>();
+*/
+
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("there was an error: " + ex.Message);
+        }
+    }
+
+}
+

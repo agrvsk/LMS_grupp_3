@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Domain.Contracts.Repositories;
 using Domain.Models.Entities;
 using LMS.Infractructure.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace LMS.Infractructure.Repositories;
 
@@ -37,6 +38,46 @@ public class ModuleRepository : RepositoryBase<Module>, IModuleRepository
         return await FindByConditionAsync(m => m.CourseId == courseId, trackChanges: false)
             .ContinueWith(task => task.Result.ToList());
     }
+    public async Task<List<Module>> GetModulesByCourseIdAndDateAsync(Guid courseId, DateTime idag)
+    {
+        var modules = await context.Modules
+        .Where(m => m.CourseId == courseId &&
+                idag.Date >= m.StartDate.Date &&
+                idag.Date <= m.EndDate.Date)
+        .Include(ma => ma.ModuleActivities)
+        .AsNoTracking()
+        .ToListAsync();
+
+        // Filter subcollection
+        foreach (var module in modules)
+        {
+            module.ModuleActivities = module.ModuleActivities
+            .Where(mb => idag.Date >= mb.StartDate.Date && idag.Date <= mb.EndDate)
+            .ToList();
+        }
+        return modules;
+    }
+    public async Task<List<Module>> GetAllModulesByDateAsync(DateTime idag)
+    {
+        var modules = await context.Modules
+        .Where(m => idag.Date >= m.StartDate.Date &&
+                    idag.Date <= m.EndDate.Date)
+        .Include(m => m.ModuleActivities)
+        .AsNoTracking()
+        .ToListAsync();
+
+        // Filter subcollection
+        foreach (var module in modules)
+        {
+            module.ModuleActivities = module.ModuleActivities
+            .Where(mb => idag.Date >= mb.StartDate.Date && idag.Date <= mb.EndDate)
+            .ToList();
+        }
+        return modules;
+
+    }
+
+
     public void CreateModule(Module module)
     {
         context.Modules.Add(module);
