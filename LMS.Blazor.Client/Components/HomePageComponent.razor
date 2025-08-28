@@ -1,0 +1,140 @@
+﻿@rendermode InteractiveWebAssembly
+
+<AuthorizeView Roles="Teacher,Student">
+    <Authorized>
+        @if (isTeacher)
+        {
+            <section class="p-4 bg-light rounded shadow-sm">
+                <header class="mb-3">
+                    <small class="text-muted">Teacher Dashboard</small><br />
+                    <small class="text-primary">Welcome, @userName!</small>
+                </header>
+            <article>
+                <p class="lead">Here’s what’s happening today:</p>
+                @if (Modules != null && Modules.Count() > 0)
+                {
+                    foreach (ModuleDto item in Modules)
+                    {
+                            <small class="text-muted">@item.Name - @item.StartDate.ToShortDateString() - @item.EndDate.ToShortDateString()</small>
+                            <br />
+                        foreach (ModuleActivityDto activityDto in item.ModuleActivities)
+                        {
+                                <small class="ml-4">@GetActivityTypeName(@activityDto.ActivityTypeId) @activityDto.Name - @activityDto.StartDate.ToShortTimeString() - @activityDto.EndDate.ToShortTimeString()</small>
+                             <br />
+                        }
+                    }
+                }
+            </article>
+            </section>
+
+        }
+        else if (isStudent)
+        {
+            <section class="p-4 bg-light rounded shadow-sm">
+                <header class="mb-3">
+                    <small class="text-muted"   >Student Dashboard</small><br/>
+                    <small class="text-primary">Welcome, @userName!</small><br />
+                    <small class="text-muted">Courseid:@courseIdAsString</small>
+                </header>
+            <article>
+                <p class="lead">Here’s what’s happening today:</p>
+                    @if (Modules != null && Modules.Count() > 0)
+                    {
+                        foreach (ModuleDto item in Modules)
+                        {
+                            @*              <p>@item.Name - @item.StartDate.ToShortDateString() - @item.EndDate.ToShortDateString()</p> <br/> *@
+                          foreach (ModuleActivityDto activityDto in item.ModuleActivities)
+                            {
+                                <small>@GetActivityTypeName(@activityDto.ActivityTypeId)  @activityDto.Name - @activityDto.StartDate.ToShortTimeString() - @activityDto.EndDate.ToShortTimeString()</small>
+                                <br />
+                            }
+                        }
+                    }
+                </article>
+            </section>
+
+
+        }
+    </Authorized>
+    <NotAuthorized>
+        <h3>You are not authorized - please log in.</h3>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code 
+{
+    [Inject]
+    private IApiService myApi { get; set; } = default!;
+    [Inject]
+    AuthenticationStateProvider AuthenticationStateProvider { get; set; } = default!;
+
+    private IEnumerable<ModuleDto>? Modules { get; set; }
+    public List<ActivityTypeDto> Types { get; set; } = new List<ActivityTypeDto>();
+
+    private bool isTeacher;
+    private bool isStudent;
+    private bool isLoading;
+    private string? userName;
+    string? courseIdAsString;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+		userName = user.Identity?.Name;
+        if (!user.Identity.IsAuthenticated) return;
+
+        courseIdAsString = user.FindFirst("CourseId")?.Value;
+
+        isLoading = true;
+
+        isTeacher = user.IsInRole("Teacher");
+        isStudent = user.IsInRole("Student");
+
+        await LoadActivities(courseIdAsString);
+
+        isLoading = false;
+    }
+
+
+    private async Task LoadActivities(string? courseIdAsString)
+    {
+        try
+        {
+            DateTime idag = DateTime.Now;
+            if (isStudent )
+            {
+                if (courseIdAsString != null && courseIdAsString.Length > 0)
+                {
+                    if (Guid.TryParse(courseIdAsString, out var courseId))
+                    {
+                        Console.WriteLine(courseId);
+                        Modules = await myApi.CallApiGetAsync<IEnumerable<ModuleDto>>($"modules/course/{courseId}/today/{idag}");
+                    }
+
+                }
+
+            }
+            else if(isTeacher)
+            {
+                Modules = await myApi.CallApiGetAsync<IEnumerable<ModuleDto>>($"modules/today/{idag}");
+            }
+
+            Types = (await myApi.CallApiGetAsync<List<ActivityTypeDto>>("activity-types"));
+
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("there was an error: " + ex.Message);
+        }
+
+ 
+    }
+
+    public string GetActivityTypeName(int activityTypeId)
+    {
+        return Types.FirstOrDefault(t => t.Id == activityTypeId)?.Name ?? "  ";
+
+    }
+}
+

@@ -35,6 +35,10 @@ internal class PersistentAuthenticationStateProvider : AuthenticationStateProvid
             new(ClaimTypes.Name, userInfo.Email),
             new(ClaimTypes.Email, userInfo.Email)
         };
+        if (userInfo.CourseId != null && userInfo.CourseId.Length > 0 )
+        {
+            claims.Add(new Claim("CourseId", userInfo.CourseId ));
+        }
 
         foreach (var role in userInfo.Roles)
         {

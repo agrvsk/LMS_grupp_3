@@ -58,7 +58,7 @@ else
 	private async Task HandleValidSubmit()
 	{
 		Module.CourseId = CourseId;
-		var newCourseDto = await myApi.CallApiPostAsync<ModuleCreateDto, ModuleDto>("modules;", Module);
+		var newCourseDto = await myApi.CallApiPostAsync<ModuleCreateDto, ModuleDto>("modules", Module);
 		Toggle();
 	}
 	private bool isAdding = false;
