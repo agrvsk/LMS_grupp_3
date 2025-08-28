@@ -10,5 +10,6 @@ public interface IServiceManager
     ISubmissionService SubmissionService { get; }
     IUserService UserService { get; }
     IActivityTypeService ActivityTypeService { get; }
+    IScheduleService ScheduleService { get; }
 
 }
