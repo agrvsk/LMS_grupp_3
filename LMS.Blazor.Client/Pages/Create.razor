@@ -1,5 +1,7 @@
 ﻿@page "/create"
+@using Microsoft.AspNetCore.Authorization
 @rendermode InteractiveWebAssembly
+@attribute [Authorize(Roles = "Teacher")]
 
 
 <h3 style="text-align: center">New course:</h3>
@@ -35,17 +37,17 @@
 				{
 					<DataAnnotationsValidator />
 					<ValidationSummary />
-					<div class="card mb-3 p-3 shadow-sm">
+					<div class="card mb-3 p-3 shadow-sm" style="background-color:mistyrose">
 						<h5>Module</h5>
 
 						<div class="mb-2">
 							<label>Name</label>
-							<InputText class="form-control" @bind-Value="module.Name" />
+							<InputTextArea class="form-control" @bind-Value="module.Name" />
 							<ValidationMessage For="@(() => module.Name)" />
 						</div>
 
 						<div class="mb-2">
-							<label>Name</label>
+							<label>Description</label>
 							<InputText class="form-control" @bind-Value="module.Description" />
 							<ValidationMessage For="@(() => module.Description)" />
 						</div>
@@ -61,8 +63,48 @@
 							<InputDate class="form-control" @bind-Value="module.EndDate" />
 							<ValidationMessage For="@(() => module.EndDate)" />
 						</div>
+						<h5>Activities</h5>
+						@foreach(var activity in module.ModuleActivities)
+						{
+							<div class="card mb-2 p-2 shadow-sm" style="background-color: lightcoral">
+								<div class="mb-2">
+									<label>Title</label>
+									<InputText class="form-control" @bind-Value="activity.Name" />
+									<ValidationMessage For="@(() => activity.Name)" />
+								</div>
+								
+								<div class="mb-3">
+									<label for="category" class="form-label">Category</label>
+									<InputSelect id="category" class="form-select" @bind-Value="activity.ActivityTypeId">
+										<option value="">-- Select Category --</option>
+										@foreach (var type in ActivityTypes)
+										{
+											<option value="@type.Id">@type.Name</option>
+										}
+									</InputSelect>
+									<ValidationMessage For="@(() => activity.ActivityTypeId)" />
+								</div>
+								<div class="mb-2">
+									<label>Description</label>
+									<InputText class="form-control" @bind-Value="activity.Description" />
+									<ValidationMessage For="@(() => activity.Description)" />
+								</div>
+								<div class="mb-2">
+									<label>Start Time</label>
+									<InputDate class="form-control" @bind-Value="activity.StartDate" />
+									<ValidationMessage For="@(() => activity.StartDate)" />
+										</div>
+								<div class="mb-2">
+									<label>End Time</label>
+									<InputDate class="form-control" @bind-Value="activity.EndDate" />
+									<ValidationMessage For="@(() => activity.EndDate)" />
+								</div>
+								<button type="button" class="btn btn-danger" @onclick="@(() => RemoveActivity(module, activity))">Remove Activity</button>
+							</div>
+						}
 
-						<button type="button" class="btn btn-danger" @onclick="@(() => RemoveModule(module))">Remove</button>
+						<button type="button" class="btn btn-secondary mb-3" @onclick="@(() =>AddActivity(module))">+ Add Activity</button>
+						<button type="button" class="btn btn-danger" @onclick="@(() => RemoveModule(module))">Remove Module</button>
 					</div>
 				}
 
@@ -78,6 +120,8 @@
 @code {
 	private CourseCreateDto Course { get; set; } = new CourseCreateDto();
 
+	private List<ActivityTypeDto> ActivityTypes { get; set; } = new List<ActivityTypeDto>();
+
 	[Inject]
 	private IApiService myApi { get; set; } = default!;
 
@@ -92,6 +136,17 @@
 		StateHasChanged();
 	}
 
+	private void AddActivity(ModuleCreateDto module)
+	{
+		module.ModuleActivities.Add(new ModuleActivityCreateDto());
+		StateHasChanged();
+	}
+	private void RemoveActivity(ModuleCreateDto module, ModuleActivityCreateDto activity)
+	{
+		module.ModuleActivities.Remove(activity);
+		StateHasChanged();
+	}
+
 	private async Task HandleValidSubmit()
 	{
 		Console.WriteLine(Course.ToString());
@@ -100,6 +155,11 @@
 		Console.WriteLine($"Course '{Course.Name}' saved successfully!");
 
 		Course = new CourseCreateDto();
+	}
+
+	protected override async Task OnInitializedAsync()
+	{
+		ActivityTypes = (await myApi.CallApiGetAsync<List<ActivityTypeDto>>("activity-types"));
 	}
 
 }
