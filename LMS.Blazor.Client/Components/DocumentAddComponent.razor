@@ -6,36 +6,45 @@
 	<ValidationSummary />
 	<div class="form-group">
 		<label for="document">Document</label>
-		<InputFile id="document" class="form-control" onchange="OnFileSelected" />
+		<InputFile id="document" class="form-control" OnChange="OnFileSelected" />
 	</div>
 	<div class="form-group">
 		<label for="description">Description</label>
 		<InputTextArea id="description" class="form-control" @bind-Value="DocumentInfo.Description" />
 	</div>
 	<button type="submit" class="btn btn-primary">Add Document</button>
+
+@if (uploadSuccess)
+	{
+		<p class="text-success">File uploaded successfully!</p>
+	}
+
 </EditForm>
+
+
 
 @code {
 
-	[Parameter]
-	public Guid ParentId { get; set; }
-	[Parameter]
-	public string ParentType { get; set; }
+	[Parameter] public Guid ParentId { get; set; }
+	[Parameter] public string ParentType { get; set; }
 
-	[CascadingParameter] 
-	private Task<AuthenticationState> AuthStateTask { get; set; }
+	[Parameter] public EventCallback<DocumentDto> OnUploadSuccess { get; set; }
+
+	[CascadingParameter] private Task<AuthenticationState> AuthStateTask { get; set; }
 	private string? UploaderId;
 
-	[Inject]
-	IApiService ApiService { get; set; }
+	[Inject] IApiService ApiService { get; set; }
 
 	private DocumentInfo DocumentInfo = new ();
+	private bool isUploading = false;
+	private bool uploadSuccess = false;
+
 
 	protected override async Task OnInitializedAsync()
 	{
 		var authState = await AuthStateTask;
 		var user = authState.User;
-		if (user.Identity.IsAuthenticated)
+		if (user.Identity?.IsAuthenticated == true)
 		{
 			UploaderId = user.FindFirst(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
 		}
@@ -43,18 +52,20 @@
 
 	private void OnFileSelected(InputFileChangeEventArgs e)
 	{
-		DocumentInfo.File = e.File;
+		DocumentInfo.File = e.File;        
+		uploadSuccess = false;
 	}
 
 	private async Task OnFileSubmit()
 	{
-		if (DocumentInfo.File == null)
+		if (DocumentInfo.File == null || string.IsNullOrEmpty(UploaderId))
 			return;
 
 		using var content = new MultipartFormDataContent();
 
 		var fileContent = new StreamContent(DocumentInfo.File.OpenReadStream(maxAllowedSize: 10_000_000));
 		fileContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(DocumentInfo.File.ContentType);
+
 		content.Add(fileContent, "File", DocumentInfo.File.Name);
 		content.Add(new StringContent(DocumentInfo.File.Name), "Name");
 		content.Add(new StringContent(DocumentInfo.Description ?? string.Empty), "Description");
@@ -77,6 +88,10 @@
 		if(response != null)
 		{
 			// Handle success (e.g., show a message, clear the form, etc.)
+			uploadSuccess = true;
+            DocumentInfo = new(); // Reset form
+            await OnUploadSuccess.InvokeAsync(response);
+			
 			Console.WriteLine("Document uploaded successfully.");
 		}
 		else
@@ -84,5 +99,6 @@
 			// Handle error (e.g., show an error message)
 			Console.WriteLine("Error uploading document");
 		}
+        isUploading = false;
 	}
 }
