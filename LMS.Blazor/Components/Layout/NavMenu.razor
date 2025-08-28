@@ -1,3 +1,4 @@
+@inject NavigationManager NavigationManager
 <nav class="nav-scrollable d-flex align-items-center">
     <div class="navbar-brand me-4">
         LMS
@@ -17,9 +18,11 @@
             <NavLink class="nav-link" href="create">Create</NavLink>
             <NavLink class="nav-link" href="schedule">Schedule</NavLink>
             <NavLink class="nav-link" href="Account/Manage">@context.User.Identity?.Name</NavLink>
-            <form action="Account/Logout" method="post">
+
+            <form action="Account/Logout" method="post" class="d-inline">
                 <AntiforgeryToken />
-                <button type="submit" class="nav-link">Logout</button>
+                <input type="hidden" name="ReturnUrl" value="@NavigationManager.ToBaseRelativePath" />
+                <button type="submit" class="btn btn-link nav-link">Logout</button>
             </form>
         </Authorized>
     </AuthorizeView>
