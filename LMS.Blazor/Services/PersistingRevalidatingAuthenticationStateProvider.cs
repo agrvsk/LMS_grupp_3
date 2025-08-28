@@ -90,6 +90,15 @@ internal sealed class PersistingRevalidatingAuthenticationStateProvider : Revali
             var userId = principal.FindFirst(options.ClaimsIdentity.UserIdClaimType)?.Value;
             var email = principal.FindFirst(options.ClaimsIdentity.EmailClaimType)?.Value;
 
+            // Get the user manager from a new scope to ensure it fetches fresh data
+            await using var scope = scopeFactory.CreateAsyncScope();
+            var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+            var user = await userManager.GetUserAsync(principal);
+            var courseId = user?.CourseId?.ToString();
+            principal.Claims.Append(new Claim("CourseId", courseId ?? ""));
+            //var courseId = principal.FindFirst("CourseId")?.Value;
+            //if (courseId == null) courseId = Guid.NewGuid().ToString();
+
             if (userId != null && email != null)
             {
                 var roles = principal.FindAll(ClaimTypes.Role).Select(c => c.Value).ToList();
@@ -98,7 +107,8 @@ internal sealed class PersistingRevalidatingAuthenticationStateProvider : Revali
                 {
                     UserId = userId,
                     Email = email,
-                    Roles = roles
+                    Roles = roles,
+                    CourseId = courseId
                 });
             }
         }
