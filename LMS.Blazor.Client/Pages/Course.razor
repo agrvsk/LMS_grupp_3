@@ -12,10 +12,11 @@
 		<div class="col-12 col-lg-3 border-end bg-light">
 			<div>
 				<DocumentComponent Documents="@DocumentDtos" />
-				<DocumentAddComponent ParentId=Id ParentType="Course"/>
+				<DocumentAddComponent ParentId=@Id ParentType="Course" OnUploadSuccess="HandleUploadSuccess"/>
 
             </div>
         </div>
+
         <!-- Main content area -->
         <div class="col-12 col-lg-6">
             <h3>Kurs @CurrentCourse?.Name</h3>
@@ -23,19 +24,21 @@
 
             <button type="cancel" class="btn btn-primary" @onclick="EditCourse">Change course</button>
 
-            @if(isEditingCourse){
+            @if(isEditingCourse)
+			{				
                 <CourseEditComponent CourseDto="@CurrentCourse" OnEditDone="Refresh" />
             }
  
             <div class="row">
                 <div class="col-12 col-lg-9">
+
 					<ModuleAddComponent CourseId=Id/>
 					@if (Modules != null)
                     {
                         @foreach (var module in Modules)
                         {
                             @if (isEditingModule && CurrentModuleGuid == module.Id)
-                            {
+                            {								
                                 <ModuleEditComponent OnEditDone="StopEditing" Module=module currentCourseId="@CurrentCourse.Id" />
                             }
                             else
@@ -62,7 +65,6 @@
 			</div>
 		</div>
 	</div>
-
 </div>
 
 @code {
@@ -71,17 +73,41 @@
 
     private bool isEditingCourse { get; set; } = false;
     private bool isEditingModule { get; set; } = false;
-    private Guid? CurrentModuleGuid { get; set; } = null!;
+    private Guid? CurrentModuleGuid { get; set; } = null!;    
 
-    private void EditCourse()
-    {
-        isEditingCourse = !isEditingCourse;
-    }
+	public bool Loading { get; set; } = true;
 
-    private void StopEditing(ModuleDto dto)
-    {
-        isEditingModule = false;
-        CurrentModuleGuid = null;
+	[Inject] private IApiService myApi { get; set; } = default!;
+	[Inject] private AuthenticationStateProvider Auth { get; set; } = default!;
+
+	private CourseDto? CurrentCourse { get; set; }
+	private IEnumerable<ModuleDto>? Modules { get; set; }
+	private IEnumerable<UserDto>? Members { get; set; }
+	private List<DocumentDto> DocumentDtos { get; set; } = new List<DocumentDto>();
+
+	protected override async Task OnInitializedAsync()
+	{
+		Loading = true;
+
+		var state = await Auth.GetAuthenticationStateAsync();
+		if (!(state.User.Identity?.IsAuthenticated) ?? false)
+		{
+			return;
+		}
+
+		await LoadCourse();
+		Loading = false;
+	}
+
+	private void EditCourse()
+	{
+		isEditingCourse = !isEditingCourse;
+	}
+
+	private void StopEditing(ModuleDto dto)
+	{
+		isEditingModule = false;
+		CurrentModuleGuid = null;
 
 		//Försök till instant refresh
 		ModuleDto? x = Modules.SingleOrDefault(o => o.Id == dto.Id);
@@ -98,33 +124,7 @@
 		isEditingModule = true;
 		CurrentModuleGuid = myId;
 	}
-
-	public bool Loading { get; set; } = true;
-
-	[Inject]
-	private IApiService myApi { get; set; } = default!;
-
-	[Inject]
-	private AuthenticationStateProvider Auth { get; set; } = default!;
-
-	private CourseDto? CurrentCourse { get; set; }
-	private IEnumerable<ModuleDto>? Modules { get; set; }
-	private IEnumerable<UserDto>? Members { get; set; }
-	private List<DocumentDto> DocumentDtos { get; set; } = new List<DocumentDto>();
-
-	protected override async Task OnInitializedAsync()
-	{
-		Loading = true;
-		var state = await Auth.GetAuthenticationStateAsync();
-
-		if (!(state.User.Identity?.IsAuthenticated) ?? false)
-		{
-			return;
-		}
-		await LoadCourse();
-		Loading = false;
-
-    }
+	
     private void Refresh(CourseDto dto)
     {
         isEditingCourse = false;
@@ -143,10 +143,8 @@
 	{
 		try
 		{
-
 			var response = await myApi.CallApiGetAsync<CourseDto>($"courses/{Id}");
 			CurrentCourse = (CourseDto)response;
-
 
 			var respModule = await myApi.CallApiGetAsync<IEnumerable<ModuleDto>>($"modules/course/{Id}");
 			Modules = respModule?.ToList();
@@ -157,13 +155,17 @@
 			var respDocs = await myApi.CallApiGetAsync<IEnumerable<DocumentDto>>($"documents/course/{Id}");
 			DocumentDtos = respDocs?.ToList() ?? new List<DocumentDto>();
 
-
-
 		}
 		catch (Exception ex)
 		{
 			Console.WriteLine("there was an error: " + ex.Message);
-		}
+		}		
+	}
+
+	private async Task HandleUploadSuccess(DocumentDto doc)
+	{
+		DocumentDtos.Add(doc);
+		StateHasChanged();
 	}
 
 }
