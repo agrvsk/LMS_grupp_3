@@ -1,5 +1,7 @@
 ﻿@page "/create"
+@using LMS.Blazor.Client.Models
 @using Microsoft.AspNetCore.Authorization
+@using System.Text.Json
 @rendermode InteractiveWebAssembly
 @attribute [Authorize(Roles = "Teacher")]
 
@@ -7,54 +9,53 @@
 <h3 style="text-align: center">New course:</h3>
 <div class="container mt-4">
 
-	<div class="card shadow-sm">
-		<div class="card-body">
-			<EditForm Model="@Course" OnValidSubmit="@(() => HandleValidSubmit())">
-				<DataAnnotationsValidator />
+	<div>
+		<div class="card-body lead">
+			<EditForm Model="@CourseForm" OnValidSubmit="@(() => HandleValidSubmit())">
+				<ObjectGraphDataAnnotationsValidator />
 				<ValidationSummary />
 				<div class="mb-3">
 					<label for="courseName" class="form-label">Course Name</label>
-					<InputText id="courseName" class="form-control" @bind-Value="Course.Name" />
-					<ValidationMessage For="@(() => Course.Name)" />
+					<InputText id="courseName" class="form-control" @bind-Value="CourseForm.Name" />
+					<ValidationMessage For="@(() => CourseForm.Name)" />
 				</div>
 				<div class="mb-3">
 					<label for="courseDescription" class="form-label">Description</label>
-					<InputTextArea id="courseDescription" class="form-control" @bind-Value="Course.Description" />
-					<ValidationMessage For="@(() => Course.Description)" />
+					<InputTextArea id="courseDescription" class="form-control" @bind-Value="CourseForm.Description" />
+					<ValidationMessage For="@(() => CourseForm.Description)" />
 				</div>
 				<div class="mb-3">
 					<label for="courseStartDate" class="form-label">Start Date</label>
-					<InputDate id="courseStartDate" class="form-control" @bind-Value="Course.StartDate" />
-					<ValidationMessage For="@(() => Course.StartDate)" />
+					<InputDate id="courseStartDate" class="form-control" @bind-Value="CourseForm.StartDate" />
+					<ValidationMessage For="@(() => CourseForm.StartDate)" />
 				</div>
 				<div class="mb-3">
 					<label for="courseEndDate" class="form-label">End Date</label>
-					<InputDate id="courseEndDate" class="form-control" @bind-Value="Course.EndDate" />
-					<ValidationMessage For="@(() => Course.EndDate)" />
+					<InputDate id="courseEndDate" class="form-control" @bind-Value="CourseForm.EndDate" />
+					<ValidationMessage For="@(() => CourseForm.EndDate)" />
 				</div>
-				<h4>Modules</h4>
-				@foreach (var module in Course.Modules)
+				<h4 class="container pt-3">Modules:</h4>
+				@foreach (var module in CourseForm.Modules)
 				{
-					<DataAnnotationsValidator />
 					<ValidationSummary />
-					<div class="card mb-3 p-3 shadow-sm" style="background-color:mistyrose">
-						<h5>Module</h5>
+					<div class="card mb-3 p-3 shadow-sm" style=" background: linear-gradient(to bottom, #C4D8E2, #A5C1D1)">
+						
 
 						<div class="mb-2">
-							<label>Name</label>
-							<InputTextArea class="form-control" @bind-Value="module.Name" />
+							<label>Module Name</label>
+							<InputText class="form-control" @bind-Value="module.Name" />
 							<ValidationMessage For="@(() => module.Name)" />
 						</div>
 
 						<div class="mb-2">
 							<label>Description</label>
-							<InputText class="form-control" @bind-Value="module.Description" />
+							<InputTextArea class="form-control" @bind-Value="module.Description" />
 							<ValidationMessage For="@(() => module.Description)" />
 						</div>
 
 						<div class="mb-2">
 							<label>Start Date</label>
-							<InputDate class="form-control"   @bind-Value="module.StartDate" />
+							<InputDate class="form-control" @bind-Value="module.StartDate" />
 							<ValidationMessage For="@(() => module.StartDate)" />
 						</div>
 
@@ -63,18 +64,18 @@
 							<InputDate class="form-control" @bind-Value="module.EndDate" />
 							<ValidationMessage For="@(() => module.EndDate)" />
 						</div>
-						<h5>Activities</h5>
-						@foreach(var activity in module.ModuleActivities)
+						<h5 class="container pt-3">Activities:</h5>
+						@foreach (var activity in module.ModuleActivities)
 						{
-							<div class="card mb-2 p-2 shadow-sm" style="background-color: lightcoral">
+							<div class="card mb-2 p-2 shadow-sm" style=" background: linear-gradient(to bottom, #C7A8C7,#D8BFD8)">
 								<div class="mb-2">
-									<label>Title</label>
+									<label>Activity Name</label>
 									<InputText class="form-control" @bind-Value="activity.Name" />
 									<ValidationMessage For="@(() => activity.Name)" />
 								</div>
-								
+
 								<div class="mb-3">
-									<label for="category" class="form-label">Category</label>
+									<label for="category" class="form-label">Activity Type</label>
 									<InputSelect id="category" class="form-select" @bind-Value="activity.ActivityTypeId">
 										<option value="">-- Select Category --</option>
 										@foreach (var type in ActivityTypes)
@@ -86,25 +87,32 @@
 								</div>
 								<div class="mb-2">
 									<label>Description</label>
-									<InputText class="form-control" @bind-Value="activity.Description" />
+									<InputTextArea class="form-control" @bind-Value="activity.Description" />
 									<ValidationMessage For="@(() => activity.Description)" />
 								</div>
 								<div class="mb-2">
-									<label>Start Time</label>
+									<label>Date</label>
 									<InputDate class="form-control" @bind-Value="activity.StartDate" />
 									<ValidationMessage For="@(() => activity.StartDate)" />
-										</div>
+								</div>
+								<div class="mb-2">
+									<label>Start Time</label>
+									<InputText type="time" class="form-control"
+											   @bind-Value="activity.StartTimeString" />
+									<ValidationMessage For="@(() => activity.StartDate)" />
+								</div>
 								<div class="mb-2">
 									<label>End Time</label>
-									<InputDate class="form-control" @bind-Value="activity.EndDate" />
+									<InputText type="time" class="form-control"
+											   @bind-Value="activity.EndTimeString" />
 									<ValidationMessage For="@(() => activity.EndDate)" />
 								</div>
-								<button type="button" class="btn btn-danger" @onclick="@(() => RemoveActivity(module, activity))">Remove Activity</button>
+								<button type="button" class="btn btn-danger" @onclick="@(() => RemoveActivity(module, activity))">Remove this activity</button>
 							</div>
 						}
 
-						<button type="button" class="btn btn-secondary mb-3" @onclick="@(() =>AddActivity(module))">+ Add Activity</button>
-						<button type="button" class="btn btn-danger" @onclick="@(() => RemoveModule(module))">Remove Module</button>
+						<button type="button" class="btn btn-secondary mb-3" @onclick="@(() => AddActivity(module))">+ Add activity</button>
+						<button type="button" class="btn btn-danger" @onclick="@(() => RemoveModule(module))">Remove this module</button>
 					</div>
 				}
 
@@ -118,10 +126,12 @@
 
 
 @code {
-	private CourseCreateDto Course { get; set; } = new CourseCreateDto()
+    
+    private CourseFormModel CourseForm = new CourseFormModel();
+    private CourseCreateDto Course { get; set; } = new CourseCreateDto()
 	{
-		StartDate = DateTime.Now,
-		EndDate = DateTime.Now.AddMonths(3)
+		StartDate = DateTime.Today,
+		EndDate = DateTime.Today.AddMonths(3)
 	};
 
 	private List<ActivityTypeDto> ActivityTypes { get; set; } = new List<ActivityTypeDto>();
@@ -131,29 +141,57 @@
 
 	private void AddModule()
 	{
-		Course.Modules.Add(new ModuleCreateDto()
+		var lastModuleEndDate = CourseForm.Modules.Count == 0
+			? CourseForm.StartDate
+			: CourseForm.Modules.Max(m => m.EndDate);
+
+		// Create a new DTO
+		var newModuleDto = new ModuleCreateDto
 		{
-			StartDate = DateTime.Now,
-			EndDate = DateTime.Now.AddMonths(1)
-		});
+			StartDate = lastModuleEndDate,
+			EndDate = lastModuleEndDate.AddMonths(1)
+		};
+
+		// Wrap it in ModuleFormModel
+		var newModuleWrapper = new ModuleFormModel(newModuleDto);
+
+		CourseForm.Modules.Add(newModuleWrapper);
+
 		StateHasChanged();
 	}
-	private void RemoveModule(ModuleCreateDto module)
+	private void RemoveModule(ModuleFormModel module)
 	{
-		Course.Modules.Remove(module);
+		CourseForm.Modules.Remove(module);
 		StateHasChanged();
 	}
 
-	private void AddActivity(ModuleCreateDto module)
+	private void AddActivity(ModuleFormModel module)
 	{
-		module.ModuleActivities.Add(new ModuleActivityCreateDto()
+		var lastActivityEndDate = new DateTime();
+		if (module.ModuleActivities.Count == 0)
 		{
-			StartDate = DateTime.Now,
-			EndDate = DateTime.Now.AddHours(2)
-		});
+			lastActivityEndDate = module.StartDate.Date.AddHours(9);
+		}
+		else
+		{
+			lastActivityEndDate = module.ModuleActivities.Max(a => a.EndDate);
+			if (lastActivityEndDate.Hour > 15)
+			{
+				lastActivityEndDate = lastActivityEndDate.Date.AddDays(1).AddHours(9);
+			}
+		}
+
+		var newActivityDto = new ModuleActivityCreateDto()
+		{
+			StartDate = lastActivityEndDate,
+			EndDate = lastActivityEndDate.AddHours(2)
+		};
+		var newActivityWrapper = new ModuleActivityFormModel(newActivityDto);
+		module.ModuleActivities.Add(newActivityWrapper);
+
 		StateHasChanged();
 	}
-	private void RemoveActivity(ModuleCreateDto module, ModuleActivityCreateDto activity)
+	private void RemoveActivity(ModuleFormModel module, ModuleActivityFormModel activity)
 	{
 		module.ModuleActivities.Remove(activity);
 		StateHasChanged();
@@ -161,12 +199,14 @@
 
 	private async Task HandleValidSubmit()
 	{
-		Console.WriteLine(Course.ToString());
-		var newCourseDto = await myApi.CallApiPostAsync<CourseCreateDto, CourseDto>("courses", Course);
+		var dtoToSend = CourseForm.ToDto();
+		var json = JsonSerializer.Serialize(dtoToSend, new JsonSerializerOptions { WriteIndented = true });
+		Console.WriteLine(json);
+		var newCourseDto = await myApi.CallApiPostAsync<CourseCreateDto, CourseDto>("courses", dtoToSend);
 
-		Console.WriteLine($"Course '{Course.Name}' saved successfully!");
+		Console.WriteLine($"Course '{CourseForm.Name}' saved successfully!");
 
-		Course = new CourseCreateDto();
+		CourseForm = new CourseFormModel();
 	}
 
 	protected override async Task OnInitializedAsync()
