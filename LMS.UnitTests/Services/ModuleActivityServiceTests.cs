@@ -167,6 +167,7 @@ namespace LMS.UnitTests.Services
         {
             var dto = new ModuleActivityUpdateDto { Id = Guid.NewGuid(), Name = "UpdatedActivity" };
             var existing = new ModuleActivity { Id = dto.Id, Name = "OldName" };
+            var mappedDto = new ModuleActivityDto { Id = dto.Id, Name = dto.Name };
 
             MockModuleActivityRepo
                 .Setup(r => r.GetModuleActivityByIdAsync(dto.Id))
@@ -176,10 +177,15 @@ namespace LMS.UnitTests.Services
                 .Setup(m => m.Map(dto, existing))
                 .Callback(() => existing.Name = dto.Name);
 
+            MockMapper
+                .Setup(m => m.Map<ModuleActivityDto>(existing))
+                .Returns(mappedDto);
+
             var result = await _service.UpdateActivityAsync(dto);
 
             Assert.NotNull(result);
             Assert.Equal("UpdatedActivity", result.Name);
+
             MockModuleActivityRepo.Verify(r => r.Update(existing), Times.Once);
             MockUow.Verify(u => u.CompleteAsync(), Times.Once);
         }
