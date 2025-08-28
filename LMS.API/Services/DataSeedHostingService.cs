@@ -123,12 +123,14 @@ public class DataSeedHostingService : IHostedService
         // ActivityType faker
         var activityTypes = new List<ActivityType>
 {
-    new ActivityType { Name = "Lecture", Id = 1 },
-    new ActivityType { Name = "Seminar", Id = 2 },
-    new ActivityType { Name = "Assignment", Id = 3 },
-    new ActivityType { Name = "Exam", Id = 4 },
-    new ActivityType { Name = "Project", Id = 5 }
+    new ActivityType { Name = "Lecture" },
+    new ActivityType { Name = "Seminar" },
+    new ActivityType { Name = "Assignment"},
+    new ActivityType { Name = "Exam" },
+    new ActivityType { Name = "Project"}
 }; 
+        context.ActivityTypes.AddRange(activityTypes);
+
 
         // ModuleActivity faker
         var moduleActivityFaker = new Faker<ModuleActivity>("sv")
