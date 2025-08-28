@@ -22,8 +22,15 @@ namespace LMS.Infractructure.Data
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
+
+            builder.Entity<Document>()
+        .HasOne(d => d.Uploader)
+        .WithMany() // or .WithMany(u => u.Documents) if you add a collection
+        .HasForeignKey(d => d.UploaderId)
+        .OnDelete(DeleteBehavior.Restrict);
+
             builder.ApplyConfiguration(new ApplicationUserConfigurations());
         }
-       
+
     }
 }

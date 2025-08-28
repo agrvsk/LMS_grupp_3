@@ -122,7 +122,6 @@ namespace LMS.Infractructure.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Description")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("EndDate")
@@ -170,6 +169,7 @@ namespace LMS.Infractructure.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("UploaderId")
+                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
@@ -189,7 +189,6 @@ namespace LMS.Infractructure.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Description")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("EndDate")
@@ -220,7 +219,6 @@ namespace LMS.Infractructure.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("Description")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("EndDate")
@@ -415,7 +413,9 @@ namespace LMS.Infractructure.Migrations
                 {
                     b.HasOne("Domain.Models.Entities.ApplicationUser", "Uploader")
                         .WithMany()
-                        .HasForeignKey("UploaderId");
+                        .HasForeignKey("UploaderId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.Navigation("Uploader");
                 });

@@ -16,8 +16,7 @@ namespace LMS.UnitTests.Services
         private readonly ModuleService _service;
 
         public ModuleServiceTests()
-        {
-            MockUow.Setup(u => u.CompleteAsync()).Returns(Task.CompletedTask);
+        {            
             _service = new ModuleService(MockUow.Object, MockMapper.Object);
         }
 

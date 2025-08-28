@@ -1,0 +1,178 @@
+﻿@page "/create"
+@using Microsoft.AspNetCore.Authorization
+@rendermode InteractiveWebAssembly
+@attribute [Authorize(Roles = "Teacher")]
+
+
+<h3 style="text-align: center">New course:</h3>
+<div class="container mt-4">
+
+	<div class="card shadow-sm">
+		<div class="card-body">
+			<EditForm Model="@Course" OnValidSubmit="@(() => HandleValidSubmit())">
+				<DataAnnotationsValidator />
+				<ValidationSummary />
+				<div class="mb-3">
+					<label for="courseName" class="form-label">Course Name</label>
+					<InputText id="courseName" class="form-control" @bind-Value="Course.Name" />
+					<ValidationMessage For="@(() => Course.Name)" />
+				</div>
+				<div class="mb-3">
+					<label for="courseDescription" class="form-label">Description</label>
+					<InputTextArea id="courseDescription" class="form-control" @bind-Value="Course.Description" />
+					<ValidationMessage For="@(() => Course.Description)" />
+				</div>
+				<div class="mb-3">
+					<label for="courseStartDate" class="form-label">Start Date</label>
+					<InputDate id="courseStartDate" class="form-control" @bind-Value="Course.StartDate" />
+					<ValidationMessage For="@(() => Course.StartDate)" />
+				</div>
+				<div class="mb-3">
+					<label for="courseEndDate" class="form-label">End Date</label>
+					<InputDate id="courseEndDate" class="form-control" @bind-Value="Course.EndDate" />
+					<ValidationMessage For="@(() => Course.EndDate)" />
+				</div>
+				<h4>Modules</h4>
+				@foreach (var module in Course.Modules)
+				{
+					<DataAnnotationsValidator />
+					<ValidationSummary />
+					<div class="card mb-3 p-3 shadow-sm" style="background-color:mistyrose">
+						<h5>Module</h5>
+
+						<div class="mb-2">
+							<label>Name</label>
+							<InputTextArea class="form-control" @bind-Value="module.Name" />
+							<ValidationMessage For="@(() => module.Name)" />
+						</div>
+
+						<div class="mb-2">
+							<label>Description</label>
+							<InputText class="form-control" @bind-Value="module.Description" />
+							<ValidationMessage For="@(() => module.Description)" />
+						</div>
+
+						<div class="mb-2">
+							<label>Start Date</label>
+							<InputDate class="form-control"   @bind-Value="module.StartDate" />
+							<ValidationMessage For="@(() => module.StartDate)" />
+						</div>
+
+						<div class="mb-2">
+							<label>End Date</label>
+							<InputDate class="form-control" @bind-Value="module.EndDate" />
+							<ValidationMessage For="@(() => module.EndDate)" />
+						</div>
+						<h5>Activities</h5>
+						@foreach(var activity in module.ModuleActivities)
+						{
+							<div class="card mb-2 p-2 shadow-sm" style="background-color: lightcoral">
+								<div class="mb-2">
+									<label>Title</label>
+									<InputText class="form-control" @bind-Value="activity.Name" />
+									<ValidationMessage For="@(() => activity.Name)" />
+								</div>
+								
+								<div class="mb-3">
+									<label for="category" class="form-label">Category</label>
+									<InputSelect id="category" class="form-select" @bind-Value="activity.ActivityTypeId">
+										<option value="">-- Select Category --</option>
+										@foreach (var type in ActivityTypes)
+										{
+											<option value="@type.Id">@type.Name</option>
+										}
+									</InputSelect>
+									<ValidationMessage For="@(() => activity.ActivityTypeId)" />
+								</div>
+								<div class="mb-2">
+									<label>Description</label>
+									<InputText class="form-control" @bind-Value="activity.Description" />
+									<ValidationMessage For="@(() => activity.Description)" />
+								</div>
+								<div class="mb-2">
+									<label>Start Time</label>
+									<InputDate class="form-control" @bind-Value="activity.StartDate" />
+									<ValidationMessage For="@(() => activity.StartDate)" />
+										</div>
+								<div class="mb-2">
+									<label>End Time</label>
+									<InputDate class="form-control" @bind-Value="activity.EndDate" />
+									<ValidationMessage For="@(() => activity.EndDate)" />
+								</div>
+								<button type="button" class="btn btn-danger" @onclick="@(() => RemoveActivity(module, activity))">Remove Activity</button>
+							</div>
+						}
+
+						<button type="button" class="btn btn-secondary mb-3" @onclick="@(() =>AddActivity(module))">+ Add Activity</button>
+						<button type="button" class="btn btn-danger" @onclick="@(() => RemoveModule(module))">Remove Module</button>
+					</div>
+				}
+
+				<button type="button" class="btn btn-secondary mb-3" @onclick="AddModule">+ Add Module</button>
+				<button type="submit" class="btn btn-primary">Add</button> <button type="button" class="btn btn-primary">Cancel</button>
+			</EditForm>
+		</div>
+	</div>
+</div>
+
+
+
+@code {
+	private CourseCreateDto Course { get; set; } = new CourseCreateDto()
+	{
+		StartDate = DateTime.Now,
+		EndDate = DateTime.Now.AddMonths(3)
+	};
+
+	private List<ActivityTypeDto> ActivityTypes { get; set; } = new List<ActivityTypeDto>();
+
+	[Inject]
+	private IApiService myApi { get; set; } = default!;
+
+	private void AddModule()
+	{
+		Course.Modules.Add(new ModuleCreateDto()
+		{
+			StartDate = DateTime.Now,
+			EndDate = DateTime.Now.AddMonths(1)
+		});
+		StateHasChanged();
+	}
+	private void RemoveModule(ModuleCreateDto module)
+	{
+		Course.Modules.Remove(module);
+		StateHasChanged();
+	}
+
+	private void AddActivity(ModuleCreateDto module)
+	{
+		module.ModuleActivities.Add(new ModuleActivityCreateDto()
+		{
+			StartDate = DateTime.Now,
+			EndDate = DateTime.Now.AddHours(2)
+		});
+		StateHasChanged();
+	}
+	private void RemoveActivity(ModuleCreateDto module, ModuleActivityCreateDto activity)
+	{
+		module.ModuleActivities.Remove(activity);
+		StateHasChanged();
+	}
+
+	private async Task HandleValidSubmit()
+	{
+		Console.WriteLine(Course.ToString());
+		var newCourseDto = await myApi.CallApiPostAsync<CourseCreateDto, CourseDto>("courses", Course);
+
+		Console.WriteLine($"Course '{Course.Name}' saved successfully!");
+
+		Course = new CourseCreateDto();
+	}
+
+	protected override async Task OnInitializedAsync()
+	{
+		ActivityTypes = (await myApi.CallApiGetAsync<List<ActivityTypeDto>>("activity-types"));
+	}
+
+}
+

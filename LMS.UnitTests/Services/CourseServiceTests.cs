@@ -17,8 +17,7 @@ namespace LMS.UnitTests.Services
         private readonly CourseService _service;
 
         public CourseServiceTests()
-        {
-            MockUow.Setup(u => u.CompleteAsync()).Returns(Task.CompletedTask);
+        {            
             _service = new CourseService(MockUow.Object, MockMapper.Object);            
         }
 
@@ -145,24 +144,29 @@ namespace LMS.UnitTests.Services
         {
             var dto = new CourseUpdateDto { Id = Guid.NewGuid(), Name = "Updated" };
             var mappedCourse = new Course { Id = dto.Id, Name = dto.Name };
+            var mappedDto = new CourseDto { Id = dto.Id, Name = dto.Name };
 
             MockMapper
                 .Setup(m => m.Map<Course>(dto))
                 .Returns(mappedCourse);
 
-            var service = new CourseService(MockUow.Object, MockMapper.Object);
+            MockMapper
+                .Setup(m => m.Map<CourseDto>(mappedCourse))
+                .Returns(mappedDto);
+
+            //var service = new CourseService(MockUow.Object, MockMapper.Object);
 
             var result = await _service.UpdateCourseAsync(dto);
 
-            // Verify that the mapper was called correctly
             Assert.NotNull(result);
-            Assert.Equal("Updated", result.Name);
+            Assert.Equal(dto.Id, result.Id);
+            Assert.Equal(dto.Name, result.Name);
 
             // Verify that the repository methods were called once
             MockCourseRepo.Verify(r => r.Update(mappedCourse), Times.Once);
 
             // Verify that the unit of work's CompleteAsync was called once
-            MockUow.Verify(u => u.CompleteAsync(), Times.Once);            
+            MockUow.Verify(u => u.CompleteAsync(), Times.Once);
         }
         #endregion
 

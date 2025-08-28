@@ -12,7 +12,7 @@ namespace LMS.Infractructure.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "ActivityType",
+                name: "ActivityTypes",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -21,7 +21,7 @@ namespace LMS.Infractructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ActivityType", x => x.Id);
+                    table.PrimaryKey("PK_ActivityTypes", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -225,7 +225,7 @@ namespace LMS.Infractructure.Migrations
                     FilePath = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     ParentType = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     ParentId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    UploaderId = table.Column<string>(type: "nvarchar(450)", nullable: true)
+                    UploaderId = table.Column<string>(type: "nvarchar(450)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -234,7 +234,8 @@ namespace LMS.Infractructure.Migrations
                         name: "FK_Documents_ApplicationUser_UploaderId",
                         column: x => x.UploaderId,
                         principalTable: "ApplicationUser",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -246,16 +247,16 @@ namespace LMS.Infractructure.Migrations
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     StartDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     EndDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    TypeId = table.Column<int>(type: "int", nullable: false),
+                    ActivityTypeId = table.Column<int>(type: "int", nullable: false),
                     ModuleId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Activities", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Activities_ActivityType_TypeId",
-                        column: x => x.TypeId,
-                        principalTable: "ActivityType",
+                        name: "FK_Activities_ActivityTypes_ActivityTypeId",
+                        column: x => x.ActivityTypeId,
+                        principalTable: "ActivityTypes",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
@@ -293,14 +294,14 @@ namespace LMS.Infractructure.Migrations
                 });
 
             migrationBuilder.CreateIndex(
+                name: "IX_Activities_ActivityTypeId",
+                table: "Activities",
+                column: "ActivityTypeId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Activities_ModuleId",
                 table: "Activities",
                 column: "ModuleId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Activities_TypeId",
-                table: "Activities",
-                column: "TypeId");
 
             migrationBuilder.CreateIndex(
                 name: "EmailIndex",
@@ -392,7 +393,7 @@ namespace LMS.Infractructure.Migrations
                 name: "Submissions");
 
             migrationBuilder.DropTable(
-                name: "ActivityType");
+                name: "ActivityTypes");
 
             migrationBuilder.DropTable(
                 name: "Modules");

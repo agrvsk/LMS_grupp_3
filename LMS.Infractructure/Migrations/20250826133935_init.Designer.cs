@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LMS.Infractructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250825133006_activity-type")]
-    partial class activitytype
+    [Migration("20250826133935_init")]
+    partial class init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -173,6 +173,7 @@ namespace LMS.Infractructure.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("UploaderId")
+                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
@@ -418,7 +419,9 @@ namespace LMS.Infractructure.Migrations
                 {
                     b.HasOne("Domain.Models.Entities.ApplicationUser", "Uploader")
                         .WithMany()
-                        .HasForeignKey("UploaderId");
+                        .HasForeignKey("UploaderId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.Navigation("Uploader");
                 });

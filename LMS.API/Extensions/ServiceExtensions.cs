@@ -114,6 +114,12 @@ public static class ServiceExtensions
         services.AddScoped<ISubmissionService, SubmissionService>();
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<IActivityTypeService, ActivityTypeService>();
+        services.AddScoped<IFileHandlerService>(provider =>
+        {
+            var env = provider.GetRequiredService<IWebHostEnvironment>();
+            var rootPath = env.ContentRootPath;
+            return new FileHandlerService(rootPath);
+        });
 
         services.AddScoped(provider => new Lazy<IAuthService>(() => provider.GetRequiredService<IAuthService>()));
         services.AddLazy<ICourseService>();

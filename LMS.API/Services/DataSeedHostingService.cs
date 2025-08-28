@@ -119,11 +119,18 @@ public class DataSeedHostingService : IHostedService
 
     private async Task AddCoursesAsync(int courseAmount, ApplicationDbContext context)
     {
+        var rnd = new Random();
         // ActivityType faker
-        var activityTypeFaker = new Faker<ActivityType>("sv")
-            .RuleFor(a => a.Name, f => f.PickRandom(new[] { "Lecture", "Seminar", "Assignment", "Exam", "Project" }));
+        var activityTypes = new List<ActivityType>
+{
+    new ActivityType { Name = "Lecture" },
+    new ActivityType { Name = "Seminar" },
+    new ActivityType { Name = "Assignment"},
+    new ActivityType { Name = "Exam" },
+    new ActivityType { Name = "Project"}
+}; 
+        context.ActivityTypes.AddRange(activityTypes);
 
-        var activityTypes = activityTypeFaker.Generate(5);
 
         // ModuleActivity faker
         var moduleActivityFaker = new Faker<ModuleActivity>("sv")

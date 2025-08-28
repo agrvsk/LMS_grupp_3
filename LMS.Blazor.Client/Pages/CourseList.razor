@@ -42,7 +42,8 @@ else
 	[Inject]
 	private AuthenticationStateProvider Auth { get; set; } = default!;
 
-	private IEnumerable<CourseDto>? Courses { get; set; }
+    // Changed from IEnumerable to List to allow adding new courses
+	private List<CourseDto>? Courses { get; set; }
 
 	protected override async Task OnInitializedAsync()
 	{
@@ -64,4 +65,10 @@ else
 	}
 
 
+    // New method to handle the event when a course is added CourseList.razor is parent to CourseAddComponent.razor
+	private void HandleCourseAdded(CourseDto newCourse)
+	{
+        Courses.Add(newCourse);
+        StateHasChanged();
+	}
 }
