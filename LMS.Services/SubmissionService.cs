@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using AutoMapper;
 using Domain.Contracts.Repositories;
 using Domain.Models.Entities;
+using LMS.Shared.DTOs.EntityDto;
 using Service.Contracts;
 
 namespace LMS.Services;
@@ -12,10 +14,12 @@ namespace LMS.Services;
 public class SubmissionService : ISubmissionService
 {
     private readonly IUnitOfWork uow;
+    private readonly IMapper mapper;
 
-    public SubmissionService(IUnitOfWork uow)
+    public SubmissionService(IUnitOfWork uow, IMapper mapper)
     {
         this.uow = uow;
+        this.mapper = mapper;
     }
 
 
@@ -40,6 +44,15 @@ public class SubmissionService : ISubmissionService
     {
 
         return await uow.SubmissionRepository.GetSubmissionsByDocumentIdAsync(documentId);
+    }
+
+    public async Task<SubmissionDto> CreateSubmissionAsync(SubmissionCreateDto submissionCreateDto)
+    {
+        var submission = mapper.Map<Submission>(submissionCreateDto);
+        uow.SubmissionRepository.Create(submission);
+        await uow.CompleteAsync();
+        var submissionDto = mapper.Map<SubmissionDto>(submission);
+        return submissionDto;
     }
 
 }

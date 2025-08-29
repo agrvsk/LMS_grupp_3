@@ -45,8 +45,12 @@
                             @*              <p>@item.Name - @item.StartDate.ToShortDateString() - @item.EndDate.ToShortDateString()</p> <br/> *@
                           foreach (ModuleActivityDto activityDto in item.ModuleActivities)
                             {
-                                <small>@GetActivityTypeName(@activityDto.ActivityTypeId)  @activityDto.Name - @activityDto.StartDate.ToShortTimeString() - @activityDto.EndDate.ToShortTimeString()</small>
+                                <small @onclick="Toggle">@GetActivityTypeName(@activityDto.ActivityTypeId)  @activityDto.Name - @activityDto.StartDate.ToShortTimeString() - @activityDto.EndDate.ToShortTimeString()</small>
                                 <br />
+                                @if (isEditing)
+                                {
+                                    <SubmissionAddComponent/>
+                                }
                             }
                         }
                     }
@@ -76,12 +80,14 @@
     private bool isLoading;
     private string? userName;
     string? courseIdAsString;
+    Guid? currentlyEditing;
+    bool isEditing = false;
 
     protected override async Task OnInitializedAsync()
     {
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         var user = authState.User;
-		userName = user.Identity?.Name;
+        userName = user.Identity?.Name;
         if (!user.Identity.IsAuthenticated) return;
 
         courseIdAsString = user.FindFirst("CourseId")?.Value;
@@ -128,7 +134,7 @@
             Console.WriteLine("there was an error: " + ex.Message);
         }
 
- 
+
     }
 
     public string GetActivityTypeName(int activityTypeId)
@@ -136,5 +142,21 @@
         return Types.FirstOrDefault(t => t.Id == activityTypeId)?.Name ?? "  ";
 
     }
+    private void Toggle()
+    {
+        isEditing = !isEditing;
+    }
+    /*
+    private void Toggle(Guid ajdi)
+    {
+        if (ajdi == currentlyEditing)
+        {
+            currentlyEditing = null;
+            return;
+		}
+        currentlyEditing = ajdi;
+
+	}
+    */
 }
 
