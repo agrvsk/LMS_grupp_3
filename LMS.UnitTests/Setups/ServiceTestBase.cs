@@ -132,7 +132,8 @@ namespace LMS.UnitTests.Setups
                 new Lazy<IModuleService>(() => MockModuleService.Object),
                 new Lazy<ISubmissionService>(() => MockSubmissionService.Object),
                 new Lazy<IUserService>(() => MockUserService.Object),
-                new Lazy<IActivityTypeService>(() => MockActivityTypeService.Object)
+                new Lazy<IActivityTypeService>(() => MockActivityTypeService.Object),
+                new Lazy<IScheduleService>(() => MockScheduleService.Object)
                 );
 
         }

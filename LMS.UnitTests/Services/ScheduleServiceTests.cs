@@ -16,7 +16,7 @@ namespace LMS.UnitTests.Services
 
         public ScheduleServiceTests() 
         { 
-            _service = new ScheduleService(MockUow.Object, ServiceManager);
+            _service = new ScheduleService(MockUow.Object);
         }
 
         [Fact]
