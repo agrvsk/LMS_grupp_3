@@ -33,14 +33,14 @@ namespace LMS.Presentation.Controllers
         }
 
         [HttpGet("course/{courseId}/today/{idag}")]
-        public async Task<IActionResult> GetActivitiesByCourseIdAsync(Guid courseId, DateTime idag)
+        public async Task<IActionResult> GetActivitiesByCourseIdAsync(Guid courseId, string idag)
         {
             var modules = await _serviceManager.ModuleService.GetActivitiesByCourseIdAsync(courseId, idag);
             return Ok(modules);
         }
 
         [HttpGet("today/{idag}")]
-        public async Task<IActionResult> GetAllActivitiesByDateAsync(DateTime idag)
+        public async Task<IActionResult> GetAllActivitiesByDateAsync(string idag)
         {
             var modules = await _serviceManager.ModuleService.GetAllActivitiesByDateAsync(idag);
             return Ok(modules);

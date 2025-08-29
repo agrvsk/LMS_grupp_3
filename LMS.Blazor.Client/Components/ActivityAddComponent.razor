@@ -40,15 +40,20 @@ else
 						<InputTextArea id="courseDescription" class="form-control" @bind-Value="Activity.Description" />
 						<ValidationMessage For="@(() => Activity.Description)" />
 					</div>
-					<div class="mb-3">
-						<label for="activityStartDate" class="form-label">Start Time</label>
-						<InputDate id="activityStartDate" class="form-control" @bind-Value="Activity.StartDate" />
+					<div>
+						<label for="courseDate" class="form-label">Date</label>
+						<InputDate id="activityEndDate" class="form-control" @bind-Value="Activity.StartDate" />
 						<ValidationMessage For="@(() => Activity.StartDate)" />
 					</div>
 					<div class="mb-3">
+						<label for="courseEndDate" class="form-label">Start Time</label>
+						<InputText type="time" id="activityEndDate" class="form-control" @bind-Value="StartTimeString" />
+						<ValidationMessage For="@(() => StartTimeString)" />
+					</div>
+					<div class="mb-3">
 						<label for="courseEndDate" class="form-label">End Time</label>
-						<InputDate id="activityEndDate" class="form-control" @bind-Value="Activity.EndDate" />
-						<ValidationMessage For="@(() => Activity.EndDate)" />
+						<InputText  type="time" id="activityEndDate" class="form-control" @bind-Value="EndTimeString" />
+						<ValidationMessage For="@(() => EndTimeString)" />
 					</div>
 					<button type="submit" class="btn btn-primary">Add</button> <button type="button" class="btn btn-primary" @onclick=Toggle>Cancel</button>
 				</EditForm>
@@ -68,6 +73,29 @@ else
 
 	[Inject]
 	private IApiService myApi { get; set; } = default!;
+
+	public string StartTimeString
+	{
+		get => Activity.StartDate.ToString("HH:mm");
+		set
+		{
+			if (TimeSpan.TryParse(value, out var ts))
+			{
+				Activity.StartDate = Activity.StartDate.Date + ts;
+			}
+		}
+	}
+	public string EndTimeString
+	{
+		get => Activity.EndDate.ToString("HH:mm");
+		set
+		{
+			if (TimeSpan.TryParse(value, out var ts))
+			{
+				Activity.EndDate = Activity.EndDate.Date + ts;
+			}
+		}
+	}
 
 	private async Task HandleValidSubmit()
 	{
