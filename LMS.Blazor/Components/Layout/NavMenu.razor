@@ -10,14 +10,17 @@
 
     <AuthorizeView>
         <NotAuthorized>
+            <div class="nav-right">
+            <NavLink class="nav-link" href="Account/Register">Register</NavLink>
             <NavLink class="nav-link" href="Account/Login">Login</NavLink>
+            </div>
         </NotAuthorized>
         <Authorized>
-            
             <NavLink class="nav-link" href="courses">Courses</NavLink>
             <NavLink class="nav-link" href="create">Create</NavLink>
             <NavLink class="nav-link" href="schedule">Schedule</NavLink>
-            <NavLink class="nav-link" href="Account/Register">Register new account</NavLink>
+            
+            <div class="nav-right">
             <NavLink class="nav-link" href="Account/Manage">@context.User.Identity?.Name</NavLink>
 
             <form action="Account/Logout" method="post" class="d-inline">
@@ -25,6 +28,7 @@
                 <input type="hidden" name="ReturnUrl" value="@NavigationManager.ToBaseRelativePath" />
                 <button type="submit" class="btn btn-link nav-link">Logout</button>
             </form>
+            </div>
         </Authorized>
     </AuthorizeView>
 </nav>
