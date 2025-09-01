@@ -4,11 +4,13 @@
 @using System.Text
 @using System.Text.Encodings.Web
 @using LMS.Blazor.Client.Services
+@using LMS.Blazor.Services
 @using LMS.Shared.DTOs.EntityDto
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Identity
 @using Microsoft.AspNetCore.WebUtilities
 @using LMS.Blazor.Data
+@using System.Text.Json
 
 @inject UserManager<ApplicationUser> UserManager
 @inject IUserStore<ApplicationUser> UserStore
@@ -17,6 +19,8 @@
 @inject ILogger<Register> Logger
 @inject NavigationManager NavigationManager
 @inject IdentityRedirectManager RedirectManager
+@inject IHttpClientFactory HttpClientFactory
+@inject ITokenStorage TokenStorage
 
 @attribute [Authorize(Roles = "Teacher")]
 
@@ -97,8 +101,8 @@
 	private string? Message => identityErrors is null ? null : $"Error: {string.Join(", ", identityErrors.Select(error => error.Description))}";
 
 	private List<string> Roles = new List<string> { "Student", "Teacher" };
-	
-	
+
+
 
 	private List<CourseDto>? Courses { get; set; }
 
@@ -165,11 +169,25 @@
 
 	protected override async Task OnInitializedAsync()
 	{
-		Console.WriteLine("OnInitializedAsync called");
-		var response = await myApi.CallApiGetAsync<IEnumerable<CourseDto>>("courses");
-		Console.WriteLine("response: "+response);
-		Courses = response?.ToList();
-		Console.WriteLine("courses: " + Courses);
+		var user = await UserManager.GetUserAsync(SignInManager.Context.User);
+		var userId = await UserManager.GetUserIdAsync(user);
+		var token = await TokenStorage.GetAccessTokenAsync(userId);
+		
+		
+		var client = HttpClientFactory.CreateClient("LmsAPIClient");
+		client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+		
+		var response = await client.GetAsync("courses");
+		if (response.IsSuccessStatusCode)
+		{
+			var responseStream = await response.Content.ReadAsStreamAsync();
+			Courses = await JsonSerializer.DeserializeAsync<List<CourseDto>>(responseStream, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+		}
+		else
+		{
+			Console.WriteLine($"Error fetching courses: {response.ReasonPhrase}");
+			Courses = new List<CourseDto>();
+		}
 	}
 
 	private sealed class InputModel

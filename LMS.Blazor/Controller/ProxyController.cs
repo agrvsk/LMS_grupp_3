@@ -64,7 +64,7 @@ public class ProxyController(IHttpClientFactory httpClientFactory, ITokenStorage
                 requestMessage.Headers.TryAddWithoutValidation(header.Key, header.Value.ToArray());
             }
         }
-
+        Console.WriteLine($"Proxying to: {targetUriBuilder.Uri}");
         var response = await client.SendAsync(requestMessage);
 
         return !response.IsSuccessStatusCode
