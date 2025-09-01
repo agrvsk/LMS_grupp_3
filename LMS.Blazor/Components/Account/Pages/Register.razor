@@ -48,7 +48,7 @@
 				<ValidationMessage For="() => Input.ConfirmPassword" class="text-danger" />
 			</div>
 			<div class="form-floating mb-3">
-				<label for="role" class="form-label">Role</label>
+				
 				<InputSelect id="role" class="form-select" @bind-Value="Input.role">
 					<option value="">-- Select Role --</option>
 					@foreach (var role in Roles)
@@ -60,7 +60,7 @@
 				<ValidationMessage For="@(() => Input.role)" />
 			</div>
 			<div class="form-floating mb-3">
-				<label for="course" class="form-label">Course (only for Students)</label>
+				
 				<InputSelect id="course" class="form-select" @bind-Value="Input.selectedCourseId">
 					<option value="">-- Select Course --</option>
 					@foreach (var course in Courses ?? new List<CourseDto>())
@@ -106,7 +106,7 @@
 	public async Task RegisterUser(EditContext editContext)
 	{
 		var user = CreateUser();
-		if (Input.selectedCourseId == Guid.Empty) user.CourseId = null;
+		if (Input.selectedCourseId == null) throw new InvalidOperationException("CourseId must be selected for students");
 		else user.CourseId = Input.selectedCourseId;
 
 
@@ -165,8 +165,11 @@
 
 	protected override async Task OnInitializedAsync()
 	{
+		Console.WriteLine("OnInitializedAsync called");
 		var response = await myApi.CallApiGetAsync<IEnumerable<CourseDto>>("courses");
+		Console.WriteLine("response: "+response);
 		Courses = response?.ToList();
+		Console.WriteLine("courses: " + Courses);
 	}
 
 	private sealed class InputModel
@@ -189,6 +192,6 @@
 
 		public string role { get; set; } = "Student";
 		
-	public Guid? selectedCourseId { get; set; } = Guid.Empty;
+	public Guid? selectedCourseId { get; set; } = null;
 	}
 }
