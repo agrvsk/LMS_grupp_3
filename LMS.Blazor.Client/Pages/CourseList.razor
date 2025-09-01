@@ -2,8 +2,9 @@
 @using LMS.Blazor.Client.Services
 @using LMS.Shared.DTOs.EntityDto
 @using Microsoft.AspNetCore.Authorization
+@inject NavigationManager Navigation
+@inject AuthenticationStateProvider AuthStateProvider
 @rendermode InteractiveWebAssembly
-@attribute [Authorize(Roles = "Teacher")]
 
 <h3>CourseList</h3>
 
@@ -42,13 +43,29 @@ else
 	[Inject]
 	private AuthenticationStateProvider Auth { get; set; } = default!;
 
-    // Changed from IEnumerable to List to allow adding new courses
+    
 	private List<CourseDto>? Courses { get; set; }
 
 	protected override async Task OnInitializedAsync()
 	{
-		await LoadCourse();
-		Loading = false;
+		var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+		var user = authState.User;
+		var isTeacher = user.IsInRole("Teacher");
+		var isStudent = user.IsInRole("Student");
+		if (isTeacher)
+		{
+			await LoadCourse();
+			Loading = false;
+		}
+		else if (isStudent)
+		{
+			var courseIdAsString = user.FindFirst("CourseId")?.Value ?? null;
+			if (courseIdAsString != null) await InvokeAsync(() => Navigation.NavigateTo($"courses/{courseIdAsString}"));
+		}
+		else
+		{
+			await InvokeAsync(() => Navigation.NavigateTo("/account/login"));
+		}
 	}
 
 	private async Task LoadCourse()
