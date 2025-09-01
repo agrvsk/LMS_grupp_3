@@ -34,10 +34,10 @@ public class SubmissionService : ISubmissionService
         return await uow.SubmissionRepository.GetSubmissionByIdAsync(submissionId);
     }
 
-    public async Task<List<Submission>> GetSubmissionsByApplicationUserIdAsync(string userId)
+    public async Task<List<SubmissionDto>> GetSubmissionsByApplicationUserIdAsync(string userId)
     {
-
-        return await uow.SubmissionRepository.GetSubmissionsByApplicationUserIdAsync(userId);
+        var data = await uow.SubmissionRepository.GetSubmissionsByApplicationUserIdAsync(userId);
+        return mapper.Map<List<SubmissionDto>>(data);
     }
 
     public async Task<List<Submission>> GetSubmissionsByDocumentIdAsync(Guid documentId)

@@ -1,4 +1,5 @@
-﻿@rendermode InteractiveWebAssembly
+﻿@using System.Security.Claims
+@rendermode InteractiveWebAssembly
 
 <AuthorizeView Roles="Teacher,Student">
     <Authorized>
@@ -42,7 +43,6 @@
                     {
                         foreach (ModuleDto item in Modules)
                         {
-                            @*              <p>@item.Name - @item.StartDate.ToShortDateString() - @item.EndDate.ToShortDateString()</p> <br/> *@
                           foreach (ModuleActivityDto activityDto in item.ModuleActivities)
                             {
                                 <small @onclick="Toggle">@GetActivityTypeName(@activityDto.ActivityTypeId)  @activityDto.Name - @activityDto.StartDate.ToShortTimeString() - @activityDto.EndDate.ToShortTimeString()</small>
@@ -54,6 +54,16 @@
                             }
                         }
                     }
+                    <p class="lead mt-3 pt-3">Entered submissions:</p>
+                    @if (Submissions != null && Submissions.Count() > 0)
+                    {
+                        foreach (SubmissionDto item in Submissions)
+                        {
+                                <small>@item.SubmissionDate.ToShortDateString() @item.DocumentId  </small>
+                                <br />
+                        }
+                    }
+
                 </article>
             </section>
 
@@ -73,6 +83,7 @@
     AuthenticationStateProvider AuthenticationStateProvider { get; set; } = default!;
 
     private IEnumerable<ModuleDto>? Modules { get; set; }
+	private IEnumerable<SubmissionDto>? Submissions { get; set; }
     public List<ActivityTypeDto> Types { get; set; } = new List<ActivityTypeDto>();
 
     private bool isTeacher;
@@ -80,6 +91,8 @@
     private bool isLoading;
     private string? userName;
     string? courseIdAsString;
+    private string? UserId;
+
     Guid? currentlyEditing;
     bool isEditing = false;
 
@@ -90,6 +103,9 @@
         userName = user.Identity?.Name;
         if (!user.Identity.IsAuthenticated) return;
 
+        UserId = user.FindFirst(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+
+
         courseIdAsString = user.FindFirst("CourseId")?.Value;
 
         isLoading = true;
@@ -98,10 +114,16 @@
         isStudent = user.IsInRole("Student");
 
         await LoadActivities(courseIdAsString);
+        await LoadSubmissions(UserId);
 
         isLoading = false;
     }
 
+    private async Task LoadSubmissions(string UserId)
+    {
+        if (!isStudent) return;
+        Submissions = await myApi.CallApiGetAsync<IEnumerable<SubmissionDto>>($"submissions/user/{UserId}");
+    }
 
     private async Task LoadActivities(string? courseIdAsString)
     {

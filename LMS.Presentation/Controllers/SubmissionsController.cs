@@ -33,6 +33,14 @@ namespace LMS.Presentation.Controllers
             return Ok(submission);
         }
 
+        [HttpGet("user/{userId}")]
+        public async Task<IActionResult> GetSubmissionByUserId(string userId)
+        {
+            var submission = await _serviceManager.SubmissionService.GetSubmissionsByApplicationUserIdAsync(userId);
+            if (submission == null)
+                return NotFound();
+            return Ok(submission);
+        }
 
         [HttpPost]
         public async Task<IActionResult> CreateSubmission([FromBody] SubmissionCreateDto submissionCreateDto)
