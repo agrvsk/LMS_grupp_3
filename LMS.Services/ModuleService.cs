@@ -43,11 +43,11 @@ public class ModuleService : IModuleService
         return mapper.Map<List<ModuleDto>>(await uow.ModuleRepository.GetModulesByCourseIdAsync(courseId));
 
     }
-    public async Task<List<ModuleDto>> GetActivitiesByCourseIdAsync(Guid courseId, DateTime idag)
+    public async Task<List<ModuleDto>> GetActivitiesByCourseIdAsync(Guid courseId, string idag)
     {
         return mapper.Map<List<ModuleDto>>(await uow.ModuleRepository.GetModulesByCourseIdAndDateAsync(courseId,idag));
     }
-    public async Task<List<ModuleDto>> GetAllActivitiesByDateAsync(DateTime idag)
+    public async Task<List<ModuleDto>> GetAllActivitiesByDateAsync(string idag)
     {
         return mapper.Map<List<ModuleDto>>(await uow.ModuleRepository.GetAllModulesByDateAsync(idag));
     }

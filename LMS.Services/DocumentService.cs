@@ -52,6 +52,16 @@ public class DocumentService : IDocumentService
         document.FilePath = filePath;
 
         uow.DocumentRepository.Create(document);
+
+        if (documentDto.Submissions != null && documentDto.Submissions.Count > 0)
+        {
+            foreach (var submissionDto in documentDto.Submissions)
+            {
+                var sub = mapper.Map<Submission>(submissionDto);
+                sub.DocumentId = document.Id;
+                uow.SubmissionRepository.Create(sub);
+            }
+        }
         await uow.CompleteAsync();
         return mapper.Map<DocumentDto>(document);
     }

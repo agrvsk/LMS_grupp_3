@@ -107,7 +107,9 @@
     {
         try
         {
-            DateTime idag = DateTime.Now;
+            DateTime idag = DateTime.UtcNow;
+            string timeString = idag.ToString("yyyy-MM-dd");
+
             if (isStudent )
             {
                 if (courseIdAsString != null && courseIdAsString.Length > 0)
@@ -115,7 +117,7 @@
                     if (Guid.TryParse(courseIdAsString, out var courseId))
                     {
                         Console.WriteLine(courseId);
-                        Modules = await myApi.CallApiGetAsync<IEnumerable<ModuleDto>>($"modules/course/{courseId}/today/{idag}");
+                        Modules = await myApi.CallApiGetAsync<IEnumerable<ModuleDto>>($"modules/course/{courseId}/today/{timeString}");
                     }
 
                 }
@@ -123,7 +125,7 @@
             }
             else if(isTeacher)
             {
-                Modules = await myApi.CallApiGetAsync<IEnumerable<ModuleDto>>($"modules/today/{idag}");
+                Modules = await myApi.CallApiGetAsync<IEnumerable<ModuleDto>>($"modules/today/{timeString}");
             }
 
             Types = (await myApi.CallApiGetAsync<List<ActivityTypeDto>>("activity-types"));

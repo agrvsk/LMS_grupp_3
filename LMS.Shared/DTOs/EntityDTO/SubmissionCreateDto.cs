@@ -10,6 +10,6 @@ public record SubmissionCreateDto
 {
     public DateTime SubmissionDate { get; set; }
     public string ApplicationUserId { get; set; }
-    public Guid DocumentId { get; set; }
+    //public Guid DocumentId { get; set; }
 
 }
