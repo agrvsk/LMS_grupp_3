@@ -1,5 +1,6 @@
 ﻿@using System.Security.Claims
 @rendermode InteractiveWebAssembly
+@inject NavigationManager nav
 
 <AuthorizeView Roles="Teacher, Student">
     <Authorized>
@@ -101,7 +102,7 @@
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         var user = authState.User;
         userName = user.Identity?.Name;
-        if (!user.Identity.IsAuthenticated) return;
+        if (!user.Identity.IsAuthenticated || user==null) return;
 
         UserId = user.FindFirst(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
 
@@ -131,7 +132,6 @@
         {
             DateTime idag = DateTime.UtcNow;
             string timeString = idag.ToString("yyyy-MM-dd");
-
             if (isStudent )
             {
                 if (courseIdAsString != null && courseIdAsString.Length > 0)
