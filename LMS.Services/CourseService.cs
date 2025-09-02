@@ -60,6 +60,14 @@ public class CourseService : ICourseService
         {
             uow.DocumentRepository.Delete(doc);
         }
+
+        var comrades = await uow.ApplicationUserRepository.GetUsersByCourseIdAsync(course.Id);
+
+        foreach (var ussr in comrades)
+        {            
+            uow.ApplicationUserRepository.Delete(ussr);
+        }
+
         var modules = await uow.ModuleRepository.GetModulesByCourseIdAsync(courseId);
 
 
