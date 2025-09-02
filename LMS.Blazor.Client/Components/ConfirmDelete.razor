@@ -1,0 +1,36 @@
+﻿<button class="btn btn-danger" @onclick="ShowDialog">@ButtonText</button>
+
+@if (isOpen)
+{
+    <div class="confirm-delete-backdrop">
+        <div class="confirm-delete-modal">
+            <h3>@Title</h3>
+            <p>@Message</p>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" @onclick="CloseDialog">Cancel</button>
+                <button class="btn btn-danger" @onclick="Confirm">Delete</button>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private bool isOpen = false;
+
+    [Parameter] public string Title { get; set; } = "Confirm delete";
+    [Parameter] public string Message { get; set; } = "Are you sure?";
+    [Parameter] public string ButtonText { get; set; } = "Delete";
+
+    [Parameter] public EventCallback OnConfirm { get; set; }
+
+    private void ShowDialog() => isOpen = true;
+    private void CloseDialog() => isOpen = false;
+
+    private async Task Confirm()
+    {
+        if (OnConfirm.HasDelegate)
+            await OnConfirm.InvokeAsync();
+
+        isOpen = false;
+    }
+}

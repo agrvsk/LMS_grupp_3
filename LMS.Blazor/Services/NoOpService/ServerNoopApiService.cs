@@ -8,5 +8,5 @@ public class ServerNoopApiService : IApiService
     public Task<TResponse?> CallApiPostAsync<TRequest, TResponse>(string endpoint, TRequest data, CancellationToken ct = default) => Task.FromResult<TResponse?>(default);
     public Task<TResponse?> CallApiPutAsync<TRequest, TResponse>(string endpoint, TRequest data, CancellationToken ct = default) => Task.FromResult<TResponse?>(default);
     public Task<TResponse?> CallApiPostMultipartAsync<TResponse>(string endpoint, MultipartFormDataContent data, CancellationToken ct = default) => Task.FromResult<TResponse?>(default);
-
+    public Task<bool> CallApiDeleteAsync(string endpoint, CancellationToken ct = default) => Task.FromResult(true);
 }

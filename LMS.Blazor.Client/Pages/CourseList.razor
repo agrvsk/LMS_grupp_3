@@ -9,26 +9,35 @@
 <h3>CourseList</h3>
 
 
-@if (Loading)
+@if (Courses != null)
 {
-	<p>Loading courses...</p>
-}
-else
-{
-	<CourseAddComponent/>
-	@if (Courses != null)
-	{
-		@foreach (var course in Courses)
-		{
-			<CourseComponent Course=course />
-		}
-		
-	}
-	else
-	{
-		<p>Loading courses...</p>
-	}
-
+	<table class="table">
+		<thead>
+			<tr>
+				<th>Name</th>
+				<th>Description</th>
+				<th>Start Date</th>
+				<th>End Date</th>
+			</tr>
+		</thead>
+		<tbody>
+			@foreach (var course in Courses)
+			{
+				<tr>
+					<td @onclick="() => NavigateToCourse(course.Id)" style="cursor:pointer">@course.Name</td>
+					<td>@course.Description</td>
+					<td>@course.StartDate</td>
+					<td>@course.EndDate</td>
+					<td>
+						<ConfirmDelete Title="Delete Course"
+									   Message="Are you sure?"
+									   OnConfirm="() => DeleteCourse(course)"
+									   ButtonText="Delete" />
+					</td>
+				</tr>
+			}
+		</tbody>
+	</table>
 }
 
 @code
@@ -88,4 +97,128 @@ else
         Courses.Add(newCourse);
         StateHasChanged();
 	}
+
+	private void NavigateToCourse(Guid courseId)
+	{
+		Navigation.NavigateTo($"/courses/{courseId}");
+	}
+
+
+	private async Task DeleteCourse(CourseDto courseToDelete)
+	{
+		if (courseToDelete == null) return;
+
+		try
+		{
+			var success = await myApi.CallApiDeleteAsync($"courses/{courseToDelete.Id}");
+			if (success)
+			{
+				// Ta bort från listan så UI uppdateras
+				Courses.Remove(courseToDelete);
+				StateHasChanged();
+			}
+			else
+			{
+				Console.WriteLine("Delete failed: API returned false");
+			}
+		}
+		catch (Exception ex)
+		{
+			Console.WriteLine($"Delete failed: {ex.Message}");
+		}
+	}
 }
+
+
+@* @page "/courses"
+@using LMS.Blazor.Client.Services
+@using LMS.Shared.DTOs.EntityDto
+@using Microsoft.AspNetCore.Authorization
+@inject NavigationManager Navigation
+@inject AuthenticationStateProvider AuthStateProvider
+@rendermode InteractiveWebAssembly
+
+<h3>CourseList</h3>
+
+
+@if (Loading)
+{
+	<p>Loading courses...</p>
+}
+else
+{
+	<CourseAddComponent />
+	@if (Courses != null)
+	{
+		@foreach (var course in Courses)
+		{
+			<CourseComponent Course=course />
+		}
+
+	}
+	else
+	{
+		<p>Loading courses...</p>
+	}
+
+}
+
+@code
+{
+	public bool Loading { get; set; } = true;
+
+	private bool isAdding = false;
+
+	[Inject]
+	private IApiService myApi { get; set; } = default!;
+
+	[Inject]
+	private AuthenticationStateProvider Auth { get; set; } = default!;
+
+
+	private List<CourseDto>? Courses { get; set; }
+
+	protected override async Task OnInitializedAsync()
+	{
+		var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+		var user = authState.User;
+		var isTeacher = user.IsInRole("Teacher");
+		var isStudent = user.IsInRole("Student");
+		if (isTeacher)
+		{
+			await LoadCourse();
+			Loading = false;
+		}
+		else if (isStudent)
+		{
+			var courseIdAsString = user.FindFirst("CourseId")?.Value ?? null;
+			if (courseIdAsString != null) await InvokeAsync(() => Navigation.NavigateTo($"courses/{courseIdAsString}"));
+		}
+		else
+		{
+			await InvokeAsync(() => Navigation.NavigateTo("/account/login"));
+		}
+	}
+
+	private async Task LoadCourse()
+	{
+
+		var response = await myApi.CallApiGetAsync<IEnumerable<CourseDto>>("courses");
+		Courses = response?.ToList();
+
+	}
+
+	private void ToggleAddCourse()
+	{
+		isAdding = !isAdding;
+	}
+
+
+	// New method to handle the event when a course is added CourseList.razor is parent to CourseAddComponent.razor
+	private void HandleCourseAdded(CourseDto newCourse)
+	{
+		Courses.Add(newCourse);
+		StateHasChanged();
+	}
+}
+ *@
