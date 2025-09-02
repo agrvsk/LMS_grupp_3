@@ -12,7 +12,11 @@ public class ClientApiService(IHttpClientFactory httpClientFactory, NavigationMa
 
     public async Task<bool> CallApiDeleteAsync(string endpoint, CancellationToken ct = default)
     {
-        var response = await httpClient.DeleteAsync(endpoint, ct);
+        await authReady.WaitAsync();
+
+        var requestMessage = new HttpRequestMessage(HttpMethod.Delete, $"proxy?endpoint={endpoint}");
+        var response = await httpClient.SendAsync(requestMessage, ct);
+
         return response.IsSuccessStatusCode;
     }
 
