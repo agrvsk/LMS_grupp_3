@@ -13,4 +13,5 @@ public record SubmissionDto
     public string ApplicationUserId { get; set; }
     public Guid DocumentId { get; set; }
 
+    public DocumentDto? DocumentDto { get; set; }
 }

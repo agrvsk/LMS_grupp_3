@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Domain.Contracts.Repositories;
 using Domain.Models.Entities;
 using LMS.Infractructure.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace LMS.Infractructure.Repositories;
 
@@ -33,9 +34,13 @@ public class SubmissionRepository : RepositoryBase<Submission>, ISubmissionRepos
 
     public async Task<List<Submission>> GetSubmissionsByApplicationUserIdAsync(string userId)
     {
-        
-        return await FindByConditionAsync(s => s.ApplicationUserId == userId, trackChanges: false)
-            .ContinueWith(task => task.Result.ToList());
+        return await context.Submissions
+        .Include(ma => ma.SubmissionDocument)
+        .Where(s => s.ApplicationUserId == userId)
+        .AsNoTracking()
+        .ToListAsync();
+
+//        return await FindByConditionAsync(s => s.ApplicationUserId == userId, trackChanges: false).ContinueWith(task => task.Result.ToList());
     }
 
     public async Task<List<Submission>> GetSubmissionsByDocumentIdAsync(Guid documentId)
