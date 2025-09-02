@@ -1,5 +1,6 @@
 ﻿using Domain.Models.Entities;
 using LMS.Services;
+using LMS.Shared.DTOs.EntityDto;
 using LMS.UnitTests.Setups;
 using Moq;
 using System;
@@ -16,7 +17,7 @@ namespace LMS.UnitTests.Services
 
         public SubmissionServiceTests()
         {
-            _service = new SubmissionService(MockUow.Object);
+            _service = new SubmissionService(MockUow.Object, MockMapper.Object);
         }
 
         #region [GetAllSubmissionsAsync]
@@ -102,9 +103,18 @@ namespace LMS.UnitTests.Services
                 new Submission { Id = Guid.NewGuid(), ApplicationUserId = userId }
             };
 
+            var submissionDtos = new List<SubmissionDto>
+            {
+                new SubmissionDto { Id = submissions[0].Id, ApplicationUserId = userId }
+            };
+
             MockSubmissionRepo
                 .Setup(r => r.GetSubmissionsByApplicationUserIdAsync(userId))
                 .ReturnsAsync(submissions);
+
+            MockMapper
+                .Setup(m => m.Map<List<SubmissionDto>>(It.IsAny<List<Submission>>()))
+                .Returns(submissionDtos);
 
             var result = await _service.GetSubmissionsByApplicationUserIdAsync(userId);
 
@@ -122,6 +132,10 @@ namespace LMS.UnitTests.Services
             MockSubmissionRepo
                 .Setup(r => r.GetSubmissionsByApplicationUserIdAsync(userId))
                 .ReturnsAsync(new List<Submission>());
+
+            MockMapper
+                .Setup(m => m.Map<List<SubmissionDto>>(It.IsAny<List<Submission>>()))
+                .Returns(new List<SubmissionDto>());
 
             var result = await _service.GetSubmissionsByApplicationUserIdAsync(userId);
 

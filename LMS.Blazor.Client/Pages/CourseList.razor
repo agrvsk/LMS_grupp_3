@@ -9,26 +9,32 @@
 <h3>CourseList</h3>
 
 
-@if (Loading)
+@if (Courses != null)
 {
-	<p>Loading courses...</p>
-}
-else
-{
-	<CourseAddComponent/>
-	@if (Courses != null)
-	{
-		@foreach (var course in Courses)
-		{
-			<CourseComponent Course=course />
-		}
-		
-	}
-	else
-	{
-		<p>Loading courses...</p>
-	}
-
+	<table class="table">
+		<thead>
+			<tr>
+				<th>Name</th>
+				<th>Description</th>
+				<th>Actions</th>
+			</tr>
+		</thead>
+		<tbody>
+			@foreach (var course in Courses)
+			{
+				<tr>
+					<td>@course.Name</td>
+					<td>@course.Description</td>
+					<td>
+						<ConfirmDelete Title="Delete Course"
+									   Message="Are you sure you want to delete this course?"
+									   OnConfirm="() => DeleteCourse(course)"
+									   ButtonText="Delete Course" />
+					</td>
+				</tr>
+			}
+		</tbody>
+	</table>
 }
 
 @code
@@ -87,5 +93,30 @@ else
 	{
         Courses.Add(newCourse);
         StateHasChanged();
+	}
+
+
+	private async Task DeleteCourse(CourseDto courseToDelete)
+	{
+		if (courseToDelete == null) return;
+
+		try
+		{
+			var success = await myApi.CallApiDeleteAsync($"courses/{courseToDelete.Id}");
+			if (success)
+			{
+				// Ta bort från listan så UI uppdateras
+				Courses.Remove(courseToDelete);
+				StateHasChanged();
+			}
+			else
+			{
+				Console.WriteLine("Delete failed: API returned false");
+			}
+		}
+		catch (Exception ex)
+		{
+			Console.WriteLine($"Delete failed: {ex.Message}");
+		}
 	}
 }

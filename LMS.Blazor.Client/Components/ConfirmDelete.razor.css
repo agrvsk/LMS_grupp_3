@@ -1,0 +1,42 @@
+﻿/* Bakgrund overlay */
+.confirm-delete-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1050;
+}
+
+/* Själva modalen */
+.confirm-delete-modal {
+    background: #fff;
+    border-radius: 8px;
+    padding: 1.5rem;
+    width: 350px;
+    max-width: 90%;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    text-align: center;
+}
+
+    /* Modal header */
+    .confirm-delete-modal h3 {
+        margin-bottom: 0.5rem;
+    }
+
+    /* Modal text */
+    .confirm-delete-modal p {
+        margin-bottom: 1rem;
+        color: #333;
+    }
+
+/* Actions */
+.modal-actions {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+}
