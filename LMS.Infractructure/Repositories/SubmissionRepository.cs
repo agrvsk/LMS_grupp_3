@@ -38,6 +38,7 @@ public class SubmissionRepository : RepositoryBase<Submission>, ISubmissionRepos
         .Include(ma => ma.SubmissionDocument)
         .Where(s => s.ApplicationUserId == userId)
         .AsNoTracking()
+        .OrderBy(o => o.SubmissionDate).Reverse()
         .ToListAsync();
 
 //        return await FindByConditionAsync(s => s.ApplicationUserId == userId, trackChanges: false).ContinueWith(task => task.Result.ToList());

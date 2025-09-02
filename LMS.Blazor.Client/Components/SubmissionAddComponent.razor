@@ -3,11 +3,12 @@
 
 
 <div class="border">
-	<DocumentAddComponent ParentType="Submission" Submissions="@MyDtoArr" />
+	<DocumentAddComponent ParentType="Submission" Submissions="@MyDtoArr" OnUploadSuccess="HandleUploadSuccess" />
 </div>
 
 @code 
 {
+	[Parameter] public EventCallback<DocumentDto> OnUploadSuccess { get; set; }
 	[CascadingParameter] private Task<AuthenticationState> AuthStateTask { get; set; }
 	private string? UploaderId;
 	private List<SubmissionCreateDto> MyDtoArr;
@@ -26,23 +27,24 @@
 		MyDtoArr = new List<SubmissionCreateDto>();
 		dto = new SubmissionCreateDto
 		{
-			SubmissionDate = DateTime.UtcNow,
+			SubmissionDate = DateTime.Now,
 			ApplicationUserId = UploaderId
 			//		DocumentId = "Assignment";
 		};
 		MyDtoArr.Add(dto);
-
+		Console.WriteLine($"dto-date:{dto.SubmissionDate.ToShortTimeString()}");	
 		//serializedData = JsonSerializer.Serialize(MyDtoArr);
 		//var stringContent = new StringContent(json, Encoding.UTF8, "application/json");
 
 	}
 
+	private async Task HandleUploadSuccess(DocumentDto doc)
+	{
+		//DocumentDtos.Add(doc);
+		//StateHasChanged();
+		await OnUploadSuccess.InvokeAsync(doc);
+	}
 
-/*
-	[Parameter] public Guid ParentId { get; set; }
-	[Parameter] public string ParentType { get; set; }
-	public string Submissions { get; set; } = "[]";
-	[Parameter] public EventCallback<DocumentDto> OnUploadSuccess { get; set; }
-	[CascadingParameter] private Task<AuthenticationState> AuthStateTask { get; set; }
-*/
+
+
 }
