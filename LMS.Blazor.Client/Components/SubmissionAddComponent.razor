@@ -1,0 +1,49 @@
+﻿@using System.Security.Claims
+@using System.Text.Json
+
+<h3>SubmissionAddComponent</h3>
+
+<div class="border">
+	<DocumentAddComponent ParentType="Submission" Submissions="@MyDtoArr" />
+</div>
+
+@code 
+{
+	[CascadingParameter] private Task<AuthenticationState> AuthStateTask { get; set; }
+	private string? UploaderId;
+	private List<SubmissionCreateDto> MyDtoArr;
+	private SubmissionCreateDto dto;
+//	private string serializedData="[]";
+
+	protected override async Task OnInitializedAsync()
+	{
+		var authState = await AuthStateTask;
+		var user = authState.User;
+		if (user.Identity?.IsAuthenticated == true)
+		{
+			UploaderId = user.FindFirst(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+		}
+
+		MyDtoArr = new List<SubmissionCreateDto>();
+		dto = new SubmissionCreateDto
+		{
+			SubmissionDate = DateTime.UtcNow,
+			ApplicationUserId = UploaderId
+			//		DocumentId = "Assignment";
+		};
+		MyDtoArr.Add(dto);
+
+		//serializedData = JsonSerializer.Serialize(MyDtoArr);
+		//var stringContent = new StringContent(json, Encoding.UTF8, "application/json");
+
+	}
+
+
+/*
+	[Parameter] public Guid ParentId { get; set; }
+	[Parameter] public string ParentType { get; set; }
+	public string Submissions { get; set; } = "[]";
+	[Parameter] public EventCallback<DocumentDto> OnUploadSuccess { get; set; }
+	[CascadingParameter] private Task<AuthenticationState> AuthStateTask { get; set; }
+*/
+}

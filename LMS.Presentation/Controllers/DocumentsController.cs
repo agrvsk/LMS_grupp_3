@@ -1,6 +1,7 @@
 ﻿using LMS.Shared.DTOs.EntityDto;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using Service.Contracts;
 
 
@@ -43,13 +44,21 @@ namespace LMS.Presentation.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateDocument([FromForm] DocumentCreateDto documentDto)
+      public async Task<IActionResult> CreateDocument([FromForm] string documentDtoJson, IFormFile file)
+       // public async Task<IActionResult> CreateDocument([FromForm] DocumentCreateDto documentDto)
         {
-            Console.WriteLine(documentDto);
+            if (documentDtoJson == null)
+            {
+                return BadRequest("Document data is null");
+            }
+            var documentDto = JsonConvert.DeserializeObject<DocumentCreateDto>(documentDtoJson);
+
             if (documentDto == null)
             {
                 return BadRequest("Document data is null");
             }
+
+            documentDto.File = file;
 
             using var stream = documentDto.File.OpenReadStream();
             var createdDocument = await _serviceManager.DocumentService.CreateDocumentAsync(documentDto, stream);

@@ -1,0 +1,82 @@
+Vanliga MVC-Fel
+===============
+1. Could not copy "obj\Debug..."
+Applikationen kan inte kompileras därför att den redan körs - stäng konsoll-appen och kör igen
+
+2. Unable to connect to webserver 'https'. The web server is no longer running.
+Antagligen något fel i Program.cs - leta efter felmeddelandet i konsoll-appen
+
+3. NullReferenceException: Object reference not set to an instance of an object
+Kontrollera att Action-metoden i Controllern skickar in en model till vyn: return View(model)
+
+4. InvalidOperationException: The model item passed into the ViewDataDictionary is of type...
+Kontrollera att datatypen på det Action-metoden skickar till vyn är samma typ som nämns i vyns @model-direktiv
+
+5. Statiska filer (bilder/CSS/JS) laddas inte
+Kontrollera att taggen som refererar den statiska filen börjar med ett slash: src="/MyImg.png" / href="/MyCss.css" / src="/MyScript.js"
+Kontrollera med Ctrl+U i browsern att länken ser korrekt ut
+Ladda om browsern med Ctrl+F5 för att rensa cachade filer
+Ladda om sidan men browserns F12-verktyg inställt på "Network"-fliken - den statiska filen ska laddas med status-kod 200 (OK)
+Kontrollera att de statiska filerna ligger i en mapp som heter wwwroot
+Kontrollera att Program innehåller ett anropet: app.UseStaticFiles();
+Om det är en bild - kontrollera att browsern inte använder någon ad-blocker som blockerar bilden
+
+6. Fel sak händer då man submittar ett formulär
+Kontrollera med en breakpoint att den action-metod ni vill anropa verkligen anropas
+Kontrollera att vyns form-tag anger rätt controller-namn & action-namn
+Kontrollera att ni anropar context.SaveChanges()
+Kontrollera att ev. asynkrona anrop väntas in med await
+
+7. Validerings-fel visas inte
+Kontrollera att vyn innehåller en span-tag med attributet "asp-validation-for"
+Kontrollera att action-metodens model-binding arbetar mot vy-modellen
+Kontrollera att action-metoden kör kollen mot ModelState.IsValid
+
+8. InvalidOperationException: Unable to resolve service for type...
+Kontrollera att er service är registrerad för Dependency Injection (AddTransient/AddSingleton) i Program.cs
+
+9. "Build failed" då man kör Add-Migration eller Update-Database
+Er solution har kompilerings-fel, kör Ctrl+Shift+B och lös kompileringsfelen innan ni kör kommandot
+
+Program.cs
+==========
+var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddControllersWithViews();
+var app = builder.Build();
+app.MapControllers();
+app.Run();
+
+Pico
+====
+<link rel="stylesheet" href="https://unpkg.com/@@picocss/pico@@latest/css/pico.classless.min.css">
+
+Tag helpers
+===========
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+
+JS-Validering
+=============
+<script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.7.1.min.js"></script>
+<script src="https://ajax.aspnetcdn.com/ajax/jquery.validate/1.19.2/jquery.validate.min.js"></script>
+<script src="https://ajax.aspnetcdn.com/ajax/mvc/5.2.3/jquery.validate.unobtrusive.min.js"></script>
+
+EF-Connection strings
+=====================
+{
+ 	"ConnectionStrings": {
+		"DefaultConnection": "Server=(localdb)\\MSSQLLocalDB;Database=DBName;Trusted_Connection=True;"
+	}
+}
+
+EF-NuGets
+=========
+Infrastructure:
+Install-Package Microsoft.EntityFrameworkCore.SqlServer
+Web:
+Install-Package Microsoft.EntityFrameworkCore.Tools
+
+Identity-Nugets
+===============
+Infrastructure:
+Microsoft.AspNetCore.Identity
+Microsoft.AspNetCore.Identity.EntityFrameworkCore

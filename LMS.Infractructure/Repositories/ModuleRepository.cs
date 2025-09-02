@@ -43,8 +43,8 @@ public class ModuleRepository : RepositoryBase<Module>, IModuleRepository
         DateTime parsedDate = DateTime.Parse(idag);
         var modules = await context.Modules
         .Where(m => m.CourseId == courseId &&
-                parsedDate >= m.StartDate.Date &&
-                parsedDate <= m.EndDate.Date)
+                parsedDate.Date >= m.StartDate.Date &&
+                parsedDate.Date <= m.EndDate.Date)
         .Include(ma => ma.ModuleActivities)
         .AsNoTracking()
         .ToListAsync();
@@ -53,7 +53,7 @@ public class ModuleRepository : RepositoryBase<Module>, IModuleRepository
         foreach (var module in modules)
         {
             module.ModuleActivities = module.ModuleActivities
-            .Where(mb => parsedDate >= mb.StartDate.Date && parsedDate <= mb.EndDate)
+            .Where(mb => parsedDate.Date >= mb.StartDate.Date && parsedDate.Date <= mb.EndDate)
             .ToList();
         }
         return modules;
@@ -62,8 +62,8 @@ public class ModuleRepository : RepositoryBase<Module>, IModuleRepository
     {
         DateTime parsedDate = DateTime.Parse(idag);
         var modules = await context.Modules
-        .Where(m => parsedDate >= m.StartDate.Date &&
-                    parsedDate <= m.EndDate.Date)
+        .Where(m => parsedDate.Date >= m.StartDate.Date &&
+                    parsedDate.Date <= m.EndDate.Date)
         .Include(m => m.ModuleActivities)
         .AsNoTracking()
         .ToListAsync();
@@ -72,7 +72,7 @@ public class ModuleRepository : RepositoryBase<Module>, IModuleRepository
         foreach (var module in modules)
         {
             module.ModuleActivities = module.ModuleActivities
-            .Where(mb => parsedDate >= mb.StartDate.Date && parsedDate <= mb.EndDate)
+            .Where(mb => parsedDate.Date >= mb.StartDate.Date && parsedDate.Date <= mb.EndDate)
             .ToList();
         }
         return modules;
