@@ -78,6 +78,15 @@ public class DocumentService : IDocumentService
         var document = await uow.DocumentRepository.GetDocumentByIdAsync(documentId);
         if (document != null)
         {
+            await fileHandlerService.DeleteFileAsync(document.FilePath);
+            if (document.ParentType=="submission")
+            {
+                var submissions = await uow.SubmissionRepository.GetSubmissionsByDocumentIdAsync(document.Id);
+                foreach (var sub in submissions)
+                {
+                    uow.SubmissionRepository.Delete(sub);
+                }
+            }
             uow.DocumentRepository.Delete(document);
             await uow.CompleteAsync();
             return true;
@@ -93,6 +102,16 @@ public class DocumentService : IDocumentService
             {
                 foreach (var document in documents)
                 {
+                    await fileHandlerService.DeleteFileAsync(document.FilePath);
+                    if (document.ParentType=="submission")
+                        {
+                        var submissions = await uow.SubmissionRepository.GetSubmissionsByDocumentIdAsync(document.Id);
+                        foreach (var sub in submissions)
+                        {
+                            uow.SubmissionRepository.Delete(sub);
+                        }
+                    }
+                    
                     uow.DocumentRepository.Delete(document);
                 }
                 await uow.CompleteAsync();
@@ -102,6 +121,7 @@ public class DocumentService : IDocumentService
         }
         catch (Exception ex)
         {
+            Console.WriteLine($"An error occurred while deleting user documents: {ex.Message}");
             return false;
         }
     }
