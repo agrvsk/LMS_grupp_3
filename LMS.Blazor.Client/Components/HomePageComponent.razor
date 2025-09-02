@@ -45,11 +45,11 @@
                         {
                           foreach (ModuleActivityDto activityDto in item.ModuleActivities)
                             {
-                                <small @onclick="Toggle">@GetActivityTypeName(@activityDto.ActivityTypeId)  @activityDto.Name - @activityDto.StartDate.ToShortTimeString() - @activityDto.EndDate.ToShortTimeString()</small>
+                                <small class="card-hover" @onclick="Toggle">@GetActivityTypeName(@activityDto.ActivityTypeId)  @activityDto.Name - @activityDto.StartDate.ToShortTimeString() - @activityDto.EndDate.ToShortTimeString()</small>
                                 <br />
                                 @if (isEditing)
                                 {
-                                    <SubmissionAddComponent/>
+                                    <SubmissionAddComponent OnUploadSuccess="HandleUploadSuccess" />
                                 }
                             }
                         }
@@ -83,7 +83,7 @@
     AuthenticationStateProvider AuthenticationStateProvider { get; set; } = default!;
 
     private IEnumerable<ModuleDto>? Modules { get; set; }
-	private IEnumerable<SubmissionDto>? Submissions { get; set; }
+    private IEnumerable<SubmissionDto>? Submissions { get; set; }
     public List<ActivityTypeDto> Types { get; set; } = new List<ActivityTypeDto>();
 
     private bool isTeacher;
@@ -177,10 +177,20 @@
         {
             currentlyEditing = null;
             return;
-		}
+            }
         currentlyEditing = ajdi;
 
-	}
+        }
     */
+
+
+    private async Task HandleUploadSuccess(DocumentDto doc)
+    {
+        LoadSubmissions(doc.UploaderId);
+        //DocumentDtos.Add(doc);
+        StateHasChanged();
+    }
+
+
 }
 
