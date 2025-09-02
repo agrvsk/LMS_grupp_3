@@ -11,4 +11,5 @@ public interface IDocumentService
     Task<DocumentDto> CreateDocumentAsync(DocumentCreateDto document, Stream fileStream);
     Task<Document> UpdateDocumentAsync(DocumentDto document);
     Task<bool> DeleteDocumentAsync(Guid documentId);
+    Task<bool> DeleteUserDocumentsAsync(string userId);
 }

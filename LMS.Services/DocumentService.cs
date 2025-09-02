@@ -7,6 +7,7 @@ using AutoMapper;
 using Domain.Contracts.Repositories;
 using Domain.Models.Entities;
 using LMS.Shared.DTOs.EntityDto;
+using Microsoft.AspNetCore.Identity;
 using Service.Contracts;
 
 namespace LMS.Services;
@@ -77,12 +78,51 @@ public class DocumentService : IDocumentService
         var document = await uow.DocumentRepository.GetDocumentByIdAsync(documentId);
         if (document != null)
         {
+            await fileHandlerService.DeleteFileAsync(document.FilePath);
+            if (document.ParentType=="submission")
+            {
+                var submissions = await uow.SubmissionRepository.GetSubmissionsByDocumentIdAsync(document.Id);
+                foreach (var sub in submissions)
+                {
+                    uow.SubmissionRepository.Delete(sub);
+                }
+            }
             uow.DocumentRepository.Delete(document);
             await uow.CompleteAsync();
             return true;
         }
         return false;
     }
-
-
+    public async Task<bool> DeleteUserDocumentsAsync(string userId)
+    {
+        try
+        {
+            var documents = await uow.DocumentRepository.GetDocumentsByUploaderIdAsync(userId);
+            if (documents.Any())
+            {
+                foreach (var document in documents)
+                {
+                    await fileHandlerService.DeleteFileAsync(document.FilePath);
+                    if (document.ParentType=="submission")
+                        {
+                        var submissions = await uow.SubmissionRepository.GetSubmissionsByDocumentIdAsync(document.Id);
+                        foreach (var sub in submissions)
+                        {
+                            uow.SubmissionRepository.Delete(sub);
+                        }
+                    }
+                    
+                    uow.DocumentRepository.Delete(document);
+                }
+                await uow.CompleteAsync();
+            }
+                return true;
+            
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"An error occurred while deleting user documents: {ex.Message}");
+            return false;
+        }
+    }
 }

@@ -8,4 +8,5 @@ public interface IDocumentRepository: IRepositoryBase<Document>
     Task<Document?> GetDocumentByIdAsync(Guid documentId);
     Task<List<Document>> GetAllDocumentsAsync();
     Task<List<Document>> GetDocumentsByParentAsync(Guid parentId, string parentType);
+    Task<List<Document>> GetDocumentsByUploaderIdAsync(string userId);
 }
