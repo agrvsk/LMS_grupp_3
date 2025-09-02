@@ -7,6 +7,7 @@ using AutoMapper;
 using Domain.Contracts.Repositories;
 using Domain.Models.Entities;
 using LMS.Shared.DTOs.EntityDto;
+using Microsoft.AspNetCore.Identity;
 using Service.Contracts;
 
 namespace LMS.Services;
@@ -83,6 +84,25 @@ public class DocumentService : IDocumentService
         }
         return false;
     }
-
-
+    public async Task<bool> DeleteUserDocumentsAsync(string userId)
+    {
+        try
+        {
+            var documents = await uow.DocumentRepository.GetDocumentsByUploaderIdAsync(userId);
+            if (documents.Any())
+            {
+                foreach (var document in documents)
+                {
+                    uow.DocumentRepository.Delete(document);
+                }
+                await uow.CompleteAsync();
+            }
+                return true;
+            
+        }
+        catch (Exception ex)
+        {
+            return false;
+        }
+    }
 }
