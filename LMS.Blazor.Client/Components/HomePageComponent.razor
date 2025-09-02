@@ -59,7 +59,7 @@
                     {
                         foreach (SubmissionDto item in Submissions)
                         {
-                                <small>@item.SubmissionDate.ToShortDateString() @item.DocumentId  </small>
+                            <small>@item.SubmissionDate.ToShortDateString() @item.SubmissionDate.ToShortTimeString() @item.DocumentDto?.Name </small>
                                 <br />
                         }
                     }
