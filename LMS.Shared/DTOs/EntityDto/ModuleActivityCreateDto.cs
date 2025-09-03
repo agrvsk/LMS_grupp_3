@@ -21,5 +21,6 @@ namespace LMS.Shared.DTOs.EntityDto
         public int? ActivityTypeId { get; set; }
         [Required]
         public Guid ModuleId { get; set; }
+        public List<AssignmentCreateDto>? Assignments { get; set; }
     }
 }

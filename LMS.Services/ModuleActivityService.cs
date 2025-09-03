@@ -7,6 +7,7 @@ using AutoMapper;
 using Domain.Contracts.Repositories;
 using Domain.Models.Entities;
 using LMS.Shared.DTOs.EntityDto;
+using Microsoft.AspNetCore.Http;
 using Service.Contracts;
 
 namespace LMS.Services;
@@ -15,11 +16,13 @@ public class ModuleActivityService : IModuleActivityService
 {
     private readonly IUnitOfWork uow;
     private readonly IMapper mapper;
+    private readonly IFileHandlerService fileHandlerService;
 
-    public ModuleActivityService(IUnitOfWork uow, IMapper mapper)
+    public ModuleActivityService(IUnitOfWork uow, IMapper mapper, IFileHandlerService fileHandlerService)
     {
         this.uow = uow;
         this.mapper = mapper;
+        this.fileHandlerService = fileHandlerService;
     }
 
 
@@ -48,6 +51,58 @@ public class ModuleActivityService : IModuleActivityService
         uow.ModuleActivityRepository.Create(activity);
         await uow.CompleteAsync();
         return activity;
+    }
+    public async Task<ModuleActivityDto> CreateActivityWithDocumentsAsync(ModuleActivityCreateDto activityDto, List<IFormFile> files)
+    {
+        // 1. Map the activity
+        var activity = mapper.Map<ModuleActivity>(activityDto);
+        activity.Id = Guid.NewGuid();
+
+        uow.ModuleActivityRepository.Create(activity);
+
+        // Prepare a lookup for uploaded files by TempId
+        var fileLookup = files.ToDictionary(f => f.Name, f => f);
+
+        // 2. Handle assignments and documents
+        foreach (var assignmentDto in activityDto.Assignments)
+        {
+            var assignment = mapper.Map<Assignment>(assignmentDto);
+            assignment.Id = Guid.NewGuid();
+            uow.AssignmentRepository.Create(assignment);
+
+            foreach (var docMeta in assignmentDto.Documents)
+            {
+                if (!fileLookup.TryGetValue(docMeta.TempId, out var file))
+                    throw new Exception($"File for TempId '{docMeta.TempId}' not found.");
+
+                // Save file to disk
+                using var stream = file.OpenReadStream();
+                var filePath = await fileHandlerService.UploadFileAsync(
+                    stream,
+                    $"{Guid.NewGuid()}_{docMeta.Name}",
+                    $"Uploads/Activity/Assignments"
+                );
+
+                // Create document entity
+                var document = new Document
+                {
+                    Id = Guid.NewGuid(),
+                    Name = docMeta.Name,
+                    Description = docMeta.Description,
+                    UploadDate = DateTime.UtcNow,
+                    FilePath = filePath,
+                    ParentType = "Activity",
+                    ParentId = activity.Id,   // <--- activity link
+                    UploaderId = docMeta.UploaderId!
+                };
+
+                uow.DocumentRepository.Create(document);
+            }
+        }
+
+        await uow.CompleteAsync();
+
+        return mapper.Map<ModuleActivityDto>(activity);
     }
     public async Task<ModuleActivityDto> UpdateActivityAsync(ModuleActivityUpdateDto moduleActivity)
     {

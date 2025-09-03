@@ -19,5 +19,7 @@ namespace LMS.Shared.DTOs.EntityDto
         public DateTime EndDate { get; set; }
         public Guid ModuleId { get; set; }
         public int ActivityTypeId { get; set; }
+        public int? AssignmentId { get; set; }
+        public AssignmentDto? Assignment { get; set; }
     }
 }

@@ -13,9 +13,10 @@ public class UnitOfWork : IUnitOfWork
     private readonly Lazy<ISubmissionRepository> submissionRepository;
     private readonly Lazy<IDocumentRepository> documentRepository;
     private readonly Lazy<IActivityTypeRepository> activityTypeRepository;
+    private readonly Lazy<IAssignmentRepository> assignmentRepository;
 
-    public ICourseRepository CourseRepository { get => courseRepository.Value;  }
-    public IModuleRepository ModuleRepository { get => moduleRepository.Value;  }
+    public ICourseRepository CourseRepository { get => courseRepository.Value; }
+    public IModuleRepository ModuleRepository { get => moduleRepository.Value; }
     public IModuleActivityRepository ModuleActivityRepository
     {
         get => moduleActivityRepository.Value;
@@ -36,6 +37,10 @@ public class UnitOfWork : IUnitOfWork
     {
         get => activityTypeRepository.Value;
     }
+    public IAssignmentRepository AssignmentRepository
+    {
+        get => assignmentRepository.Value;
+    }
 
 
     public UnitOfWork(ApplicationDbContext context
@@ -47,18 +52,19 @@ public class UnitOfWork : IUnitOfWork
             , Lazy<ISubmissionRepository> aSsubmissionRepository
             , Lazy<IDocumentRepository> aDocumentRepository
             , Lazy<IActivityTypeRepository> aActivityTypeRepository
+        , Lazy<IAssignmentRepository> aAssignmentRepository
 
         )
     {
         this.context = context ?? throw new ArgumentNullException(nameof(context));
-/*
-        courseRepository = new Lazy<ICourseRepository>(() => new CourseRepository(context));
-        moduleRepository = new Lazy<IModuleRepository>(() => new ModuleRepository(context));
-        moduleActivityRepository = new Lazy<IModuleActivityRepository>(() => new ModuleActivityRepository(context));
-        applicationUserRepository = new Lazy<IApplicationUserRepository>(() => new ApplicationUserRepository(context));
-        submissionRepository = new Lazy<ISubmissionRepository>(() => new SubmissionRepository(context));
-        documentRepository = new Lazy<IDocumentRepository>(() => new DocumentRepository(context));
-*/
+        /*
+                courseRepository = new Lazy<ICourseRepository>(() => new CourseRepository(context));
+                moduleRepository = new Lazy<IModuleRepository>(() => new ModuleRepository(context));
+                moduleActivityRepository = new Lazy<IModuleActivityRepository>(() => new ModuleActivityRepository(context));
+                applicationUserRepository = new Lazy<IApplicationUserRepository>(() => new ApplicationUserRepository(context));
+                submissionRepository = new Lazy<ISubmissionRepository>(() => new SubmissionRepository(context));
+                documentRepository = new Lazy<IDocumentRepository>(() => new DocumentRepository(context));
+        */
 
 
         courseRepository = aCourseRepository;
@@ -68,6 +74,7 @@ public class UnitOfWork : IUnitOfWork
         submissionRepository = aSsubmissionRepository;
         documentRepository = aDocumentRepository;
         activityTypeRepository = aActivityTypeRepository;
+        assignmentRepository = aAssignmentRepository;
 
     }
 
