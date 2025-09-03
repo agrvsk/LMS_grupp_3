@@ -114,6 +114,7 @@ public static class ServiceExtensions
         services.AddScoped<ISubmissionService, SubmissionService>();
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<IActivityTypeService, ActivityTypeService>();
+        services.AddScoped<IDateValidationService, DateValidationService>();
         services.AddScoped<IFileHandlerService>(provider =>
         {
             var env = provider.GetRequiredService<IWebHostEnvironment>();
@@ -129,6 +130,7 @@ public static class ServiceExtensions
         services.AddLazy<ISubmissionService>();
         services.AddLazy<IUserService>();
         services.AddLazy<IActivityTypeService>();
+        services.AddLazy<IDateValidationService>();
 
 
     }

@@ -46,7 +46,12 @@ namespace LMS.Presentation.Controllers
         {
             if (activityDto == null)
                 return BadRequest("Activity data is null");
-            var createdActivity = await _serviceManager.ModuleActivityService.CreateActivityAsync(activityDto);
+            if (!await _serviceManager.DateValidationService.ValidateModuleActivityDatesAsync(activityDto.StartDate, activityDto.EndDate, activityDto.ModuleId))
+            {
+                ModelState.AddModelError("DateValidation", "End date must be greater than start date and within module dates.");
+                return BadRequest(ModelState);
+            }
+                var createdActivity = await _serviceManager.ModuleActivityService.CreateActivityAsync(activityDto);
             return CreatedAtAction(nameof(GetActivityById), new { id = createdActivity.Id }, createdActivity);
         }
         [HttpPut("{id}")]
@@ -54,9 +59,15 @@ namespace LMS.Presentation.Controllers
         {
             if (activityDto == null || id != activityDto.Id)
                 return BadRequest("Activity data is invalid");
-            var updatedActivity = await _serviceManager.ModuleActivityService.UpdateActivityAsync(activityDto);
+            if (!await _serviceManager.DateValidationService.ValidateModuleActivityDatesAsync(activityDto.StartDate, activityDto.EndDate, activityDto.ModuleId, activityDto.Id))
+            {
+                ModelState.AddModelError("DateValidation", "End date must be greater than start date and within module dates.");
+                return BadRequest(ModelState);
+            }
+                var updatedActivity = await _serviceManager.ModuleActivityService.UpdateActivityAsync(activityDto);
             if (updatedActivity == null)
                 return NotFound();
+
             return Ok(updatedActivity);
         }
         [HttpDelete("{id}")]

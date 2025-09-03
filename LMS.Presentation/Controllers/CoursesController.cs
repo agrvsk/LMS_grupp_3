@@ -40,6 +40,11 @@ namespace LMS.Presentation.Controllers
             {
                 return BadRequest("Course data is null");
             }
+            if(!_serviceManager.DateValidationService.ValidateCourseDates(courseDto.StartDate,courseDto.EndDate))
+            {
+                ModelState.AddModelError("DateValidation", "End date must be greater than start date.");
+                return BadRequest(ModelState);
+            }
             var createdCourse = await _serviceManager.CourseService.CreateCourseAsync(courseDto);
             return CreatedAtAction(nameof(GetCourseById), new { id = createdCourse.Id }, createdCourse);
         }
@@ -50,6 +55,11 @@ namespace LMS.Presentation.Controllers
             if (courseDto == null || id != courseDto.Id)
             {
                 return BadRequest("Course data is invalid");
+            }
+            if (!_serviceManager.DateValidationService.ValidateCourseDates(courseDto.StartDate, courseDto.EndDate))
+            {
+                ModelState.AddModelError("DateValidation", "End date must be greater than start date.");
+                return BadRequest(ModelState);
             }
             var updatedCourse = await _serviceManager.CourseService.UpdateCourseAsync(courseDto);
             if (updatedCourse == null)
