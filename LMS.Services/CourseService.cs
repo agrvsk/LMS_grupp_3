@@ -54,6 +54,36 @@ public class CourseService : ICourseService
         var course = await uow.CourseRepository.GetCourseByIdAsync(courseId);
         if (course == null)
             return false;
+
+        var documents = await uow.DocumentRepository.GetDocumentsByParentAsync(courseId, "course");
+        foreach (var doc in documents)
+        {
+            uow.DocumentRepository.Delete(doc);
+        }
+
+        var comrades = await uow.ApplicationUserRepository.GetUsersByCourseIdAsync(course.Id);
+
+        foreach (var ussr in comrades)
+        {            
+            uow.ApplicationUserRepository.Delete(ussr);
+        }
+
+        var modules = await uow.ModuleRepository.GetModulesByCourseIdAsync(courseId);
+
+
+        foreach (var mod in modules)
+        {
+            var activities = await uow.ModuleActivityRepository.GetModuleActivitiesByModuleIdAsync(mod.Id);
+
+            foreach (var act in activities)
+            {
+                uow.ModuleActivityRepository.Delete(act);
+            }
+
+            uow.ModuleRepository.Delete(mod);
+        }
+
+
         uow.CourseRepository.Delete(course);
         await uow.CompleteAsync();
         return true;

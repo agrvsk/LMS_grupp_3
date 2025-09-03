@@ -10,6 +10,16 @@ public class ClientApiService(IHttpClientFactory httpClientFactory, NavigationMa
     private readonly JsonSerializerOptions _jsonSerializerOptions = new()
     { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
 
+    public async Task<bool> CallApiDeleteAsync(string endpoint, CancellationToken ct = default)
+    {
+        await authReady.WaitAsync();
+
+        var requestMessage = new HttpRequestMessage(HttpMethod.Delete, $"proxy?endpoint={endpoint}");
+        var response = await httpClient.SendAsync(requestMessage, ct);
+
+        return response.IsSuccessStatusCode;
+    }
+
     public async Task<T?> CallApiGetAsync<T>(string endpoint, CancellationToken ct = default)
     {
         await authReady.WaitAsync();

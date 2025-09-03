@@ -90,5 +90,15 @@ namespace LMS.Presentation.Controllers
             }
             return NoContent();
         }
+        [HttpDelete("user/{id}")]
+        public async Task<IActionResult> DeleteUserDocuments(string id)
+        {
+            var result = await _serviceManager.DocumentService.DeleteUserDocumentsAsync(id);
+            if (!result)
+            {
+                return NotFound();
+            }
+            return NoContent();
+        }
     }
 }
