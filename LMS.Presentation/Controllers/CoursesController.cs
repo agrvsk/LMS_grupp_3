@@ -1,4 +1,5 @@
-﻿using LMS.Shared.DTOs.EntityDto;
+﻿using Domain.Models.Exceptions;
+using LMS.Shared.DTOs.EntityDto;
 using Microsoft.AspNetCore.Mvc;
 using Service.Contracts;
 
@@ -28,7 +29,7 @@ namespace LMS.Presentation.Controllers
             var course = await _serviceManager.CourseService.GetCourseByIdAsync(id);
             if (course == null)
             {
-                return NotFound();
+                throw new CourseNotFoundException(id);
             }
             return Ok(course);
         }

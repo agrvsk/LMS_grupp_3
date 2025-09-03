@@ -1,5 +1,6 @@
-﻿using Microsoft.AspNetCore.Components;
+﻿using System.Net;
 using System.Text.Json;
+using Microsoft.AspNetCore.Components;
 
 namespace LMS.Blazor.Client.Services;
 
@@ -31,6 +32,22 @@ public class ClientApiService(IHttpClientFactory httpClientFactory, NavigationMa
            || response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
         {
             navigationManager.NavigateTo("AccessDenied");
+        }
+
+        if (response.StatusCode == HttpStatusCode.NotFound)
+        {
+            // Deserialize into ProblemDetails
+            //var problem = JsonSerializer.Deserialize<ProblemDetails>(
+            //    errorJson,
+            //    new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+            //// Now you can access problem.Title, problem.Detail, etc.
+            //Console.WriteLine($"Error Title: {problem?.Title}");
+            //Console.WriteLine((int)response.StatusCode);
+            if (response.StatusCode == HttpStatusCode.NotFound)
+                throw new HttpRequestException("TESTING");
+                //return NotFound(problem.Detail);
+
         }
 
         response.EnsureSuccessStatusCode();
