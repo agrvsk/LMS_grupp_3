@@ -11,5 +11,6 @@ public interface IServiceManager
     IUserService UserService { get; }
     IActivityTypeService ActivityTypeService { get; }
     IDateValidationService DateValidationService { get; }
+    IAssignmentService AssignmentService { get; }
 
 }
