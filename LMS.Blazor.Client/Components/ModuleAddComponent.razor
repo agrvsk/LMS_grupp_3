@@ -1,75 +1,107 @@
-﻿@if (!isAdding)
+﻿@using LMS.Shared.DTOs.EntityDto
+@inject IApiService ApiService
+
+@if (!isAdding)
 {
-	<div class="container mt-4">
-		<div class="card shadow-sm text-center card-hover" style="cursor:pointer;" @onclick="Toggle">
-			<div class="card-body">
-				<h5 class="card-title">＋</h5>
-				<p class="card-text">New module</p>
-			</div>
-		</div>
-	</div>
+    <div class="container mt-4">
+        <div class="card shadow-sm text-center card-hover" style="cursor:pointer;" @onclick="Toggle">
+            <div class="card-body">
+                <h5 class="card-title">＋</h5>
+                <p class="card-text">New module</p>
+            </div>
+        </div>
+    </div>
 }
 else
 {
-	<h3 style="text-align: center">New course:</h3>
-	<div class="container mt-4">
+    <div class="container mt-4">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title text-center">Add New Module</h5>
+                <EditForm Model="@ModuleDto" OnValidSubmit="HandleValidSubmit">
+                    <DataAnnotationsValidator />
+                    <ValidationSummary />
 
-		<div class="card shadow-sm">
-			<div class="card-body">
-				<EditForm Model="@Module" OnValidSubmit="@(() => HandleValidSubmit())">
-					<DataAnnotationsValidator />
-					<ValidationSummary />
-					<div class="mb-3">
-						<label for="moduleName" class="form-label">Module Name</label>
-						<InputText id="moduleName" class="form-control" @bind-Value="Module.Name" />
-						<ValidationMessage For="@(() => Module.Name)" />
-					</div>
-					<div class="mb-3">
-						<label for="moduleDescription" class="form-label">Description</label>
-						<InputTextArea id="moduleDescription" class="form-control" @bind-Value="Module.Description" />
-						<ValidationMessage For="@(() => Module.Description)" />
-					</div>
-					<div class="mb-3">
-						<label for="moduleStartDate" class="form-label">Start Date</label>
-						<InputDate id="moduleStartDate" class="form-control" @bind-Value="Module.StartDate" />
-						<ValidationMessage For="@(() => Module.StartDate)" />
-					</div>
-					<div class="mb-3">
-						<label for="moduleEndDate" class="form-label">End Date</label>
-						<InputDate id="moduleEndDate" class="form-control" @bind-Value="Module.EndDate" />
-						<ValidationMessage For="@(() => Module.EndDate)" />
-					</div>
-					<button type="submit" class="btn btn-primary">Add</button> <button type="button" class="btn btn-primary" @onclick=Toggle>Cancel</button>
-				</EditForm>
-			</div>
-		</div>
-	</div>
+                    <div class="mb-3">
+                        <label for="moduleName" class="form-label">Module Name</label>
+                        <InputText id="moduleName" class="form-control" @bind-Value="ModuleDto.Name" />
+                        <ValidationMessage For="@(() => ModuleDto.Name)" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="moduleDescription" class="form-label">Description</label>
+                        <InputTextArea id="moduleDescription" class="form-control" @bind-Value="ModuleDto.Description" />
+                        <ValidationMessage For="@(() => ModuleDto.Description)" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="moduleStartDate" class="form-label">Start Date</label>
+                        <InputDate id="moduleStartDate" class="form-control" @bind-Value="ModuleDto.StartDate" />
+                        <ValidationMessage For="@(() => ModuleDto.StartDate)" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="moduleEndDate" class="form-label">End Date</label>
+                        <InputDate id="moduleEndDate" class="form-control" @bind-Value="ModuleDto.EndDate" />
+                        <ValidationMessage For="@(() => ModuleDto.EndDate)" />
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <button type="button" class="btn btn-secondary" @onclick="Toggle">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Add Module</button>
+                    </div>
+                </EditForm>
+            </div>
+        </div>
+    </div>
 }
 
 @code {
-	[Parameter]	public Guid CourseId { get; set; }
+    [Parameter] public Guid CourseId { get; set; }
+    [Parameter] public EventCallback<ModuleDto> OnModuleAdded { get; set; }
 
-	[Parameter] public EventCallback<ModuleDto> OnModuleAdded { get; set; }
+    private bool isAdding = false;
 
-	[Inject] private IApiService myApi { get; set; } = default!;
+    // DTO som skickas till backend
+    private ModuleCreateDto ModuleDto { get; set; } = new ModuleCreateDto();
 
-	public ModuleCreateDto Module { get; set; } = new ModuleCreateDto();
+    private void Toggle()
+    {
+        isAdding = !isAdding;
 
-	private bool isAdding = false;
+        if (isAdding)
+        {
+            // Initiera DTO med nödvändiga fält
+            ModuleDto = new ModuleCreateDto
+            {
+                CourseId = CourseId,
+                StartDate = DateTime.Today,
+                EndDate = DateTime.Today.AddMonths(1)
+            };
+        }
+    }
 
-	private void Toggle() => isAdding = !isAdding;
+    private async Task HandleValidSubmit()
+    {
+        try
+        {
+            // Logga DTO för felsökning
+            var json = System.Text.Json.JsonSerializer.Serialize(ModuleDto, new System.Text.Json.JsonSerializerOptions { WriteIndented = true });
+            Console.WriteLine("Sending Module DTO to API:");
+            Console.WriteLine(json);
 
-	private async Task HandleValidSubmit()
-	{
-		Module.CourseId = CourseId;
-		var newModule = await myApi.CallApiPostAsync<ModuleCreateDto, ModuleDto>("modules", Module);
+            // Skicka till backend via proxy
+            var newModule = await ApiService.CallApiPostAsync<ModuleCreateDto, ModuleDto>("modules", ModuleDto);
 
-		if (newModule != null)
-		{
+            // Returnera resultatet till föräldrakomponenten
             await OnModuleAdded.InvokeAsync(newModule);
-		}
 
-        Toggle();
-        Module = new ModuleCreateDto();
-	}	
+            Toggle(); // Stäng formuläret
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error adding module: {ex.Message}");
+            // Här kan du även visa ett toast/alert till användaren
+        }
+    }
 }

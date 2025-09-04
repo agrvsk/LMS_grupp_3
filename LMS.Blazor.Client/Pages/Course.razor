@@ -6,6 +6,8 @@
 @inject AuthenticationStateProvider AuthStateProvider
 @rendermode InteractiveWebAssembly
 
+@attribute [Authorize]
+
 <h3>@(currentCourse?.Name ?? "Kurs")</h3>
 
 @if (loading)
@@ -64,7 +66,10 @@ else
                                 <li class="list-group-item d-flex justify-content-between align-items-center">
                                     @if (isEditingModule && currentModuleGuid == module.Id)
                                     {
-                                        <ModuleEditComponent Module="module" currentCourseId="@currentCourse.Id" OnEditDone="StopEditingModule" />
+                                        <ModuleEditComponent Module="module"
+                                                             CurrentCourseId="@currentCourse.Id"
+                                                             OnEditDone="StopEditingModule"
+                                                             @key="module.Id" />
                                     }
                                     else
                                     {
@@ -187,16 +192,20 @@ else
 
     private void StopEditingModule(ModuleDto updatedModule)
     {
-        isEditingModule = false;
-        currentModuleGuid = null;
+        // isEditingModule = false;
+        // currentModuleGuid = null;
 
         var moduleToUpdate = modules?.FirstOrDefault(m => m.Id == updatedModule.Id);
         if (moduleToUpdate is not null)
         {
             moduleToUpdate.Name = updatedModule.Name;
+            moduleToUpdate.Description = updatedModule.Description;
             moduleToUpdate.StartDate = updatedModule.StartDate;
             moduleToUpdate.EndDate = updatedModule.EndDate;
         }
+
+        isEditingModule = false;
+        currentModuleGuid = null;
         StateHasChanged();
     }
 
