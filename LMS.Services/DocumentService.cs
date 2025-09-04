@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using AutoMapper;
 using Domain.Contracts.Repositories;
 using Domain.Models.Entities;
+using Domain.Models.Exceptions;
 using LMS.Shared.DTOs.EntityDto;
 using Microsoft.AspNetCore.Identity;
 using Service.Contracts;
@@ -28,6 +29,7 @@ public class DocumentService : IDocumentService
     public async Task<DocumentDto?> GetDocumentByIdAsync(Guid documentId)
     {
         var document = await uow.DocumentRepository.GetDocumentByIdAsync(documentId);
+        if (document == null) throw new DocumentNotFoundException(documentId);
         var documentDto = mapper.Map<DocumentDto>(document);
         return documentDto;
     }

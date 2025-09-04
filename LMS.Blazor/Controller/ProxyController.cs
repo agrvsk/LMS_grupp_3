@@ -1,8 +1,11 @@
-﻿using LMS.Blazor.Services;
-using Microsoft.AspNetCore.Mvc;
+﻿using System.Net;
 using System.Net.Http.Headers;
 using System.Security.Claims;
+using System.Text.Json;
 using System.Web;
+using LMS.Blazor.Services;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 
 namespace LMS.Blazor.Controller;
 
@@ -66,6 +69,33 @@ public class ProxyController(IHttpClientFactory httpClientFactory, ITokenStorage
         }
         Console.WriteLine($"Proxying to: {targetUriBuilder.Uri}");
         var response = await client.SendAsync(requestMessage);
+
+        //Handle customized error response
+        if (!response.IsSuccessStatusCode) 
+        {
+            var errorJson = await response.Content.ReadAsStringAsync();
+            try 
+            {
+                // Deserialize into ProblemDetails
+                var problem = JsonSerializer.Deserialize<ProblemDetails>(
+                    errorJson,
+                    new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+                if (problem != null)
+                {
+                    // Now you can access problem.Title, problem.Detail, etc.
+                    Console.WriteLine($"Error Title: {problem?.Title}");
+                    Console.WriteLine((int)response.StatusCode);
+
+                    if (response.StatusCode == HttpStatusCode.NotFound)
+                        return StatusCode((int)response.StatusCode, problem?.Detail);   //<- returns new Content in response - ProblemDetails is not accessible from Client.Blazor
+                }
+            }
+            catch (Exception ex) 
+            {
+                Console.WriteLine($"Error: {ex.Message}");
+            }
+        }
 
         return !response.IsSuccessStatusCode
             ? Unauthorized()
