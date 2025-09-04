@@ -47,21 +47,29 @@ else
 }
 
 @code {
-	[Parameter]
-	public Guid CourseId { get; set; }
+	[Parameter]	public Guid CourseId { get; set; }
+
+	[Parameter] public EventCallback<ModuleDto> OnModuleAdded { get; set; }
+
+	[Inject] private IApiService myApi { get; set; } = default!;
 
 	public ModuleCreateDto Module { get; set; } = new ModuleCreateDto();
 
-	[Inject]
-	private IApiService myApi { get; set; } = default!;
+	private bool isAdding = false;
+
+	private void Toggle() => isAdding = !isAdding;
 
 	private async Task HandleValidSubmit()
 	{
 		Module.CourseId = CourseId;
-		var newCourseDto = await myApi.CallApiPostAsync<ModuleCreateDto, ModuleDto>("modules", Module);
-		Toggle();
-	}
-	private bool isAdding = false;
+		var newModule = await myApi.CallApiPostAsync<ModuleCreateDto, ModuleDto>("modules", Module);
 
-	private void Toggle() => isAdding = !isAdding;
+		if (newModule != null)
+		{
+            await OnModuleAdded.InvokeAsync(newModule);
+		}
+
+        Toggle();
+        Module = new ModuleCreateDto();
+	}	
 }

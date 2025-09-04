@@ -2,138 +2,165 @@
 @using LMS.Blazor.Client.Services
 @using LMS.Shared.DTOs.EntityDto
 @using Microsoft.AspNetCore.Authorization
+@inject NavigationManager Navigation
+@inject AuthenticationStateProvider AuthStateProvider
 @rendermode InteractiveWebAssembly
 
-@attribute [Authorize]
+<h3>@(currentCourse?.Name ?? "Kurs")</h3>
 
-<div class="container-fluid">
-    <div class="row">
-        <!-- L Sidebar area -->
-        <div class="col-12 col-lg-3 border-end bg-light">
-            <div>
-                <DocumentComponent Documents="@DocumentDtos" OnEditRequested="EditDocument" />
-                <DocumentAddComponent ParentId="@Id" ParentType="Course" OnUploadSuccess="HandleUploadSuccess" />
+@if (loading)
+{
+    <div class="text-center my-5">
+        <div class="spinner-border text-primary" role="status"></div>
+        <p>Laddar kursdata...</p>
+    </div>
+}
+else if (currentCourse is null)
+{
+    <div class="alert alert-warning">Kursen kunde inte laddas.</div>
+}
+else
+{
+    <div class="row gx-4">
+        <!-- Left-Column: Kursinfo + Dokument -->
+        <div class="col-12 col-lg-7">
+            <section class="mb-4">
+                <p>@currentCourse.Description</p>
+                <small class="text-muted">
+                    Start: @currentCourse.StartDate:yyyy-MM-dd &nbsp;|&nbsp; Slut: @currentCourse.EndDate:yyyy-MM-dd
+                </small>
+            </section>
 
-                @if (isEditingDocument && editingDocumentId.HasValue)
-                {
-                    <div class="modal-backdrop fade show"></div>
-                    <div class="modal d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
-                        <div class="modal-dialog">
-                            <div class="modal-content p-3">
-                                <button type="button" class="btn-close float-end" aria-label="Close" @onclick="CloseDocumentEdit"></button>
-                                <DocumentEditComponent DocumentId="@editingDocumentId.Value" OnSaved="OnDocumentSaved" OnCancel="CloseDocumentEdit" />
-                            </div>
-                        </div>
-                    </div>
-                }
-            </div>
-        </div>
-
-        <!-- Main content area -->
-        <div class="col-12 col-lg-6">
-            <h3>Kurs @CurrentCourse?.Name</h3>
-            <p>@CurrentCourse?.Description</p>
-
-            <button type="button" class="btn btn-primary" @onclick="ToggleEditCourse">Change course</button>
+            <button class="btn btn-outline-primary mb-3" @onclick="ToggleEditCourse">
+                @(isEditingCourse ? "Avbryt redigering" : "Redigera kurs")
+            </button>
 
             @if (isEditingCourse)
             {
-                <CourseEditComponent CourseDto="@CurrentCourse" OnEditDone="RefreshCourse" />
+                <CourseEditComponent CourseDto="@currentCourse" OnEditDone="RefreshCourse" />
             }
 
-            <div class="row">
-                <div class="col-12 col-lg-9">
-                    <ModuleAddComponent CourseId="@Id" />
-                    @if (Modules != null)
-                    {
-                        @foreach (var module in Modules)
-                        {
-                            if (isEditingModule && CurrentModuleGuid == module.Id)
-                            {
-                                <ModuleEditComponent OnEditDone="StopEditingModule" Module="module" currentCourseId="@CurrentCourse.Id" />
-                            }
-                            else
-                            {
-                                <ModuleComponent OnMessageSent="StartEditingModule" Module="module" />
-                            }
-                        }
-                    }
-                </div>
-            </div>
+            <hr />
+
+            <section>
+                <h5>Dokument</h5>
+                <DocumentComponent Documents="@documentDtos" OnEditRequested="EditDocument" />
+                <DocumentAddComponent ParentId="@Id" ParentType="Course" OnUploadSuccess="HandleUploadSuccess" />
+            </section>
         </div>
 
-        <!-- R Sidebar area -->
-        <div class="col-12 col-lg-3 border-start bg-light">
-            <div class="p-3 sticky-top">
-                @if (Members != null)
-                {
-                    @foreach (var member in Members)
+        <!-- Right-Column: Moduler + Deltagare in a box -->
+        <div class="col-12 col-lg-5">
+            <div class="p-3 border rounded shadow-sm bg-white sticky-top" style="top: 1rem;">
+                <section class="mb-4">
+                    <h5>Moduler</h5>
+                    <ModuleAddComponent CourseId="@Id" OnModuleAdded="AddModule" />
+
+                    @if (modules?.Any() == true)
                     {
-                        <MemberComponent Member="member" />
+                        <ul class="list-group mt-2">
+                            @foreach (var module in modules)
+                            {
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    @if (isEditingModule && currentModuleGuid == module.Id)
+                                    {
+                                        <ModuleEditComponent Module="module" currentCourseId="@currentCourse.Id" OnEditDone="StopEditingModule" />
+                                    }
+                                    else
+                                    {
+                                        <span>@module.Name</span>
+                                        <button class="btn btn-sm btn-outline-secondary" @onclick="() => StartEditingModule(module.Id)">Redigera</button>
+                                    }
+                                </li>
+                            }
+                        </ul>
                     }
-                }
+                    else
+                    {
+                        <p class="text-muted mt-2">Inga moduler tillagda än.</p>
+                    }
+                </section>
+
+                <hr />
+
+                <section>
+                    <h5>Deltagare</h5>
+                    @if (members?.Any() == true)
+                    {
+                        <ul class="list-group">
+                            @foreach (var member in members)
+                            {
+                                <li class="list-group-item">@member.Email</li>
+                            }
+                        </ul>
+                    }
+                    else
+                    {
+                        <p class="text-muted">Inga deltagare tillagda.</p>
+                    }
+                </section>
             </div>
         </div>
     </div>
-</div>
+
+    @if (isEditingDocument && editingDocumentId is Guid docId)
+    {
+        @DocumentEditModal(docId)
+    }
+}
 
 @code {
-    // Parameters
     [Parameter]
-    [SupplyParameterFromQuery]
     public Guid Id { get; set; }
 
-    // Injected services
-    [Inject] private IApiService myApi { get; set; } = default!;
-    [Inject] private AuthenticationStateProvider Auth { get; set; } = default!;
+    [Inject] private IApiService ApiService { get; set; } = default!;
+    [Inject] private AuthenticationStateProvider AuthProvider { get; set; } = default!;
 
-    // State properties
-    private bool Loading { get; set; } = true;
+    private bool loading = true;
 
-    private CourseDto? CurrentCourse { get; set; }
-    private IEnumerable<ModuleDto>? Modules { get; set; }
-    private IEnumerable<UserDto>? Members { get; set; }
-    private List<DocumentDto> DocumentDtos { get; set; } = new();
+    private CourseDto? currentCourse;
+    private List<ModuleDto>? modules;
+    private List<UserDto>? members;
+    private List<DocumentDto> documentDtos = new();
 
     private bool isEditingCourse = false;
     private bool isEditingModule = false;
-    private Guid? CurrentModuleGuid = null;
+    private Guid? currentModuleGuid;
 
     private bool isEditingDocument = false;
-    private Guid? editingDocumentId = null;
+    private Guid? editingDocumentId;
 
-    // Lifecycle
     protected override async Task OnInitializedAsync()
     {
-        Loading = true;
+        loading = true;
 
-        var state = await Auth.GetAuthenticationStateAsync();
-        if (!(state.User.Identity?.IsAuthenticated ?? false))
+        var authState = await AuthProvider.GetAuthenticationStateAsync();
+        if (!(authState.User.Identity?.IsAuthenticated ?? false))
         {
+            Navigation.NavigateTo("/account/login");
             return;
         }
 
         await LoadCourseDataAsync();
-        Loading = false;
+        loading = false;
     }
 
-    // Load all course related data
     private async Task LoadCourseDataAsync()
     {
         try
         {
-            CurrentCourse = await myApi.CallApiGetAsync<CourseDto>($"courses/{Id}");
-            Modules = (await myApi.CallApiGetAsync<IEnumerable<ModuleDto>>($"modules/course/{Id}"))?.ToList();
-            Members = await myApi.CallApiGetAsync<IEnumerable<UserDto>>($"users/course/{Id}");
-            DocumentDtos = (await myApi.CallApiGetAsync<IEnumerable<DocumentDto>>($"documents/course/{Id}"))?.ToList() ?? new List<DocumentDto>();
+            currentCourse = await ApiService.CallApiGetAsync<CourseDto>($"courses/{Id}");
+            modules = (await ApiService.CallApiGetAsync<IEnumerable<ModuleDto>>($"modules/course/{Id}"))?.ToList() ?? new();
+            members = (await ApiService.CallApiGetAsync<IEnumerable<UserDto>>($"users/course/{Id}"))?.ToList() ?? new();
+            documentDtos = (await ApiService.CallApiGetAsync<IEnumerable<DocumentDto>>($"documents/course/{Id}"))?.ToList() ?? new();
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error loading course data: {ex.Message}");
+            Console.Error.WriteLine($"Fel vid inläsning av kursdata: {ex.Message}");
+            currentCourse = null;
         }
     }
 
-    // Course editing
     private void ToggleEditCourse()
     {
         isEditingCourse = !isEditingCourse;
@@ -142,30 +169,29 @@
     private void RefreshCourse(CourseDto updatedCourse)
     {
         isEditingCourse = false;
-        if (CurrentCourse != null && CurrentCourse.Id == updatedCourse.Id)
+        if (currentCourse is not null && currentCourse.Id == updatedCourse.Id)
         {
-            CurrentCourse.Name = updatedCourse.Name;
-            CurrentCourse.Description = updatedCourse.Description;
-            CurrentCourse.StartDate = updatedCourse.StartDate;
-            CurrentCourse.EndDate = updatedCourse.EndDate;
+            currentCourse.Name = updatedCourse.Name;
+            currentCourse.Description = updatedCourse.Description;
+            currentCourse.StartDate = updatedCourse.StartDate;
+            currentCourse.EndDate = updatedCourse.EndDate;
         }
         StateHasChanged();
     }
 
-    // Module editing
     private void StartEditingModule(Guid moduleId)
     {
         isEditingModule = true;
-        CurrentModuleGuid = moduleId;
+        currentModuleGuid = moduleId;
     }
 
     private void StopEditingModule(ModuleDto updatedModule)
     {
         isEditingModule = false;
-        CurrentModuleGuid = null;
+        currentModuleGuid = null;
 
-        var moduleToUpdate = Modules?.SingleOrDefault(m => m.Id == updatedModule.Id);
-        if (moduleToUpdate != null)
+        var moduleToUpdate = modules?.FirstOrDefault(m => m.Id == updatedModule.Id);
+        if (moduleToUpdate is not null)
         {
             moduleToUpdate.Name = updatedModule.Name;
             moduleToUpdate.StartDate = updatedModule.StartDate;
@@ -174,7 +200,13 @@
         StateHasChanged();
     }
 
-    // Document editing popup control
+    private void AddModule(ModuleDto newModule)
+    {
+        modules ??= new List<ModuleDto>();
+        modules.Add(newModule);
+        StateHasChanged();
+    }
+
     private void EditDocument(Guid documentId)
     {
         editingDocumentId = documentId;
@@ -189,35 +221,35 @@
 
     private async Task OnDocumentSaved(DocumentDto updatedDoc)
     {
-        // Uppdatera document directly in the list instead of loading everything
-        var existing = DocumentDtos.FirstOrDefault(d => d.Id == updatedDoc.Id);
-        if (existing != null)
+        var existing = documentDtos.FirstOrDefault(d => d.Id == updatedDoc.Id);
+        if (existing is not null)
         {
             existing.Name = updatedDoc.Name;
             existing.Description = updatedDoc.Description;
         }
-
         CloseDocumentEdit();
-        StateHasChanged();
+        await InvokeAsync(StateHasChanged);
     }
 
-    // private async Task OnDocumentSaved()
-    // {
-    //     // Reload documents after save
-    //     DocumentDtos = (await myApi.CallApiGetAsync<IEnumerable<DocumentDto>>($"documents/course/{Id}"))?.ToList() ?? new List<DocumentDto>();
-
-    //     CloseDocumentEdit();
-    //     StateHasChanged();
-    // }
-
-    // Handle new document upload
     private void HandleUploadSuccess(DocumentDto newDoc)
     {
-        DocumentDtos.Add(newDoc);
+        documentDtos.Add(newDoc);
         StateHasChanged();
     }
-}
 
+    private RenderFragment DocumentEditModal(Guid documentId) => __builder =>
+    {
+        <div class="modal-backdrop fade show"></div>
+        <div class="modal d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+            <div class="modal-dialog">
+                <div class="modal-content p-3">
+                    <button type="button" class="btn-close float-end" aria-label="Close" @onclick="CloseDocumentEdit"></button>
+                    <DocumentEditComponent DocumentId="@documentId" OnSaved="OnDocumentSaved" OnCancel="CloseDocumentEdit" />
+                </div>
+            </div>
+        </div>
+    };
+}
 
 
 
