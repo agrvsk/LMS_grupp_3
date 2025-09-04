@@ -178,5 +178,10 @@ namespace LMS.Blazor.Client.Models
                 }
             }
         }
+        public List<AssignmentCreateDto>? Assignments
+        {
+            get => ModuleActivityDto.Assignments ?? new List<AssignmentCreateDto>();
+            set => ModuleActivityDto.Assignments = value;
+        }
     }
 }

@@ -18,6 +18,7 @@ namespace LMS.Infractructure.Data
         public DbSet<ModuleActivity> Activities { get; set; }
         public DbSet<Submission> Submissions { get; set; }
         public DbSet<ActivityType> ActivityTypes { get; set; }
+        public DbSet<Assignment> Assignments { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

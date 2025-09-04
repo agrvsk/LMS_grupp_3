@@ -365,3 +365,5 @@ FodyWeavers.xsd
 # our things
 /Uploads
 /LMS.API/Uploads/Course
+/LMS.API/Uploads
+/LMS.UnitTests/Services/SubmissionServiceTests.cs

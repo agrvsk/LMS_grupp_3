@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using AutoMapper;
 using Domain.Contracts.Repositories;
 using Domain.Models.Entities;
+using Domain.Models.Exceptions;
 using LMS.Shared.DTOs.EntityDto;
 using Microsoft.AspNetCore.Identity;
 using Service.Contracts;
@@ -29,6 +30,7 @@ public class UserService : IUserService
     public async Task<UserDto?> GetUserByIdAsync(string userId)
     {
         var user = await uow.ApplicationUserRepository.GetUserByIdAsync(userId);
+        if (user == null) throw new UserNotFoundException(userId);
         var userDto = mapper.Map<UserDto>(user);
         return userDto;
     }

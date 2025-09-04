@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Domain.Contracts.Repositories;
+using Domain.Models.Exceptions;
 using LMS.Shared.DTOs.EntityDto;
 using Service.Contracts;
 using System;

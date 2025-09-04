@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using AutoMapper;
 using Domain.Contracts.Repositories;
 using Domain.Models.Entities;
+using Domain.Models.Exceptions;
 using LMS.Shared.DTOs.EntityDto;
 using Service.Contracts;
 
@@ -25,7 +26,9 @@ public class CourseService : ICourseService
 
     public async Task<CourseDto?> GetCourseByIdAsync(Guid courseId)
     {
-        return mapper.Map<CourseDto>(await uow.CourseRepository.GetCourseByIdAsync(courseId));
+        var course = await uow.CourseRepository.GetCourseByIdAsync(courseId);
+        if (course == null) throw new CourseNotFoundException(courseId);
+        return mapper.Map<CourseDto>(course);
     }
     public async Task<List<CourseDto>> GetAllCoursesAsync()
     {
@@ -33,13 +36,14 @@ public class CourseService : ICourseService
         var courseDtos = mapper.Map<List<CourseDto>>(courses);
         return courseDtos;
     }
-    public async Task<Course> CreateCourseAsync(CourseCreateDto courseDto)
+    public async Task<CourseDto> CreateCourseAsync(CourseCreateDto courseDto)
     {
         var course= mapper.Map<Course>(courseDto);
         uow.CourseRepository.Create(course);
+        var newCourseDto = mapper.Map<CourseDto>(course);
         await uow.CompleteAsync();
 
-        return course;
+        return newCourseDto;
     }
     public async Task<CourseDto> UpdateCourseAsync(CourseUpdateDto courseUpdDto)
     {

@@ -13,4 +13,5 @@ public class Submission
     public string ApplicationUserId { get; set; } 
     public Guid DocumentId { get; set; } 
     public Document? SubmissionDocument { get; set; }
+    public Guid AssignmentId { get; set; }
 }

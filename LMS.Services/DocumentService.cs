@@ -6,7 +6,9 @@ using System.Threading.Tasks;
 using AutoMapper;
 using Domain.Contracts.Repositories;
 using Domain.Models.Entities;
+using Domain.Models.Exceptions;
 using LMS.Shared.DTOs.EntityDto;
+using LMS.Shared.DTOs.EntityDTO;
 using Microsoft.AspNetCore.Identity;
 using Service.Contracts;
 
@@ -28,6 +30,7 @@ public class DocumentService : IDocumentService
     public async Task<DocumentDto?> GetDocumentByIdAsync(Guid documentId)
     {
         var document = await uow.DocumentRepository.GetDocumentByIdAsync(documentId);
+        if (document == null) throw new DocumentNotFoundException(documentId);
         var documentDto = mapper.Map<DocumentDto>(document);
         return documentDto;
     }
@@ -66,12 +69,26 @@ public class DocumentService : IDocumentService
         await uow.CompleteAsync();
         return mapper.Map<DocumentDto>(document);
     }
-    public async Task<Document?> UpdateDocumentAsync(DocumentDto documentDto)
+    public async Task<Document?> UpdateDocumentAsync(DocumentEditDto documentDto)
     {
-        var document = mapper.Map<Document>(documentDto);
+        var document = await uow.DocumentRepository.GetDocumentByIdAsync(documentDto.Id);
+        if (document == null)
+            return null;
+
+        // Uppdatera bara de fält som får ändras
+        document.Name = documentDto.Name;
+        document.Description = documentDto.Description;
+
         uow.DocumentRepository.Update(document);
         await uow.CompleteAsync();
+
         return document;
+
+
+        //var document = mapper.Map<Document>(documentDto);
+        //uow.DocumentRepository.Update(document);
+        //await uow.CompleteAsync();
+        //return document;
     }
     public async Task<bool> DeleteDocumentAsync(Guid documentId)
     {

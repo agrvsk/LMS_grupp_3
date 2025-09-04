@@ -1,5 +1,7 @@
-﻿using Microsoft.AspNetCore.Components;
+﻿using System.Net;
 using System.Text.Json;
+using LMS.Blazor.Client.Models;
+using Microsoft.AspNetCore.Components;
 
 namespace LMS.Blazor.Client.Services;
 
@@ -31,6 +33,15 @@ public class ClientApiService(IHttpClientFactory httpClientFactory, NavigationMa
            || response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
         {
             navigationManager.NavigateTo("AccessDenied");
+        }
+
+        if (response.StatusCode == HttpStatusCode.NotFound)
+        {
+            var errorJson = await response.Content.ReadAsStringAsync();
+
+            if (response.StatusCode == HttpStatusCode.NotFound)
+                throw new HttpRequestException(errorJson);
+
         }
 
         response.EnsureSuccessStatusCode();

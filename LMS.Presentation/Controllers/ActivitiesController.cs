@@ -1,5 +1,7 @@
 ﻿using LMS.Shared.DTOs.EntityDto;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using Service.Contracts;
 using System;
 using System.Collections.Generic;
@@ -54,6 +56,26 @@ namespace LMS.Presentation.Controllers
                 var createdActivity = await _serviceManager.ModuleActivityService.CreateActivityAsync(activityDto);
             return CreatedAtAction(nameof(GetActivityById), new { id = createdActivity.Id }, createdActivity);
         }
+
+        [HttpPost("with-documents")]
+        public async Task<IActionResult> CreateActivityWithDocuments([FromForm] string activityDtoJson)
+        {
+            if (string.IsNullOrEmpty(activityDtoJson))
+                return BadRequest("Activity data is missing.");
+
+            var activityDto = JsonConvert.DeserializeObject<ModuleActivityCreateDto>(activityDtoJson);
+            if (activityDto == null)
+                return BadRequest("Invalid activity data.");
+
+            // Read all files from the form dynamically
+            var files = Request.Form.Files.ToList(); // <-- grab them all
+
+            var createdActivity = await _serviceManager.ModuleActivityService
+                .CreateActivityWithDocumentsAsync(activityDto, files);
+
+            return CreatedAtAction(nameof(GetActivityById), new { id = createdActivity.Id }, createdActivity);
+        }
+
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateActivity(Guid id, [FromBody] ModuleActivityUpdateDto activityDto)
         {

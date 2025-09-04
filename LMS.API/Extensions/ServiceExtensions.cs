@@ -89,6 +89,7 @@ public static class ServiceExtensions
         services.AddScoped<ISubmissionRepository, SubmissionRepository>();
         services.AddScoped<IDocumentRepository, DocumentRepository>();
         services.AddScoped<IActivityTypeRepository, ActivityTypeRepository>();
+        services.AddScoped<IAssignmentRepository, AssignmentRepository>();
 
         services.AddLazy<ICourseRepository>();
         services.AddLazy<IModuleRepository>();
@@ -97,6 +98,7 @@ public static class ServiceExtensions
         services.AddLazy<ISubmissionRepository>();
         services.AddLazy<IDocumentRepository>();
         services.AddLazy<IActivityTypeRepository>();
+        services.AddLazy<IAssignmentRepository>();
 
         services.AddScoped<IUnitOfWork, UnitOfWork>();
 
