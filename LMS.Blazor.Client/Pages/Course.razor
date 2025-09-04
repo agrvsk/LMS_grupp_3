@@ -7,6 +7,13 @@
 @attribute [Authorize]
 
 <div class="container-fluid">
+    @if (!string.IsNullOrEmpty(errorMessage))
+    {
+        <div class="alert alert-danger" role="alert">
+            <p>@errorMessage</p>
+        </div>
+    }
+
     <div class="row">
         <!-- L Sidebar area -->
         <div class="col-12 col-lg-3 border-end bg-light">
@@ -101,6 +108,8 @@
 
     private bool isEditingDocument = false;
     private Guid? editingDocumentId = null;
+    private string? errorMessage;
+
 
     // Lifecycle
     protected override async Task OnInitializedAsync()
@@ -127,6 +136,12 @@
             Members = await myApi.CallApiGetAsync<IEnumerable<UserDto>>($"users/course/{Id}");
             DocumentDtos = (await myApi.CallApiGetAsync<IEnumerable<DocumentDto>>($"documents/course/{Id}"))?.ToList() ?? new List<DocumentDto>();
         }
+        catch (HttpRequestException apiEx)
+        {
+            errorMessage = $"API Error: {apiEx.StatusCode} - {apiEx.Message}";
+            Console.WriteLine("there was an API error: " + apiEx.Message);
+        }
+
         catch (Exception ex)
         {
             Console.WriteLine($"Error loading course data: {ex.Message}");
@@ -448,8 +463,8 @@
 	@if (!string.IsNullOrEmpty(errorMessage))
 	{
 		<div class="alert alert-danger" role="alert">
-@* 			<h4 class="alert-heading">Error</h4>
- *@			<p>@errorMessage</p>
+ 			<h4 class="alert-heading">Error</h4>
+ 			<p>@errorMessage</p>
 		</div>
 	}
 	<div class="row">
