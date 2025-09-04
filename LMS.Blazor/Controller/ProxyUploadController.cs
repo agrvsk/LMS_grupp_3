@@ -22,6 +22,10 @@ namespace LMS.Blazor.Controller
         [HttpPost]
         public async Task<IActionResult> UploadDocument()
         {
+            var endpoint = Request.Query["endpoint"].ToString();
+            if (string.IsNullOrEmpty(endpoint))
+                return BadRequest("No endpoint specified.");
+
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (userId == null) return Unauthorized();
 
@@ -39,7 +43,7 @@ namespace LMS.Blazor.Controller
             var content = new StreamContent(ms);
             content.Headers.ContentType = MediaTypeHeaderValue.Parse(Request.ContentType);
 
-            var response = await client.PostAsync("documents", content);
+            var response = await client.PostAsync(endpoint, content);
 
             var responseBody = await response.Content.ReadAsStringAsync();
             return StatusCode((int)response.StatusCode, responseBody);

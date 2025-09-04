@@ -1,4 +1,10 @@
-﻿@if (!isAdding)
+﻿@using System.Text
+@using System.Text.Json
+@using System.Net.Http.Headers
+@using System.Security.Claims
+@using LMS.Blazor.Client.Models
+@inject IApiService ApiService
+@if (!isAdding)
 {
 	<div class="container mt-4">
 		<div class="card shadow-sm text-center card-hover" style="cursor:pointer;" @onclick="Toggle">
@@ -11,63 +17,143 @@
 }
 else
 {
-	<h3 style="text-align: center">New course:</h3>
+	<h3 style="text-align: center">New activity:</h3>
 	<div class="container mt-4">
 
 		<div class="card shadow-sm">
 			<div class="card-body">
-				<EditForm Model="@Activity" OnValidSubmit="@(() => HandleValidSubmit())">
+				@page "/module-activities/add"
+				@inject IApiService ApiService
+				@using Microsoft.AspNetCore.Components.Forms
+			@using System.Security.Claims
+
+			<h3>Add Module Activity</h3>
+
+				<EditForm Model="@ActivityModel" OnValidSubmit="@HandleSubmit">
 					<DataAnnotationsValidator />
 					<ValidationSummary />
+
 					<div class="mb-3">
-						<label for="activityName" class="form-label">Activity Name</label>
-						<InputText id="activityName" class="form-control" @bind-Value="Activity.Name" />
-						<ValidationMessage For="@(() => Activity.Name)" />
+						<label>Name</label>
+						<InputText @bind-Value="ActivityModel.Name" class="form-control" />
 					</div>
+
 					<div class="mb-3">
-						<label for="category" class="form-label">Category</label>
-						<InputSelect id="category" class="form-select" @bind-Value="Activity.ActivityTypeId">
-							<option value="">-- Select Category --</option>
-							@foreach (var type in Types)
+						<label>Start Date</label>
+						<InputDate @bind-Value="ActivityModel.StartDate" class="form-control" />
+					</div>
+
+					<div class="mb-3">
+						<label>End Date</label>
+						<InputDate @bind-Value="ActivityModel.EndDate" class="form-control" />
+					</div>
+
+					<div class="mb-3">
+						<label>Activity Type</label>
+						<InputSelect @bind-Value="ActivityModel.ActivityTypeId" class="form-select">
+							<option value="">-- Select --</option>
+						@foreach (var t in Types)
 							{
-								<option value="@type.Id">@type.Name</option>
+								<option value="@t.Id">@t.Name</option>
 							}
 						</InputSelect>
-						<ValidationMessage For="@(() => Activity.ActivityTypeId)" />
 					</div>
-					<div class="mb-3">
-						<label for="activityDescription" class="form-label">Description</label>
-						<InputTextArea id="courseDescription" class="form-control" @bind-Value="Activity.Description" />
-						<ValidationMessage For="@(() => Activity.Description)" />
-					</div>
-					<div>
-						<label for="courseDate" class="form-label">Date</label>
-						<InputDate id="activityEndDate" class="form-control" @bind-Value="Activity.StartDate" />
-						<ValidationMessage For="@(() => Activity.StartDate)" />
-					</div>
-					<div class="mb-3">
-						<label for="courseEndDate" class="form-label">Start Time</label>
-						<InputText type="time" id="activityEndDate" class="form-control" @bind-Value="StartTimeString" />
-						<ValidationMessage For="@(() => StartTimeString)" />
-					</div>
-					<div class="mb-3">
-						<label for="courseEndDate" class="form-label">End Time</label>
-						<InputText  type="time" id="activityEndDate" class="form-control" @bind-Value="EndTimeString" />
-						<ValidationMessage For="@(() => EndTimeString)" />
-					</div>
-					<button type="submit" class="btn btn-primary">Add</button> <button type="button" class="btn btn-primary" @onclick=Toggle>Cancel</button>
+
+					<h4>Assignments</h4>
+					@for (int i = 0; i < Assignments.Count; i++)
+					{
+						<AssignmentAddComponent Assignment="Assignments[i]" OnDocumentsAdded="HandleDocumentsAdded" />
+					}
+					<button type="button" class="btn btn-secondary" @onclick="AddAssignment">Add Assignment</button>
+
+					<br /><br />
+					<button type="submit" class="btn btn-primary">Submit Activity</button>
 				</EditForm>
 			</div>
 		</div>
 	</div>
 }
 
+@code{
+	[Parameter] public Guid ModuleId { get; set; }
+	[CascadingParameter] private Task<AuthenticationState> AuthStateTask { get; set; }
+	private bool isAdding = false;
 
-@code {
+	private ModuleActivityCreateDto ActivityModel = new();
+	private List<AssignmentFormModel> Assignments = new();
+	private List<DocumentInfo> AllDocsToUpload = new();
+	private List<ActivityTypeDto> Types = new();
+
+	protected override async Task OnInitializedAsync()
+	{
+		Types = await ApiService.CallApiGetAsync<List<ActivityTypeDto>>("activity-types");
+	}
+
+	private void AddAssignment()
+	{
+		Assignments.Add(new AssignmentFormModel());
+	}
+
+	private void HandleDocumentsAdded(AssignmentFormModel assignment)
+	{
+		foreach (var doc in assignment.Documents)
+		{
+			if (!AllDocsToUpload.Any(d => d.TempId == doc.TempId))
+				AllDocsToUpload.Add(doc);
+		}
+	}
+
+	private async Task HandleSubmit()
+	{
+		var authState = await AuthStateTask;
+		var user = authState.User;
+		string? uploaderId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+		// Build shared DTOs
+		ActivityModel.ModuleId = ModuleId;
+		ActivityModel.Assignments = Assignments.Select(a => new AssignmentCreateDto
+		{
+			Name = a.Name,
+			Description = a.Description,
+			DueDate = a.DueDate,
+			Documents = a.Documents.Select(d => new DocumentMetadataDto
+			{
+				TempId = d.TempId,
+				Name = d.FileName,
+				Description = d.Description,
+				UploaderId = uploaderId
+			}).ToList()
+		}).ToList();
+
+		// Prepare Multipart
+		using var content = new MultipartFormDataContent();
+		var json = JsonSerializer.Serialize(ActivityModel);
+		content.Add(new StringContent(json, Encoding.UTF8, "application/json"), "activityDtoJson");
+		Console.WriteLine(json);
+
+		foreach (var doc in AllDocsToUpload)
+		{
+			var fileContent = new ByteArrayContent(doc.Content);
+			fileContent.Headers.ContentType = new MediaTypeHeaderValue(doc.ContentType);
+			content.Add(fileContent, doc.TempId, doc.FileName);
+		}
+
+		var result = await ApiService.CallApiPostMultipartAsync<ModuleActivityDto>("activities/with-documents", content);
+
+		// Reset
+		ActivityModel = new ModuleActivityCreateDto();
+		Assignments.Clear();
+		AllDocsToUpload.Clear();
+	}
+	private void Toggle() => isAdding = !isAdding;
+}
+
+@* @code {
 	[Parameter]
 	public Guid ModuleId { get; set; }
 	
 	public ModuleActivityCreateDto Activity { get; set; } = new ModuleActivityCreateDto();
+	public List<DocumentInfo> AllDocsToUpload { get; set; } = new();
 	public List<ActivityTypeDto> Types { get; set; }
 	private bool isAdding = false;
 
@@ -97,10 +183,96 @@ else
 		}
 	}
 
+	private List<AssignmentFormModel> Assignments { get; set; } = new();
+	private List<int> AssignmentComponents { get; set; } = new();
+	[CascadingParameter] private Task<AuthenticationState> AuthStateTask { get; set; }
+
+	private void AddAssignmentComponent()
+	{
+		AssignmentComponents.Add(AssignmentComponents.Count);
+	}
+
+	private void HandleAssignmentAdded(int index, AssignmentCreateDto assignment)
+	{
+		if (Assignments.Count > index)
+			Assignments[index] = assignment;
+		else
+			Assignments.Add(assignment);
+
+		// Collect documents from the assignment
+		foreach (var doc in assignment.AttachedDocuments)
+		{
+			if (!AllDocsToUpload.Any(d => d.TempId == doc.TempId))
+			{
+				AllDocsToUpload.Add(doc);
+			}
+		}
+	}
+
 	private async Task HandleValidSubmit()
 	{
-		Activity.ModuleId = ModuleId;
-		var newCourseDto = await myApi.CallApiPostAsync<ModuleActivityCreateDto, ModuleActivityDto>("activities", Activity);
+		var authState = await AuthStateTask;
+		var user = authState.User;
+		string? UploaderId = null;
+		if (user.Identity?.IsAuthenticated == true)
+		{
+			UploaderId = user.FindFirst(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+		}
+		
+		using var content = new MultipartFormDataContent();
+
+		// 1. Prepare the DTO with TempIds
+		var activityDto = new ModuleActivityCreateWithAssignmentsDto
+		{
+			Name = Activity.Name,
+			Description = Activity.Description,
+			StartDate = Activity.StartDate,
+			EndDate = Activity.EndDate,
+			ModuleId = ModuleId,
+			ActivityTypeId = Activity.ActivityTypeId,
+			Assignments = new List<AssignmentCreateDto>
+	{
+		new AssignmentCreateDto
+		{
+			Name = "Homework 1",
+			Description = "Solve problems",
+			DueDate = DateTime.UtcNow.AddDays(5),
+			AttachedDocuments = new List<DocumentMetadataDto>
+			{
+				new DocumentMetadataDto
+				{
+					TempId = "doc1",
+					Name = "Instructions.pdf",
+					Description = "Homework instructions",
+					UploaderId = UploaderId
+				}
+			}
+		}
+	}
+		};
+
+		// 2. Add the JSON to the multipart form
+		var json = JsonSerializer.Serialize(activityDto);
+		content.Add(new StringContent(json, Encoding.UTF8, "application/json"), "activityDtoJson");
+
+		// 3. Attach the actual file(s)
+		foreach (var doc in AllDocsToUpload) // e.g., from InputFile
+		{
+			var fileContent = new StreamContent(doc.File.OpenReadStream(maxAllowedSize: 10_000_000));
+			fileContent.Headers.ContentType = new MediaTypeHeaderValue(doc.File.ContentType);
+			content.Add(fileContent, doc.TempId, doc.File.Name); // TempId ties it back
+		}
+
+		// 4. Send to API
+		var createdActivity = await myApi.CallApiPostMultipartAsync<ModuleActivityDto>(
+			"activities/with-documents",
+			content
+		);
+		
+		
+		
+		// Activity.ModuleId = ModuleId;
+		// var newCourseDto = await myApi.CallApiPostAsync<ModuleActivityCreateDto, ModuleActivityDto>("activities", Activity);
 		Toggle();
 	}
 
@@ -110,4 +282,4 @@ else
 	}
 
 	private void Toggle() => isAdding = !isAdding;
-}
+} *@

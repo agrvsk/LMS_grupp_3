@@ -9,6 +9,7 @@ public interface IUnitOfWork
     public ISubmissionRepository SubmissionRepository { get;  }
     public IDocumentRepository DocumentRepository { get; }
     public IActivityTypeRepository ActivityTypeRepository { get; }
+    public IAssignmentRepository AssignmentRepository { get; }
 
     Task CompleteAsync();
 }

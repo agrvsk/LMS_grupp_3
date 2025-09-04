@@ -50,7 +50,10 @@ else
 	[Parameter]
 	public Guid CourseId { get; set; }
 
-	public ModuleCreateDto Module { get; set; } = new ModuleCreateDto();
+	public ModuleCreateDto Module { get; set; } = new ModuleCreateDto()
+	{
+		ModuleActivities = new List<ModuleActivityCreateDto>()
+	};
 
 	[Inject]
 	private IApiService myApi { get; set; } = default!;

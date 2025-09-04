@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+
 namespace LMS.Shared.DTOs.EntityDto;
 
 public record CourseUpdateDto
@@ -15,6 +16,7 @@ public record CourseUpdateDto
     public string Name { get; set; }
     [Required]
     public string Description { get; set; }
+    
     public DateTime StartDate { get; set; }
     public DateTime EndDate { get; set; }
 

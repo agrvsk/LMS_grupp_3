@@ -1,4 +1,5 @@
 ﻿using LMS.Shared.DTOs.EntityDto;
+using LMS.Shared.DTOs.EntityDTO;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
@@ -66,19 +67,32 @@ namespace LMS.Presentation.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateDocument(Guid id, [FromBody] DocumentDto documentDto)
+        public async Task<IActionResult> UpdateDocument(Guid id, [FromBody] DocumentEditDto documentDto)
         {
-            if (documentDto == null || id != documentDto.Id)
-            {
+            if (documentDto == null)
                 return BadRequest("Document data is invalid");
-            }
+
             var updatedDocument = await _serviceManager.DocumentService.UpdateDocumentAsync(documentDto);
             if (updatedDocument == null)
-            {
                 return NotFound();
-            }
+
             return Ok(updatedDocument);
         }
+
+        //[HttpPut("{id}")]
+        //public async Task<IActionResult> UpdateDocument(Guid id, [FromBody] DocumentDto documentDto)
+        //{
+        //    if (documentDto == null || id != documentDto.Id)
+        //    {
+        //        return BadRequest("Document data is invalid");
+        //    }
+        //    var updatedDocument = await _serviceManager.DocumentService.UpdateDocumentAsync(documentDto);
+        //    if (updatedDocument == null)
+        //    {
+        //        return NotFound();
+        //    }
+        //    return Ok(updatedDocument);
+        //}
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteDocument(Guid id)

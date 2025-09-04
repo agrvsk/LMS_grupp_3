@@ -4,75 +4,129 @@
 @using System.Text.Json
 
 <EditForm Model="@DocumentInfo" OnValidSubmit=OnFileSubmit>
-	<DataAnnotationsValidator />
-	<ValidationSummary />
-	<div class="form-group">
-		<label for="document">Document</label>
-		<InputFile id="document" class="form-control" OnChange="OnFileSelected" />
-	</div>
-	<div class="form-group">
-		<label for="description">Description</label>
-		<InputTextArea id="description" class="form-control" @bind-Value="DocumentInfo.Description" />
-	</div>
-	<button type="submit" class="btn btn-primary">Add Document</button>
+    <DataAnnotationsValidator />
+    <ValidationSummary />
 
-@if (uploadSuccess)
-	{
-		<p class="text-success">File uploaded successfully!</p>
-	}
+    <div class="form-group">
+        <label for="name">Document Name</label>
+        <InputText id="name" class="form-control" @bind-Value="DocumentInfo.FileName" />
+        <ValidationMessage For="@(() => DocumentInfo.FileName)" />
+    </div>
 
+    <div class="form-group">
+        <label for="document">Document</label>
+        <InputFile id="document" class="form-control" OnChange="OnFileSelected" />
+
+        @if (!string.IsNullOrEmpty(fileError))
+        {
+            <p class="text-danger">@fileError</p>
+        }
+
+    </div>
+
+    <div class="form-group">
+        <label for="description">Description</label>
+        <InputTextArea id="description" class="form-control" @bind-Value="DocumentInfo.Description" />
+    </div>
+
+    <button type="submit" class="btn btn-primary" disabled="@isUploading">Add Document</button>
+
+
+    @if (uploadSuccess)
+    {
+        <p class="text-success">File uploaded successfully!</p>
+    }
 </EditForm>
 
 
 
 @code {
 
-	[Parameter] public Guid ParentId { get; set; }
-	[Parameter] public string ParentType { get; set; }
-	[Parameter] public List<SubmissionCreateDto> Submissions { get; set; } = new();
-	[Parameter] public EventCallback<DocumentDto> OnUploadSuccess { get; set; }
+    [Parameter] public Guid ParentId { get; set; }
+    [Parameter] public string ParentType { get; set; }
+    [Parameter] public List<SubmissionCreateDto> Submissions { get; set; } = new();
+    [Parameter] public EventCallback<DocumentDto> OnUploadSuccess { get; set; }
 
-	[CascadingParameter] private Task<AuthenticationState> AuthStateTask { get; set; }
-	private string? UploaderId;
+    [CascadingParameter] private Task<AuthenticationState> AuthStateTask { get; set; }
+    private string? UploaderId;
 
-	[Inject] IApiService ApiService { get; set; }
+    [Inject] IApiService ApiService { get; set; }
 
-	private DocumentInfo DocumentInfo = new ();
-	private bool isUploading = false;
-	private bool uploadSuccess = false;
+    private DocumentInfo DocumentInfo = new();
+    private bool isUploading = false;
+    private bool uploadSuccess = false;
 
 
-	protected override async Task OnInitializedAsync()
-	{
-		var authState = await AuthStateTask;
-		var user = authState.User;
-		if (user.Identity?.IsAuthenticated == true)
-		{
-			UploaderId = user.FindFirst(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
-		}
-	}
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthStateTask;
+        var user = authState.User;
+        if (user.Identity?.IsAuthenticated == true)
+        {
+            UploaderId = user.FindFirst(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+        }
+    }
 
-	private void OnFileSelected(InputFileChangeEventArgs e)
-	{
-		DocumentInfo.File = e.File;        
-		uploadSuccess = false;
-	}
+    private readonly string[] permittedExtensions = { ".pdf", ".docx", ".xlsx", ".png", ".jpg" };
+    private const long maxFileSize = 10_000_000; // 10 MB
+    private string? fileError;
+    private async void OnFileSelected(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+        var ext = Path.GetExtension(file.Name).ToLowerInvariant();
+
+        if (!permittedExtensions.Contains(ext))
+        {
+            fileError = "Invalid file type.";
+            DocumentInfo = new DocumentInfo(); // reset
+            uploadSuccess = false;
+            return;
+        }
+
+        if (file.Size > maxFileSize)
+        {
+            fileError = "File size exceeds 10 MB.";
+            DocumentInfo = new DocumentInfo(); // reset
+            uploadSuccess = false;
+            return;
+        }
+        try
+        {
+            // Read into byte[]
+            using var stream = file.OpenReadStream(maxAllowedSize: 10_000_000);
+            using var ms = new MemoryStream();
+            await stream.CopyToAsync(ms);
+
+            DocumentInfo.FileName = file.Name;
+            DocumentInfo.ContentType = file.ContentType;
+            DocumentInfo.Content = ms.ToArray();
+
+
+            uploadSuccess = false;
+        }
+        catch (Exception ex)
+        {
+            fileError = $"Error reading file: {ex.Message}";
+            DocumentInfo = new DocumentInfo(); // reset
+            uploadSuccess = false;
+        }
+    }
 
 	private async Task OnFileSubmit()
 	{
-		if (DocumentInfo.File == null || string.IsNullOrEmpty(UploaderId))
+		if (DocumentInfo.Content == null || string.IsNullOrEmpty(UploaderId))
 			return;
 
-		using var content = new MultipartFormDataContent();
+        using var content = new MultipartFormDataContent();
 
-		var fileContent = new StreamContent(DocumentInfo.File.OpenReadStream(maxAllowedSize: 10_000_000));
-		fileContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(DocumentInfo.File.ContentType);
-		content.Add(fileContent, "File", DocumentInfo.File.Name);
+		var fileContent = new ByteArrayContent(DocumentInfo.Content);
+		fileContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(DocumentInfo.ContentType ?? "application/octet-stream");
+		content.Add(fileContent, "File", DocumentInfo.FileName);
 
 		//DocumentCreateDto - utan IFormFile!
 		var documentDto = new
 		{
-			Name = DocumentInfo.File.Name,
+			Name = DocumentInfo.FileName,
 			Description = DocumentInfo.Description ?? string.Empty,
 			UploaderId = UploaderId,
 			ParentType = ParentType,
@@ -80,45 +134,26 @@
 			Submissions = Submissions,
 		};
 
-		// Add Dto as JSON
-		var json = JsonSerializer.Serialize(documentDto);
-		content.Add(new StringContent(json, Encoding.UTF8), "documentDtoJson");
-
-
-/*******************
-		content.Add(new StringContent(DocumentInfo.File.Name), "Name");
-		content.Add(new StringContent(DocumentInfo.Description ?? string.Empty), "Description");
-		content.Add(new StringContent(ParentId.ToString()), "ParentId");
-		content.Add(new StringContent(ParentType), "ParentType");
-		content.Add(new StringContent(UploaderId), "UploaderId");
-		content.Add(new StringContent(DocumentInfo.File.ToString()), "File");
-
-		Console.WriteLine($"UploaderId: {UploaderId}");
-		Console.WriteLine($"ParentId: {ParentId}");
-		Console.WriteLine($"ParentType: {ParentType}");
-		Console.WriteLine($"FileName: {DocumentInfo.File.Name}");
-		Console.WriteLine($"Description: {DocumentInfo.Description}");
-		Console.WriteLine($"FileContentType: {DocumentInfo.File.ContentType}");
-		Console.WriteLine($"FileSize: {DocumentInfo.File.Size}");
-//		Console.WriteLine($"Submissions: {Submissions}");
-*********************/
+        // Add Dto as JSON
+        var json = JsonSerializer.Serialize(documentDto);
+        content.Add(new StringContent(json, Encoding.UTF8), "documentDtoJson");
 
 		var response = await ApiService.CallApiPostMultipartAsync<DocumentDto>("documents", content);
 
-		if(response != null)
-		{
-			// Handle success (e.g., show a message, clear the form, etc.)
-			uploadSuccess = true;
+        if (response != null)
+        {
+            // Handle success (e.g., show a message, clear the form, etc.)
+            uploadSuccess = true;
             DocumentInfo = new(); // Reset form
             await OnUploadSuccess.InvokeAsync(response);
-			
-			Console.WriteLine("Document uploaded successfully.");
-		}
-		else
-		{
-			// Handle error (e.g., show an error message)
-			Console.WriteLine("Error uploading document");
-		}
+
+            Console.WriteLine("Document uploaded successfully.");
+        }
+        else
+        {
+            // Handle error (e.g., show an error message)
+            Console.WriteLine("Error uploading document");
+        }
         isUploading = false;
-	}
+    }
 }

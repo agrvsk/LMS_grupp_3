@@ -1,0 +1,50 @@
+﻿@using LMS.Blazor.Client.Models
+<EditForm Model="@Assignment" OnValidSubmit="@(() => { })">
+    <div class="mb-2">
+        <label>Name</label>
+        <InputText @bind-Value="Assignment.Name" class="form-control" />
+    </div>
+    <div class="mb-2">
+        <label>Description</label>
+        <InputTextArea @bind-Value="Assignment.Description" class="form-control" />
+    </div>
+    <div class="mb-2">
+        <label>Due Date</label>
+        <InputDate @bind-Value="Assignment.DueDate" class="form-control" />
+    </div>
+
+    <div>
+        <label>Attach Documents</label>
+        <InputFile OnChange="OnFilesSelected" multiple />
+        @foreach (var doc in Assignment.Documents)
+        {
+            <p>@doc.FileName</p>
+        }
+    </div>
+</EditForm>
+
+@code {
+    [Parameter] public AssignmentFormModel Assignment { get; set; } = new();
+    [Parameter] public EventCallback<AssignmentFormModel> OnDocumentsAdded { get; set; }
+
+    private async void OnFilesSelected(InputFileChangeEventArgs e)
+    {
+        foreach (var file in e.GetMultipleFiles())
+        {
+            using var stream = file.OpenReadStream(maxAllowedSize: 10_000_000);
+            using var ms = new MemoryStream();
+            await stream.CopyToAsync(ms);
+
+            Assignment.Documents.Add(new DocumentInfo
+            {
+                TempId = Guid.NewGuid().ToString(),
+                FileName = file.Name,
+                ContentType = file.ContentType,
+                Content = ms.ToArray(),   // buffered bytes, safe after re-render
+                Description = string.Empty // optional, your model can handle it
+            });
+        }
+
+        await OnDocumentsAdded.InvokeAsync(Assignment);
+    }
+}
