@@ -48,8 +48,20 @@ public class ProxyController(IHttpClientFactory httpClientFactory, ITokenStorage
 
         if (method != HttpMethod.Get && Request.ContentLength > 0)
         {
-            requestMessage.Content = new StreamContent(Request.Body);
+            Request.EnableBuffering();
+                        
+            var ms = new MemoryStream(); //Creates a temporary memorystream to place the requestbody into
+                        
+            await Request.Body.CopyToAsync(ms); // Copies the requestbody from client into our memorystream
 
+            // Once it's written to "ms" the "pointer" points at the end of the stream.
+            ms.Position = 0; // This line moves the pointer to the beginning to start reading again
+                        
+            Request.Body.Position = 0; //Sets the original requestbody's position to the beginning aswell for safetymeasures
+                       
+            requestMessage.Content = new StreamContent(ms); // Creates a new HttpContent-object based on the memorystream. Wich we send to the backend-API
+
+            
             if (!string.IsNullOrEmpty(Request.ContentType))
             {
                 requestMessage.Content.Headers.ContentType =
@@ -67,8 +79,12 @@ public class ProxyController(IHttpClientFactory httpClientFactory, ITokenStorage
         Console.WriteLine($"Proxying to: {targetUriBuilder.Uri}");
         var response = await client.SendAsync(requestMessage);
 
-        return !response.IsSuccessStatusCode
-            ? Unauthorized()
-            : StatusCode((int)response.StatusCode, await response.Content.ReadAsStringAsync());
+        //return !response.IsSuccessStatusCode
+        //    ? Unauthorized()
+        //    : StatusCode((int)response.StatusCode, await response.Content.ReadAsStringAsync());
+
+        var content = await response.Content.ReadAsStringAsync();
+        return StatusCode((int)response.StatusCode, content);
+
     }
 }
