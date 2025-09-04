@@ -7,6 +7,7 @@ public abstract class NotFoundException(string Message, string Title = "Not Foun
     //    Title = title;
     //}
 }
+//Nedanstående måste även in i LMS.API/Extensions/ExceptionMiddlewareExtensions.cs
 public sealed class NoUsersFoundException() : NotFoundException($"No users found") { }
 public sealed class UserNotFoundException(string Id) : NotFoundException($"The user with id {Id} is not found") { }
 public sealed class NoCoursesFoundException() : NotFoundException($"No courses found") { }

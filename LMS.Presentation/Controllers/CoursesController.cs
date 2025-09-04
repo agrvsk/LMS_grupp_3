@@ -27,7 +27,7 @@ namespace LMS.Presentation.Controllers
         public async Task<IActionResult> GetCourseById(Guid id)
         {
             var course = await _serviceManager.CourseService.GetCourseByIdAsync(id);
-            if (course == null)
+            if (course != null)
             {
                 throw new CourseNotFoundException(id);
             }
