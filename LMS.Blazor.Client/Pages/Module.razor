@@ -7,6 +7,12 @@
 @attribute [Authorize]
 
 <div class="container-fluid">
+	@if (!string.IsNullOrEmpty(errorMessage))
+	{
+		<div class="alert alert-danger" role="alert">
+			<p>@errorMessage</p>
+		</div>
+	}
 	<div class="row">
 		<!-- Main content area -->
 		<div class="col-12 col-lg-9">
@@ -67,6 +73,7 @@
 
 	private IEnumerable<ModuleActivityDto>? ModuleActivities { get; set; }
 	private List<DocumentDto>? DocumentDtos { get; set; } = new List<DocumentDto>();
+	private string? errorMessage;
 
 	protected override async Task OnInitializedAsync()
 	{
@@ -99,6 +106,11 @@
 
 			Loading = false;
 
+		}
+		catch (HttpRequestException apiEx)
+		{
+			errorMessage = $"API Error: {apiEx.StatusCode} - {apiEx.Message}";
+			Console.WriteLine("there was an API error: " + apiEx.Message);
 		}
 		catch (Exception ex)
 		{

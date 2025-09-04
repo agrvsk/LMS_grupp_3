@@ -5,6 +5,12 @@
 @rendermode InteractiveWebAssembly
 @attribute [Authorize]
 <h3>ModuleList</h3>
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div class="alert alert-danger" role="alert">
+        <p>@errorMessage</p>
+    </div>
+}
 @if (Loading)
 {
     <p>Loading modules...</p>
@@ -40,6 +46,7 @@ else
     private AuthenticationStateProvider Auth { get; set; } = default!;
 
     private IEnumerable<ModuleDto>? Modules { get; set; }
+    private string? errorMessage;
 
     protected override async Task OnInitializedAsync()
     {
@@ -65,6 +72,11 @@ else
 
             Loading = false;
 
+        }
+        catch (HttpRequestException apiEx)
+        {
+            errorMessage = $"API Error: {apiEx.StatusCode} - {apiEx.Message}";
+            Console.WriteLine("there was an API error: " + apiEx.Message);
         }
         catch (Exception ex)
         {
