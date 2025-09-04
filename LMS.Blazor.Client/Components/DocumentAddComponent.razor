@@ -9,8 +9,8 @@
 
     <div class="form-group">
         <label for="name">Document Name</label>
-        <InputText id="name" class="form-control" @bind-Value="DocumentInfo.Name" />
-        <ValidationMessage For="@(() => DocumentInfo.Name)" />
+        <InputText id="name" class="form-control" @bind-Value="DocumentInfo.FileName" />
+        <ValidationMessage For="@(() => DocumentInfo.FileName)" />
     </div>
 
     <div class="form-group">
@@ -67,47 +67,50 @@
         }
     }
 
-	private readonly string[] permittedExtensions = { ".pdf", ".docx", ".xlsx", ".png", ".jpg" };
-private const long maxFileSize = 10_000_000; // 10 MB
-private string? fileError;
+    private readonly string[] permittedExtensions = { ".pdf", ".docx", ".xlsx", ".png", ".jpg" };
+    private const long maxFileSize = 10_000_000; // 10 MB
+    private string? fileError;
     private async void OnFileSelected(InputFileChangeEventArgs e)
-	{
-		var file = e.File;
-    var ext = Path.GetExtension(file.Name).ToLowerInvariant();
-
-    if (!permittedExtensions.Contains(ext))
     {
-        fileError = "Invalid file type.";
-        DocumentInfo = new DocumentInfo(); // reset
-        uploadSuccess = false;
-        return;
+        var file = e.File;
+        var ext = Path.GetExtension(file.Name).ToLowerInvariant();
+
+        if (!permittedExtensions.Contains(ext))
+        {
+            fileError = "Invalid file type.";
+            DocumentInfo = new DocumentInfo(); // reset
+            uploadSuccess = false;
+            return;
+        }
+
+        if (file.Size > maxFileSize)
+        {
+            fileError = "File size exceeds 10 MB.";
+            DocumentInfo = new DocumentInfo(); // reset
+            uploadSuccess = false;
+            return;
+        }
+        try
+        {
+            // Read into byte[]
+            using var stream = file.OpenReadStream(maxAllowedSize: 10_000_000);
+            using var ms = new MemoryStream();
+            await stream.CopyToAsync(ms);
+
+            DocumentInfo.FileName = file.Name;
+            DocumentInfo.ContentType = file.ContentType;
+            DocumentInfo.Content = ms.ToArray();
+
+
+            uploadSuccess = false;
+        }
+        catch (Exception ex)
+        {
+            fileError = $"Error reading file: {ex.Message}";
+            DocumentInfo = new DocumentInfo(); // reset
+            uploadSuccess = false;
+        }
     }
-
-    if (file.Size > maxFileSize)
-    {
-        fileError = "File size exceeds 10 MB.";
-        DocumentInfo = new DocumentInfo(); // reset
-        uploadSuccess = false;
-        return;
-    }
-		try{
-		// Read into byte[]
-		using var stream = file.OpenReadStream(maxAllowedSize: 10_000_000);
-		using var ms = new MemoryStream();
-		await stream.CopyToAsync(ms);
-
-		DocumentInfo.FileName = file.Name;
-		DocumentInfo.ContentType = file.ContentType;
-		DocumentInfo.Content = ms.ToArray();
-
-
-		uploadSuccess = false;
-    }
-    catch(Exception ex){
-        fileError = $"Error reading file: {ex.Message}";
-        DocumentInfo = new DocumentInfo(); // reset
-        uploadSuccess = false;
-	}
 
 	private async Task OnFileSubmit()
 	{
