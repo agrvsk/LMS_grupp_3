@@ -36,9 +36,9 @@ public class DateValidationService : IDateValidationService
             return (false/*, message*/);
         }
         var modules = await moduleService.GetModulesByCourseIdAsync(courseId);
-        if (moduleId.HasValue)
+        if (moduleId!=null)
         {
-            modules = modules.Where(m => m.Id != moduleId.Value).ToList();
+            modules = modules.Where(m => m.Id != moduleId).ToList();
         }
         foreach (var module in modules)
         {
@@ -92,7 +92,7 @@ public class DateValidationService : IDateValidationService
     {
 
 
-        return ((aEnd < bStart && aStart < bStart) ||
-                    (bEnd < aStart && bStart < aStart));
+         if((aEnd < bStart && aStart < bStart) ||
+                    (bEnd < aStart && bStart < aStart)) return false; return true;
     }
 }
