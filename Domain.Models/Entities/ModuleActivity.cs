@@ -17,7 +17,6 @@ public class ModuleActivity
     public ActivityType Type { get; set; }
 
     public Guid ModuleId { get; set; }
-    public Module Module { get; set; }
     public List<Assignment>? Assignments { get; set; }
 
 }

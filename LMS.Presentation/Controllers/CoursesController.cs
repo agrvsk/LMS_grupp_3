@@ -7,11 +7,11 @@ namespace LMS.Presentation.Controllers
     [Route("/courses")]
     [ApiController]
     public class CoursesController : ControllerBase
-    {        
+    {
         private readonly IServiceManager _serviceManager;
 
         public CoursesController(IServiceManager serviceManager)
-        {            
+        {
             _serviceManager = serviceManager;
         }
 
@@ -40,13 +40,21 @@ namespace LMS.Presentation.Controllers
             {
                 return BadRequest("Course data is null");
             }
-            if(!_serviceManager.DateValidationService.ValidateCourseDates(courseDto.StartDate,courseDto.EndDate))
+            if (!_serviceManager.DateValidationService.ValidateCourseDates(courseDto.StartDate, courseDto.EndDate))
             {
                 ModelState.AddModelError("DateValidation", "End date must be greater than start date.");
                 return BadRequest(ModelState);
             }
-            var createdCourse = await _serviceManager.CourseService.CreateCourseAsync(courseDto);
-            return CreatedAtAction(nameof(GetCourseById), new { id = createdCourse.Id }, createdCourse);
+            try
+            {
+                var createdCourse = await _serviceManager.CourseService.CreateCourseAsync(courseDto);
+                
+                return CreatedAtAction(nameof(GetCourseById), new { id = createdCourse.Id }, createdCourse);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
         }
 
         [HttpPut("{id}")]

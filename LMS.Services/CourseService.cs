@@ -33,13 +33,14 @@ public class CourseService : ICourseService
         var courseDtos = mapper.Map<List<CourseDto>>(courses);
         return courseDtos;
     }
-    public async Task<Course> CreateCourseAsync(CourseCreateDto courseDto)
+    public async Task<CourseDto> CreateCourseAsync(CourseCreateDto courseDto)
     {
         var course= mapper.Map<Course>(courseDto);
         uow.CourseRepository.Create(course);
+        var newCourseDto = mapper.Map<CourseDto>(course);
         await uow.CompleteAsync();
 
-        return course;
+        return newCourseDto;
     }
     public async Task<CourseDto> UpdateCourseAsync(CourseUpdateDto courseUpdDto)
     {
