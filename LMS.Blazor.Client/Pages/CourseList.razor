@@ -8,6 +8,12 @@
 
 <h3>CourseList</h3>
 
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+	<div class="alert alert-danger" role="alert">
+		<p>@errorMessage</p>
+	</div>
+}
 
 @if (Courses != null)
 {
@@ -52,8 +58,10 @@
 	[Inject]
 	private AuthenticationStateProvider Auth { get; set; } = default!;
 
-    
+
 	private List<CourseDto>? Courses { get; set; }
+	private string? errorMessage;
+
 
 	protected override async Task OnInitializedAsync()
 	{
@@ -79,9 +87,17 @@
 
 	private async Task LoadCourse()
 	{
+		try
+		{
+			var response = await myApi.CallApiGetAsync<IEnumerable<CourseDto>>("courses");
+			Courses = response?.ToList();
+		}
+		catch (HttpRequestException apiEx)
+		{
+			errorMessage = $"API Error: {apiEx.StatusCode} - {apiEx.Message}";
+			Console.WriteLine("there was an API error: " + apiEx.Message);
+		}
 
-		var response = await myApi.CallApiGetAsync<IEnumerable<CourseDto>>("courses");
-		Courses = response?.ToList();
 
 	}
 

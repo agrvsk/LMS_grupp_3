@@ -4,6 +4,12 @@
 
 <AuthorizeView Roles="Teacher, Student">
     <Authorized>
+        @if (!string.IsNullOrEmpty(errorMessage))
+        {
+            <div class="alert alert-danger" role="alert">
+                <p>@errorMessage</p>
+            </div>
+        }
         @if (isTeacher)
         {
             <section class="p-4 bg-light rounded shadow-sm">
@@ -96,6 +102,8 @@
 
     Guid? currentlyEditing;
     bool isEditing = false;
+    private string? errorMessage;
+
 
     protected override async Task OnInitializedAsync()
     {
@@ -123,7 +131,16 @@
     private async Task LoadSubmissions(string UserId)
     {
         if (!isStudent) return;
-        Submissions = await myApi.CallApiGetAsync<IEnumerable<SubmissionDto>>($"submissions/user/{UserId}");
+        try
+        {
+            Submissions = await myApi.CallApiGetAsync<IEnumerable<SubmissionDto>>($"submissions/user/{UserId}");
+        }
+        catch (HttpRequestException apiEx)
+        {
+            errorMessage = $"API Error: {apiEx.StatusCode} - {apiEx.Message}";
+            Console.WriteLine("there was an API error: " + apiEx.Message);
+        }
+
     }
 
     private async Task LoadActivities(string? courseIdAsString)
@@ -152,6 +169,11 @@
 
             Types = (await myApi.CallApiGetAsync<List<ActivityTypeDto>>("activity-types"));
 
+        }
+        catch (HttpRequestException apiEx)
+        {
+            errorMessage = $"API Error: {apiEx.StatusCode} - {apiEx.Message}";
+            Console.WriteLine("there was an API error: " + apiEx.Message);
         }
         catch (Exception ex)
         {

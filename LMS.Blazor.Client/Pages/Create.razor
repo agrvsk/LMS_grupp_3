@@ -8,7 +8,12 @@
 
 <h3 style="text-align: center">New course:</h3>
 <div class="container mt-4">
-
+	@if (!string.IsNullOrEmpty(errorMessage))
+	{
+		<div class="alert alert-danger" role="alert">
+			<p>@errorMessage</p>
+		</div>
+	}
 	<div>
 		<div class="card-body lead">
 			<EditForm Model="@CourseForm" OnValidSubmit="@(() => HandleValidSubmit())">
@@ -126,9 +131,9 @@
 
 
 @code {
-    
-    private CourseFormModel CourseForm = new CourseFormModel();
-    private CourseCreateDto Course { get; set; } = new CourseCreateDto()
+
+	private CourseFormModel CourseForm = new CourseFormModel();
+	private CourseCreateDto Course { get; set; } = new CourseCreateDto()
 	{
 		StartDate = DateTime.Today,
 		EndDate = DateTime.Today.AddMonths(3)
@@ -138,6 +143,7 @@
 
 	[Inject]
 	private IApiService myApi { get; set; } = default!;
+	private string? errorMessage;
 
 	private void AddModule()
 	{
@@ -199,19 +205,37 @@
 
 	private async Task HandleValidSubmit()
 	{
-		var dtoToSend = CourseForm.ToDto();
-		var json = JsonSerializer.Serialize(dtoToSend, new JsonSerializerOptions { WriteIndented = true });
-		Console.WriteLine(json);
-		var newCourseDto = await myApi.CallApiPostAsync<CourseCreateDto, CourseDto>("courses", dtoToSend);
+		try
+		{
+			var dtoToSend = CourseForm.ToDto();
+			var json = JsonSerializer.Serialize(dtoToSend, new JsonSerializerOptions { WriteIndented = true });
+			Console.WriteLine(json);
+			var newCourseDto = await myApi.CallApiPostAsync<CourseCreateDto, CourseDto>("courses", dtoToSend);
 
-		Console.WriteLine($"Course '{CourseForm.Name}' saved successfully!");
+			Console.WriteLine($"Course '{CourseForm.Name}' saved successfully!");
 
-		CourseForm = new CourseFormModel();
+			CourseForm = new CourseFormModel();
+		}
+		catch (HttpRequestException apiEx)
+		{
+			errorMessage = $"API Error: {apiEx.StatusCode} - {apiEx.Message}";
+			Console.WriteLine("there was an API error: " + apiEx.Message);
+		}
+
 	}
 
 	protected override async Task OnInitializedAsync()
 	{
-		ActivityTypes = (await myApi.CallApiGetAsync<List<ActivityTypeDto>>("activity-types"));
+		try 
+		{
+			ActivityTypes = (await myApi.CallApiGetAsync<List<ActivityTypeDto>>("activity-types"));
+		}
+		catch (HttpRequestException apiEx)
+		{
+			errorMessage = $"API Error: {apiEx.StatusCode} - {apiEx.Message}";
+			Console.WriteLine("there was an API error: " + apiEx.Message);
+		}
+
 	}
 
 }

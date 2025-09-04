@@ -13,7 +13,12 @@ else
 {
 	<h3 style="text-align: center">New course:</h3>
 	<div class="container mt-4">
-
+		@if (!string.IsNullOrEmpty(errorMessage))
+		{
+			<div class="alert alert-danger" role="alert">
+				<p>@errorMessage</p>
+			</div>
+		}
 		<div class="card shadow-sm">
 			<div class="card-body">
 				<EditForm Model="@Activity" OnValidSubmit="@(() => HandleValidSubmit())">
@@ -66,10 +71,11 @@ else
 @code {
 	[Parameter]
 	public Guid ModuleId { get; set; }
-	
+
 	public ModuleActivityCreateDto Activity { get; set; } = new ModuleActivityCreateDto();
 	public List<ActivityTypeDto> Types { get; set; }
 	private bool isAdding = false;
+	private string? errorMessage;
 
 	[Inject]
 	private IApiService myApi { get; set; } = default!;
@@ -99,14 +105,32 @@ else
 
 	private async Task HandleValidSubmit()
 	{
-		Activity.ModuleId = ModuleId;
-		var newCourseDto = await myApi.CallApiPostAsync<ModuleActivityCreateDto, ModuleActivityDto>("activities", Activity);
-		Toggle();
+		try
+		{
+			Activity.ModuleId = ModuleId;
+			var newCourseDto = await myApi.CallApiPostAsync<ModuleActivityCreateDto, ModuleActivityDto>("activities", Activity);
+			Toggle();
+		}
+		catch (HttpRequestException apiEx)
+		{
+			errorMessage = $"API Error: {apiEx.StatusCode} - {apiEx.Message}";
+			Console.WriteLine("there was an API error: " + apiEx.Message);
+		}
+
 	}
 
 	protected override async Task OnInitializedAsync()
 	{
-		Types = (await myApi.CallApiGetAsync<List<ActivityTypeDto>>("activity-types"));
+		try
+		{
+			Types = (await myApi.CallApiGetAsync<List<ActivityTypeDto>>("activity-types"));
+		}
+		catch (HttpRequestException apiEx)
+		{
+			errorMessage = $"API Error: {apiEx.StatusCode} - {apiEx.Message}";
+			Console.WriteLine("there was an API error: " + apiEx.Message);
+		}
+
 	}
 
 	private void Toggle() => isAdding = !isAdding;
