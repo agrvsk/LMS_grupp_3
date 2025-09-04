@@ -1,6 +1,5 @@
 ﻿@using System.Security.Claims
 @rendermode InteractiveWebAssembly
-@inject NavigationManager nav
 
 <AuthorizeView Roles="Teacher, Student">
     <Authorized>
@@ -56,11 +55,11 @@
                         }
                     }
                     <p class="lead mt-3 pt-3">Entered submissions:</p>
-                    @if (Submissions != null && Submissions.Count() > 0)
+                    @if (Assignments != null && Assignments.Count() > 0)
                     {
-                        foreach (SubmissionDto item in Submissions)
+                        foreach (AssignmentDto item in Assignments)
                         {
-                                <small>@item.SubmissionDate.ToShortDateString() @item.DocumentId  </small>
+                                <small>@item.DueDate.ToShortDateString() @item.Name  </small>
                                 <br />
                         }
                     }
@@ -84,7 +83,7 @@
     AuthenticationStateProvider AuthenticationStateProvider { get; set; } = default!;
 
     private IEnumerable<ModuleDto>? Modules { get; set; }
-	private IEnumerable<SubmissionDto>? Submissions { get; set; }
+	private IEnumerable<AssignmentDto>? Assignments { get; set; }
     public List<ActivityTypeDto> Types { get; set; } = new List<ActivityTypeDto>();
 
     private bool isTeacher;
@@ -115,15 +114,15 @@
         isStudent = user.IsInRole("Student");
 
         await LoadActivities(courseIdAsString);
-        await LoadSubmissions(UserId);
+        await LoadAssignments(courseIdAsString);
 
         isLoading = false;
     }
 
-    private async Task LoadSubmissions(string UserId)
+    private async Task LoadAssignments(string CourseId)
     {
         if (!isStudent) return;
-        Submissions = await myApi.CallApiGetAsync<IEnumerable<SubmissionDto>>($"submissions/user/{UserId}");
+        Assignments = await myApi.CallApiGetAsync<IEnumerable<AssignmentDto>>($"courses/{CourseId}/assignments");
     }
 
     private async Task LoadActivities(string? courseIdAsString)
