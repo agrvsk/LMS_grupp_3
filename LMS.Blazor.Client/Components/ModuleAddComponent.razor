@@ -15,6 +15,12 @@
 else
 {
     <div class="container mt-4">
+        @if (!string.IsNullOrEmpty(errorMessage))
+        {
+            <div class="alert alert-danger" role="alert">
+                <p>@errorMessage</p>
+            </div>
+        }
         <div class="card shadow-sm">
             <div class="card-body">
                 <h5 class="card-title text-center">Add New Module</h5>
@@ -70,6 +76,7 @@ else
 
     private bool isAdding = false;
     private ModuleCreateDto ModuleDto { get; set; } = new ModuleCreateDto();
+    private string? errorMessage;
 
     private void Toggle()
     {
@@ -98,6 +105,13 @@ else
 
             await OnModuleAdded.InvokeAsync(newModule);
             Toggle();
+        }
+        catch (System.ComponentModel.DataAnnotations.ValidationException ex)
+        {
+            errorMessage = $"API Error:  - {ex.Message}";
+            Console.WriteLine(ex.Message);
+            StateHasChanged();
+
         }
         catch (Exception ex)
         {

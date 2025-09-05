@@ -2,6 +2,12 @@
 @inject IApiService ApiService
 
 <div class="card p-3 mb-2 shadow-sm">
+    @if (!string.IsNullOrEmpty(errorMessage))
+    {
+        <div class="alert alert-danger" role="alert">
+            <p>@errorMessage</p>
+        </div>
+    }
     <EditForm Model="@ModuleUpdDto" OnValidSubmit="@HandleValidSubmit">
         <DataAnnotationsValidator />
         <ValidationSummary />
@@ -49,6 +55,7 @@
     [Parameter] public EventCallback<ModuleDto> OnEditDone { get; set; }
 
     private ModuleUpdateDto ModuleUpdDto { get; set; } = new ModuleUpdateDto();
+    private string? errorMessage;
 
     protected override void OnInitialized()
     {
@@ -65,12 +72,25 @@
 
     private async Task HandleValidSubmit()
     {
+        try
+        {
+
         // Ta bort tid innan API-anrop
         ModuleUpdDto.StartDate = ModuleUpdDto.StartDate.Date;
         ModuleUpdDto.EndDate = ModuleUpdDto.EndDate.Date;
 
         Module = await ApiService.CallApiPutAsync<ModuleUpdateDto, ModuleDto>($"modules/{Module.Id}", ModuleUpdDto);
         await CancelEdit();
+
+        }
+        catch (System.ComponentModel.DataAnnotations.ValidationException ex)
+        {
+            errorMessage = $"API Error:  - {ex.Message}";
+            Console.WriteLine(ex.Message);
+            StateHasChanged();
+
+        }
+
     }
 
     private async Task CancelEdit()
