@@ -4,6 +4,7 @@
 @using LMS.Blazor.Client.Models
 @using System.Text
 @using Microsoft.AspNetCore.Identity
+@rendermode InteractiveWebAssembly
 @inject IApiService ApiService
 
 <h3>SubmissionAddComponent</h3>
@@ -18,7 +19,7 @@
 		</div>
 		<div class="form-group">
 			<label for="description">Document Description</label>
-			<InputTextArea id="description" class="form-control" @bind-Value="model.DocumentDescription" />
+			<InputTextArea id="description" class="form-control" @bind-Value="model.documentInfo.Description" />
 		</div>
 		<div class="mb-3">
 			<label>Group Members</label>
@@ -57,39 +58,47 @@
 	private List<UserDto> Users = new();
 
 	private Model model = new();
-	private DocumentInfo documentInfo = new();
 	private bool uploadSuccess = false;
 
 	private class Model
 	{
-		public string? DocumentDescription { get; set; }
 		public string? Comment { get; set; }
 		public List<string> SubmitterIds { get; set; } = new();
+		public DocumentInfo documentInfo { get; set; } = new();
 	}
 
-	
+
 	private async Task HandleValidSubmit()
 	{
 		if (!model.SubmitterIds.Contains(UploaderId))
 			model.SubmitterIds.Insert(0, UploaderId);
-		
-		var submissionJson = JsonSerializer.Serialize(new SubmissionCreateDto
+
+		using var content = new MultipartFormDataContent();
+		var sub = new
 		{
 			AssignmentId = AssignmentId,
 			SubmitterIds = model.SubmitterIds,
 			Description = model.Comment
-		});
+		};
+		var submissionJson = JsonSerializer.Serialize(sub);
 
+		var fileContent = new ByteArrayContent(model.documentInfo.Content);
+		fileContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(model.documentInfo.ContentType ?? "application/octet-stream");
+		content.Add(fileContent, "File", model.documentInfo.FileName);
 
-		using var content = new MultipartFormDataContent();
-
-		var fileContent = new ByteArrayContent(documentInfo.Content);
-		fileContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(documentInfo.ContentType ?? "application/octet-stream");
-		content.Add(fileContent, "File", documentInfo.FileName);
-
-		content.Add(new StringContent(submissionJson, Encoding.UTF8, "application/json"), "submission");
+		content.Add(new StringContent(submissionJson, Encoding.UTF8, "application/json"), "submissionDtoJson");
 
 		var result = await ApiService.CallApiPostMultipartAsync<SubmissionDto>("submissions", content);
+		if (result != null)
+		{
+			uploadSuccess = true;
+			model = new Model();
+			StateHasChanged();
+		}
+		else
+		{
+			uploadSuccess = false;
+		}
 	}
 	private async void OnFileSelected(InputFileChangeEventArgs e)
 	{
@@ -100,9 +109,9 @@
 		using var ms = new MemoryStream();
 		await stream.CopyToAsync(ms);
 
-		documentInfo.FileName = file.Name;
-		documentInfo.ContentType = file.ContentType;
-		documentInfo.Content = ms.ToArray();
+		model.documentInfo.FileName = file.Name;
+		model.documentInfo.ContentType = file.ContentType;
+		model.documentInfo.Content = ms.ToArray();
 
 
 		uploadSuccess = false;
