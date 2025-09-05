@@ -36,6 +36,13 @@
     {
         <p class="text-success">File uploaded successfully!</p>
     }
+    @if (!string.IsNullOrEmpty(errorMessage))
+    {
+        <div class="alert alert-danger" role="alert">
+            <p>@errorMessage</p>
+        </div>
+    }
+
 </EditForm>
 
 
@@ -49,6 +56,7 @@
 
     [CascadingParameter] private Task<AuthenticationState> AuthStateTask { get; set; }
     private string? UploaderId;
+    private string? errorMessage;
 
     [Inject] IApiService ApiService { get; set; }
 
@@ -112,16 +120,19 @@
         }
     }
 
-	private async Task OnFileSubmit()
-	{
-		if (DocumentInfo.Content == null || string.IsNullOrEmpty(UploaderId))
-			return;
+    private async Task OnFileSubmit()
+    {
+        if (DocumentInfo.Content == null || string.IsNullOrEmpty(UploaderId))
+            return;
+
+        try
+        {
 
         using var content = new MultipartFormDataContent();
 
-		var fileContent = new ByteArrayContent(DocumentInfo.Content);
-		fileContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(DocumentInfo.ContentType ?? "application/octet-stream");
-		content.Add(fileContent, "File", DocumentInfo.FileName);
+        var fileContent = new ByteArrayContent(DocumentInfo.Content);
+        fileContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(DocumentInfo.ContentType ?? "application/octet-stream");
+        content.Add(fileContent, "File", DocumentInfo.FileName);
 
 		//DocumentCreateDto - utan IFormFile!
 		var documentDto = new
@@ -131,13 +142,14 @@
 			UploaderId = UploaderId,
 			ParentType = ParentType,
 			ParentId = ParentId.ToString(),
+			Submissions = Submissions,
 		};
 
         // Add Dto as JSON
         var json = JsonSerializer.Serialize(documentDto);
         content.Add(new StringContent(json, Encoding.UTF8), "documentDtoJson");
 
-		var response = await ApiService.CallApiPostMultipartAsync<DocumentDto>("documents", content);
+        var response = await ApiService.CallApiPostMultipartAsync<DocumentDto>("documents", content);
 
         if (response != null)
         {
@@ -154,5 +166,14 @@
             Console.WriteLine("Error uploading document");
         }
         isUploading = false;
+        }
+        catch (System.ComponentModel.DataAnnotations.ValidationException ex)
+        {
+            errorMessage = $"API Error:  - {ex.Message}";
+            Console.WriteLine(ex.Message);
+            StateHasChanged();
+
+        }
+
     }
 }

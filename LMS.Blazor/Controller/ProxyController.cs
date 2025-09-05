@@ -101,6 +101,10 @@ public class ProxyController(IHttpClientFactory httpClientFactory, ITokenStorage
 
                     if (response.StatusCode == HttpStatusCode.NotFound)
                         return StatusCode((int)response.StatusCode, problem?.Detail);   //<- returns new Content in response - ProblemDetails is not accessible from Client.Blazor
+
+                    if (response.StatusCode == HttpStatusCode.BadRequest)
+                        return StatusCode((int)response.StatusCode, errorJson); //modelValidation
+
                 }
             }
             catch (Exception ex) 

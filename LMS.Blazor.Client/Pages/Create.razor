@@ -216,10 +216,10 @@
 
 			CourseForm = new CourseFormModel();
 		}
-		catch (HttpRequestException apiEx)
+		catch (System.ComponentModel.DataAnnotations.ValidationException ex)
 		{
-			errorMessage = $"API Error: {apiEx.StatusCode} - {apiEx.Message}";
-			Console.WriteLine("there was an API error: " + apiEx.Message);
+			errorMessage = $"API Error:  {ex.Message}";
+			Console.WriteLine("there was an API error: " + ex.Message);
 		}
 
 	}

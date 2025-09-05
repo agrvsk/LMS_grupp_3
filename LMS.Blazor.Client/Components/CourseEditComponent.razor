@@ -1,6 +1,12 @@
 ﻿@using LMS.Blazor.Client.Services
 @using LMS.Shared.DTOs.EntityDto
 <div class="container mt-4 border-primary">
+	@if (!string.IsNullOrEmpty(errorMessage))
+	{
+		<div class="alert alert-danger" role="alert">
+			<p>@errorMessage</p>
+		</div>
+	}
 	<EditForm class="form m-1 border-primary" Model="@CourseUpdDto" OnValidSubmit="@HandleValidSubmit" FormName="EditCourse">
 		<DataAnnotationsValidator />
 		<ValidationSummary />
@@ -53,6 +59,7 @@
 	public EventCallback<CourseDto> OnEditDone { get; set; }
 
 	public CourseUpdateDto CourseUpdDto { get; set; }
+	private string? errorMessage;
 
 	protected override async Task OnInitializedAsync()
 	{
@@ -81,9 +88,18 @@
 
 	private async Task HandleValidSubmit()
 	{
-		CourseDto = await myApi.CallApiPutAsync<CourseUpdateDto, CourseDto>($"courses/{CourseUpdDto.Id}", CourseUpdDto);
-		Console.WriteLine($"Course '{CourseUpdDto.Name}' saved successfully!");
-		StopEditing();
+		try
+		{
+			CourseDto = await myApi.CallApiPutAsync<CourseUpdateDto, CourseDto>($"courses/{CourseUpdDto.Id}", CourseUpdDto);
+			Console.WriteLine($"Course '{CourseUpdDto.Name}' saved successfully!");
+			StopEditing();
+		}
+		catch (System.ComponentModel.DataAnnotations.ValidationException ex)
+		{
+			errorMessage = $"API Error:  - {ex.Message}";
+			Console.WriteLine(ex.Message);
+			StateHasChanged();
+		}
 	}
 
 

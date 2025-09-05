@@ -1,7 +1,9 @@
-﻿using System.Net;
+﻿using System.ComponentModel.DataAnnotations;
+using System.Net;
 using System.Text.Json;
 using LMS.Blazor.Client.Models;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Forms;
 
 namespace LMS.Blazor.Client.Services;
 
@@ -35,13 +37,11 @@ public class ClientApiService(IHttpClientFactory httpClientFactory, NavigationMa
             navigationManager.NavigateTo("AccessDenied");
         }
 
+        //Handle customized errors
         if (response.StatusCode == HttpStatusCode.NotFound)
         {
             var errorJson = await response.Content.ReadAsStringAsync();
-
-            if (response.StatusCode == HttpStatusCode.NotFound)
                 throw new HttpRequestException(errorJson);
-
         }
 
         response.EnsureSuccessStatusCode();
@@ -59,7 +59,24 @@ public class ClientApiService(IHttpClientFactory httpClientFactory, NavigationMa
 
         var response = await httpClient.PostAsync($"proxy?endpoint={endpoint}", content, ct);
 
+        //Handle customized errors
+        if (response.StatusCode == HttpStatusCode.BadRequest)
+        {
+            var errorJson = await response.Content.ReadAsStringAsync();
+            if (!string.IsNullOrEmpty(errorJson))
+            {
+                //ModelState
+                var errors = JsonSerializer.Deserialize<Dictionary<string, string[]>>(errorJson,
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
+                if (errors != null)
+                {
+                    var rrr = errors.FirstOrDefault();
+                    Console.WriteLine($"{rrr.Key}: {string.Join(", ", rrr.Value)}");
+                    throw new ValidationException(string.Join(", ", rrr.Value));
+                }
+            }
+        }
 
         response.EnsureSuccessStatusCode();
 
@@ -76,6 +93,26 @@ public class ClientApiService(IHttpClientFactory httpClientFactory, NavigationMa
     {
         await authReady.WaitAsync();
         var response = await httpClient.PostAsync($"proxy/upload?endpoint={endpoint}", data, ct);
+
+        //Handle customized errors
+        if (response.StatusCode == HttpStatusCode.BadRequest)
+        {
+            var errorJson = await response.Content.ReadAsStringAsync();
+            if (!string.IsNullOrEmpty(errorJson))
+            {
+                //ModelState
+                var errors = JsonSerializer.Deserialize<Dictionary<string, string[]>>(errorJson,
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+                if (errors != null)
+                {
+                    var rrr = errors.FirstOrDefault();
+                    Console.WriteLine($"{rrr.Key}: {string.Join(", ", rrr.Value)}");
+                    throw new ValidationException(string.Join(", ", rrr.Value));
+                }
+            }
+        }
+
         response.EnsureSuccessStatusCode();
         
         var result = await JsonSerializer.DeserializeAsync<TResponse>(
@@ -96,6 +133,26 @@ public class ClientApiService(IHttpClientFactory httpClientFactory, NavigationMa
 
         var response = await httpClient.PutAsync($"proxy?endpoint={endpoint}", content, ct);
 
+        //Handle customized errors
+        if (response.StatusCode == HttpStatusCode.BadRequest)
+        {
+            var errorJson = await response.Content.ReadAsStringAsync();
+            if (!string.IsNullOrEmpty(errorJson))
+            {
+                //ModelState
+                var errors = JsonSerializer.Deserialize<Dictionary<string, string[]>>(errorJson,
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+                if (errors != null)
+                {
+                    var rrr = errors.FirstOrDefault();
+                    Console.WriteLine($"{rrr.Key}: {string.Join(", ", rrr.Value)}");
+                    throw new ValidationException(string.Join(", ", rrr.Value));
+                }
+
+
+            }
+        }
 
 
         response.EnsureSuccessStatusCode();
