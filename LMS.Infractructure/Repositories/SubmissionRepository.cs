@@ -34,7 +34,7 @@ public class SubmissionRepository : RepositoryBase<Submission>, ISubmissionRepos
     public async Task<List<Submission>> GetSubmissionsByApplicationUserIdAsync(string userId)
     {
         
-        return await FindByConditionAsync(s => s.ApplicationUserId == userId, trackChanges: false)
+        return await FindByConditionAsync(s => s.Submitters.Any(u => u.Id == userId), trackChanges: false)
             .ContinueWith(task => task.Result.ToList());
     }
 

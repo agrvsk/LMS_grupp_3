@@ -39,4 +39,12 @@ public class ModuleActivityRepository : RepositoryBase<ModuleActivity>, IModuleA
         .AsNoTracking()
         .ToListAsync();
     }
+    public async Task<List<Assignment>> GetAssignmentsByModuleActivityIdAsync(Guid moduleActivityId)
+    {
+        var moduleActivity = await _context.Activities
+            .Include(ma => ma.Assignments)
+            .AsNoTracking()
+            .FirstOrDefaultAsync(ma => ma.Id == moduleActivityId);
+        return moduleActivity?.Assignments ?? new List<Assignment>();
+    }
 }

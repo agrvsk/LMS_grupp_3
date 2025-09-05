@@ -35,7 +35,8 @@ public class MapperProfile : Profile
         CreateMap<DocumentDto, Document>().ReverseMap();
         CreateMap<DocumentCreateDto, Document>().ReverseMap();
 
-        CreateMap<SubmissionCreateDto, Submission>().ReverseMap();
+        CreateMap<SubmissionCreateDto, Submission>()
+            .ForMember(dest => dest.Submitters, opt => opt.Ignore());
         CreateMap<SubmissionDto, Submission>().ReverseMap();
 
         CreateMap<ActivityTypeDto, ActivityType>().ReverseMap();

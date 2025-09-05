@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Domain.Models.Entities;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,8 +9,7 @@ namespace LMS.Shared.DTOs.EntityDto;
 
 public record SubmissionCreateDto
 {
-    public DateTime SubmissionDate { get; set; }
-    public string ApplicationUserId { get; set; }
-    //public Guid DocumentId { get; set; }
-
+    public string? Description { get; set; }
+    public List<string> SubmitterIds { get; set; }
+    public Guid AssignmentId { get; set; }
 }

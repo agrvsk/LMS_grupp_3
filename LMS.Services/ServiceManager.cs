@@ -13,6 +13,7 @@ public class ServiceManager : IServiceManager
     private Lazy<IUserService> userService;
     private Lazy<IActivityTypeService> activityTypeService;
     private Lazy<IDateValidationService> dateValidationService;
+    private Lazy<IAssignmentService> assignmentService;
 
     public IAuthService AuthService => authService.Value;
 
@@ -30,6 +31,7 @@ public class ServiceManager : IServiceManager
 
     public IActivityTypeService ActivityTypeService => activityTypeService.Value;
     public IDateValidationService DateValidationService => dateValidationService.Value;
+    public IAssignmentService AssignmentService => assignmentService.Value;
 
     public ServiceManager(Lazy<IAuthService> authService
         , Lazy<ICourseService> courseService
@@ -40,6 +42,7 @@ public class ServiceManager : IServiceManager
         , Lazy<IUserService> userService
         , Lazy<IActivityTypeService> activityTypeService
         , Lazy<IDateValidationService> dateValidationService
+        , Lazy<IAssignmentService> assignmentService
 
         )
     {
@@ -52,6 +55,7 @@ public class ServiceManager : IServiceManager
         this.userService = userService;
         this.activityTypeService = activityTypeService;
         this.dateValidationService = dateValidationService;
+        this.assignmentService = assignmentService;
 
     }
 }

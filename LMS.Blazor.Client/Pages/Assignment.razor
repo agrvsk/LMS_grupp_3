@@ -1,0 +1,36 @@
+﻿@page "/assignments/{Id:guid}"
+@inject IApiService ApiService
+@rendermode InteractiveWebAssembly
+<h3>Assignment</h3>
+@if (AssignmentDto == null)
+{
+	<p><em>Loading...</em></p>
+}
+else
+{
+	<div class="card">
+		<div class="card-body">
+			<h5 class="card-title">@AssignmentDto.Name</h5>
+			<p class="card-text">@AssignmentDto.Description</p>
+			<p class="card-text"><strong>Due Date:</strong> @AssignmentDto.DueDate.ToString("f")</p>
+		</div>
+	</div>
+	<SubmissionAddComponent AssignmentId="@Id" />
+}
+
+@code {
+	[Parameter]
+	public Guid Id { get; set; }
+
+	private AssignmentDto? AssignmentDto;
+
+	protected override async Task OnParametersSetAsync()
+	{
+		await LoadAssignment();
+	}
+	private async Task LoadAssignment()
+	{
+		AssignmentDto = await ApiService.CallApiGetAsync<AssignmentDto>($"assignments/{Id}");
+	}
+
+}

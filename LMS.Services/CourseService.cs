@@ -33,6 +33,22 @@ public class CourseService : ICourseService
         var courseDtos = mapper.Map<List<CourseDto>>(courses);
         return courseDtos;
     }
+    public async Task<List<AssignmentDto>> GetAssignmentsByCourseIdAsync(Guid courseId)
+    {
+        var modules = await uow.ModuleRepository.GetModulesByCourseIdAsync(courseId);
+        var allAssignments = new List<Assignment>();
+        foreach (var mod in modules)
+        {
+            var activities = await uow.ModuleActivityRepository.GetModuleActivitiesByModuleIdAsync(mod.Id);
+            foreach (var act in activities)
+            {
+                var assignments = await uow.ModuleActivityRepository.GetAssignmentsByModuleActivityIdAsync(act.Id);
+                allAssignments.AddRange(assignments);
+            }
+        }
+        var assignmentDtos = mapper.Map<List<AssignmentDto>>(allAssignments);
+        return assignmentDtos;
+    }
     public async Task<CourseDto> CreateCourseAsync(CourseCreateDto courseDto)
     {
         var course= mapper.Map<Course>(courseDto);

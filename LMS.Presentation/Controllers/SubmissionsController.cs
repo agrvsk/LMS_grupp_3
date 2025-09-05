@@ -1,11 +1,13 @@
-﻿using System;
+﻿using LMS.Shared.DTOs.EntityDto;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
+using Service.Contracts;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using LMS.Shared.DTOs.EntityDto;
-using Microsoft.AspNetCore.Mvc;
-using Service.Contracts;
 
 namespace LMS.Presentation.Controllers
 {
@@ -43,13 +45,20 @@ namespace LMS.Presentation.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateSubmission([FromBody] SubmissionCreateDto submissionCreateDto)
+        public async Task<IActionResult> CreateSubmission([FromForm] string submissionDtoJson, IFormFile file)
         {
-            if (submissionCreateDto == null)
-                return BadRequest("Submission data is null");
+            Console.WriteLine("Received submissionDtoJson: " + submissionDtoJson);
+            if (string.IsNullOrEmpty(submissionDtoJson))
+                return BadRequest("Submission metadata missing.");
 
-            var createdSubmission = await _serviceManager.SubmissionService.CreateSubmissionAsync(submissionCreateDto);
-            return CreatedAtAction(nameof(GetSubmissionById), new { id = createdSubmission.Id }, createdSubmission );
+            var submissionDto = JsonConvert.DeserializeObject<SubmissionCreateDto>(submissionDtoJson);
+            if (submissionDto == null)
+                return BadRequest("Invalid submission data.");
+
+            var createdSubmission = await _serviceManager.SubmissionService
+                .CreateSubmissionAsync(submissionDto, file);
+
+            return CreatedAtAction(nameof(GetSubmissionById), new { id = createdSubmission.Id }, createdSubmission);
         }
 
 

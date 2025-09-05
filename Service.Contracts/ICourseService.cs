@@ -10,4 +10,5 @@ public interface ICourseService
     Task<CourseDto> CreateCourseAsync(CourseCreateDto course);
     Task<CourseDto> UpdateCourseAsync(CourseUpdateDto course);
     Task<bool> DeleteCourseAsync(Guid courseId);
+    Task<List<AssignmentDto>> GetAssignmentsByCourseIdAsync(Guid courseId);
 }

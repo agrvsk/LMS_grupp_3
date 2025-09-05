@@ -32,6 +32,16 @@ namespace LMS.Presentation.Controllers
             }
             return Ok(course);
         }
+        [HttpGet("{id}/assignments")]
+        public async Task<IActionResult> GetAssignmentsByCourseId(Guid id)
+        {
+            var assignments = await _serviceManager.CourseService.GetAssignmentsByCourseIdAsync(id);
+            if (assignments == null)
+            {
+                return NotFound();
+            }
+            return Ok(assignments);
+        }
 
         [HttpPost]
         public async Task<IActionResult> CreateCourse([FromBody] CourseCreateDto courseDto)

@@ -17,5 +17,6 @@ namespace Domain.Models.Entities
         public DateTime DueDate { get; set; }
         public List<Guid>? DocumentIds { get; set; }
         public List<Document>? Documents { get; set; }
+        public List<Submission> Submissions { get; set; } = new List<Submission>();
     }
 }
