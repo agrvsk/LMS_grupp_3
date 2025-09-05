@@ -13,6 +13,12 @@ else
 {
 	<h3 style="text-align: center">New course:</h3>
 	<div class="container mt-4">
+		@if (!string.IsNullOrEmpty(errorMessage))
+		{
+			<div class="alert alert-danger" role="alert">
+				<p>@errorMessage</p>
+			</div>
+		}
 
 		<div class="card shadow-sm">
 			<div class="card-body">
@@ -49,6 +55,7 @@ else
 @code {
 	[Parameter]
 	public Guid CourseId { get; set; }
+	private string? errorMessage;
 
 	public ModuleCreateDto Module { get; set; } = new ModuleCreateDto()
 	{
@@ -60,9 +67,26 @@ else
 
 	private async Task HandleValidSubmit()
 	{
-		Module.CourseId = CourseId;
-		var newCourseDto = await myApi.CallApiPostAsync<ModuleCreateDto, ModuleDto>("modules", Module);
-		Toggle();
+		EditContext editContext = new EditContext(Module);
+		ValidationMessageStore messageStore = new ValidationMessageStore(editContext);
+		try
+		{
+			Module.CourseId = CourseId;
+			var newCourseDto = await myApi.CallApiPostAsync<ModuleCreateDto, ModuleDto>("modules", Module);
+			Toggle();
+		}
+		catch (System.ComponentModel.DataAnnotations.ValidationException ex)
+		{
+			errorMessage = $"API Error:  - {ex.Message}";
+
+			Console.WriteLine(ex.Message);
+			messageStore.Clear();
+			messageStore.Add(new FieldIdentifier(Module, nameof(Module.StartDate)), ex.Message);
+			editContext.NotifyValidationStateChanged();
+			//StateHasChanged();
+
+		}
+
 	}
 	private bool isAdding = false;
 

@@ -1,7 +1,9 @@
-﻿using System.Net;
+﻿using System.ComponentModel.DataAnnotations;
+using System.Net;
 using System.Text.Json;
 using LMS.Blazor.Client.Models;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Forms;
 
 namespace LMS.Blazor.Client.Services;
 
@@ -38,10 +40,7 @@ public class ClientApiService(IHttpClientFactory httpClientFactory, NavigationMa
         if (response.StatusCode == HttpStatusCode.NotFound)
         {
             var errorJson = await response.Content.ReadAsStringAsync();
-
-            if (response.StatusCode == HttpStatusCode.NotFound)
                 throw new HttpRequestException(errorJson);
-
         }
 
         response.EnsureSuccessStatusCode();
@@ -59,7 +58,53 @@ public class ClientApiService(IHttpClientFactory httpClientFactory, NavigationMa
 
         var response = await httpClient.PostAsync($"proxy?endpoint={endpoint}", content, ct);
 
+        if (response.StatusCode == HttpStatusCode.BadRequest)
+        {
+            var errorJson = await response.Content.ReadAsStringAsync();
+            if (!string.IsNullOrEmpty(errorJson))
+            {
+                var errors = JsonSerializer.Deserialize<Dictionary<string, string[]>>(errorJson,
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
+                if (errors != null)
+                {
+                    foreach (var kvp in errors)
+                    {
+                      Console.WriteLine($"{kvp.Key}: {string.Join(", ", kvp.Value)}");
+                        
+                        throw new ValidationException(string.Join(", ", kvp.Value ));
+                        break;
+                        //var field = new FieldIdentifier(Module, kvp.Key);
+                        //foreach (var error in kvp.Value)
+                        //{
+                        //    messageStore?.Add(field, error);
+                        //}
+                    }
+                    //editContext?.NotifyValidationStateChanged();
+                }
+
+                //throw new ValidationException(errors);
+
+            }
+        }
+        /*
+    if (response.StatusCode == HttpStatusCode.BadRequest)
+    {
+        if (errors != null)
+        {
+            foreach (var kvp in errors)
+            {
+                var field = new FieldIdentifier(Module, kvp.Key);
+                foreach (var error in kvp.Value)
+                {
+                    messageStore?.Add(field, error);
+                }
+            }
+
+            editContext?.NotifyValidationStateChanged();
+        }
+    }
+        */
 
         response.EnsureSuccessStatusCode();
 
