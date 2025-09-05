@@ -1,80 +1,134 @@
-﻿@using LMS.Blazor.Client.Services
-@using LMS.Shared.DTOs.EntityDto
-<div class="container mt-4">
-	<EditForm class="form" Model="@ModuleUpdDto" OnValidSubmit="@HandleValidSubmit" FormName="EditModel">
-		<DataAnnotationsValidator />
-		<ValidationSummary />
-		<div>
-			<p>@Module.Id</p>
-		</div>
-		<div>
-			<InputText class="form-control" @bind-Value="@ModuleUpdDto.Name" id="name" placeholder="Name" />
-			<ValidationMessage For="@(() => ModuleUpdDto.Name)" />
-		</div>
-		<div>
-			<InputDate class="form-control" @bind-Value="@ModuleUpdDto.StartDate" id="Start" placeholder="Start" />
-			<ValidationMessage For="@(() => ModuleUpdDto.StartDate)" />
-		</div>
-		<div>
-			<InputDate class="form-control" @bind-Value="@ModuleUpdDto.EndDate" id="End" placeholder="End" />
-			<ValidationMessage For="@(() => ModuleUpdDto.EndDate)" />
-		</div>
-		<button type="cancel" class="btn btn-primary" @onclick="StopEditing">Cancel</button>
-		<button type="submit" class="btn btn-primary">Save</button>
-		
+﻿@using LMS.Shared.DTOs.EntityDto
+@inject IApiService ApiService
 
-	</EditForm>
+<div class="card p-3 mb-2 shadow-sm">
+    <EditForm Model="@ModuleUpdDto" OnValidSubmit="@HandleValidSubmit">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
 
+        <div class="mb-2">
+            <label>Name</label>
+            <InputText class="form-control" @bind-Value="ModuleUpdDto.Name" />
+            <ValidationMessage For="@(() => ModuleUpdDto.Name)" />
+        </div>
+
+        <div class="mb-2">
+            <label>Description</label>
+            <InputTextArea class="form-control" @bind-Value="ModuleUpdDto.Description" />
+            <ValidationMessage For="@(() => ModuleUpdDto.Description)" />
+        </div>
+
+        <div class="mb-2">
+            <label>Start Date</label>
+            <InputDate class="form-control" @bind-Value="ModuleUpdDto.StartDate"
+                       min="@CourseStart.ToString("yyyy-MM-dd")"
+                       max="@CourseEnd.ToString("yyyy-MM-dd")" />
+            <ValidationMessage For="@(() => ModuleUpdDto.StartDate)" />
+        </div>
+
+        <div class="mb-2">
+            <label>End Date</label>
+            <InputDate class="form-control" @bind-Value="ModuleUpdDto.EndDate"
+                       min="@CourseStart.ToString("yyyy-MM-dd")"
+                       max="@CourseEnd.ToString("yyyy-MM-dd")" />
+            <ValidationMessage For="@(() => ModuleUpdDto.EndDate)" />
+        </div>
+
+        <div class="d-flex justify-content-end mt-3">
+            <button type="button" class="btn btn-secondary me-2" @onclick="CancelEdit">Cancel</button>
+            <button type="submit" class="btn btn-primary">Save</button>
+        </div>
+    </EditForm>
 </div>
 
 @code {
-	[Inject]
-	private IApiService myApi { get; set; } = default!;
+    [Parameter] public ModuleDto Module { get; set; } = default!;
+    [Parameter] public Guid CurrentCourseId { get; set; }
+    [Parameter] public DateTime CourseStart { get; set; }
+    [Parameter] public DateTime CourseEnd { get; set; }
+    [Parameter] public EventCallback<ModuleDto> OnEditDone { get; set; }
 
-	[Parameter]
-	public ModuleDto Module { get; set; }
+    private ModuleUpdateDto ModuleUpdDto { get; set; } = new ModuleUpdateDto();
 
-	[Parameter]
-	public Guid currentCourseId { get; set; }
+    protected override void OnInitialized()
+    {
+        ModuleUpdDto = new ModuleUpdateDto
+        {
+            Id = Module.Id,
+            CourseId = CurrentCourseId,
+            Name = Module.Name,
+            Description = Module.Description,
+            StartDate = Module.StartDate.Date,
+            EndDate = Module.EndDate.Date
+        };
+    }
 
-	[Parameter]
-	public EventCallback<ModuleDto> OnEditDone { get; set; }
+    private async Task HandleValidSubmit()
+    {
+        // Ta bort tid innan API-anrop
+        ModuleUpdDto.StartDate = ModuleUpdDto.StartDate.Date;
+        ModuleUpdDto.EndDate = ModuleUpdDto.EndDate.Date;
 
-	public ModuleUpdateDto ModuleUpdDto { get; set; }
+        Module = await ApiService.CallApiPutAsync<ModuleUpdateDto, ModuleDto>($"modules/{Module.Id}", ModuleUpdDto);
+        await CancelEdit();
+    }
 
-	protected override async Task OnInitializedAsync()
-	{
-		//await base.OnInitializedAsync();
-		ModuleUpdDto = new ModuleUpdateDto
-		{
-			Id = Module.Id,
-			//			CourseId = Guid.Parse( currentCourseId ),
-			CourseId = currentCourseId,
-			Name = Module.Name,
-			Description = Module.Description,
-			StartDate = Module.StartDate,
-			EndDate = Module.EndDate
-		};
-
-
-	}
-
-
-	private async Task StopEditing()
-	{
-		await OnEditDone.InvokeAsync(Module);
-	}
-
-
-
-
-
-	private async Task HandleValidSubmit()
-	{
-		Module = await myApi.CallApiPutAsync<ModuleUpdateDto, ModuleDto>($"modules/{Module.Id}", ModuleUpdDto);
-		Console.WriteLine($"Course '{ModuleUpdDto.Name}' saved successfully!");
-		StopEditing();
-	}
-
-
+    private async Task CancelEdit()
+    {
+        if (OnEditDone.HasDelegate)
+        {
+            await OnEditDone.InvokeAsync(Module);
+        }
+    }
 }
+@* 
+	// [Inject]
+	// private IApiService myApi { get; set; } = default!;
+
+	// [Parameter]
+	// public ModuleDto Module { get; set; }
+
+	// [Parameter]
+	// public Guid currentCourseId { get; set; }
+
+	// [Parameter]
+	// public EventCallback<ModuleDto> OnEditDone { get; set; }
+
+	// public ModuleUpdateDto ModuleUpdDto { get; set; }
+
+	// protected override async Task OnInitializedAsync()
+	// {
+	// 	//await base.OnInitializedAsync();
+	// 	ModuleUpdDto = new ModuleUpdateDto
+	// 	{
+	// 		Id = Module.Id,
+	// 		//			CourseId = Guid.Parse( currentCourseId ),
+	// 		CourseId = currentCourseId,
+	// 		Name = Module.Name,
+	// 		Description = Module.Description,
+	// 		StartDate = Module.StartDate,
+	// 		EndDate = Module.EndDate
+	// 	};
+
+
+	// }
+
+
+	// private async Task StopEditing()
+	// {
+	// 	await OnEditDone.InvokeAsync(Module);
+	// }
+
+
+
+
+
+	// private async Task HandleValidSubmit()
+	// {
+	// 	Module = await myApi.CallApiPutAsync<ModuleUpdateDto, ModuleDto>($"modules/{Module.Id}", ModuleUpdDto);
+	// 	Console.WriteLine($"Course '{ModuleUpdDto.Name}' saved successfully!");
+	// 	StopEditing();
+	// }
+
+ *@
+

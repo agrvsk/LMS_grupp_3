@@ -15,13 +15,15 @@ public class DateValidationService : IDateValidationService
 
     private readonly IModuleService moduleService;
     private readonly IModuleActivityService moduleActivityService;
+    private readonly ICourseService courseService;
 
-    public DateValidationService(IMapper mapper, IModuleService moduleService, IModuleActivityService moduleActivityService)
+    public DateValidationService(IMapper mapper, IModuleService moduleService, IModuleActivityService moduleActivityService, ICourseService courseService)
     {
         this.mapper = mapper;
 
         this.moduleService = moduleService;
         this.moduleActivityService = moduleActivityService;
+        this.courseService = courseService;
     }
     public bool ValidateCourseDates(DateTime startDate, DateTime endDate)
     {
