@@ -16,4 +16,5 @@ public record SubmissionDto
     public DateTime SubmissionDate { get; set; }
     public string? Description { get; set; }
 
+    public DocumentDto? DocumentDto { get; set; }
 }

@@ -7,7 +7,6 @@
 @rendermode InteractiveWebAssembly
 @inject IApiService ApiService
 
-<h3>SubmissionAddComponent</h3>
 
 <div class="border">
 	<EditForm Model="@model" OnValidSubmit=HandleValidSubmit>
@@ -49,6 +48,7 @@
 
 @code 
 {
+	[Parameter] public EventCallback<DocumentDto> OnUploadSuccess { get; set; }
 	[CascadingParameter] private Task<AuthenticationState> AuthStateTask { get; set; }
 	[Parameter]
 	public Guid AssignmentId { get; set; }

@@ -7,6 +7,13 @@
 @attribute [Authorize]
 
 <div class="container-fluid">
+    @if (!string.IsNullOrEmpty(errorMessage))
+    {
+        <div class="alert alert-danger" role="alert">
+            <p>@errorMessage</p>
+        </div>
+    }
+
     <div class="row">
         <!-- L Sidebar area -->
         <div class="col-12 col-lg-3 border-end bg-light">
@@ -101,6 +108,8 @@
 
     private bool isEditingDocument = false;
     private Guid? editingDocumentId = null;
+    private string? errorMessage;
+
 
     // Lifecycle
     protected override async Task OnInitializedAsync()
@@ -127,6 +136,12 @@
             Members = await myApi.CallApiGetAsync<IEnumerable<UserDto>>($"users/course/{Id}");
             DocumentDtos = (await myApi.CallApiGetAsync<IEnumerable<DocumentDto>>($"documents/course/{Id}"))?.ToList() ?? new List<DocumentDto>();
         }
+        catch (HttpRequestException apiEx)
+        {
+            errorMessage = $"API Error: {apiEx.StatusCode} - {apiEx.Message}";
+            Console.WriteLine("there was an API error: " + apiEx.Message);
+        }
+
         catch (Exception ex)
         {
             Console.WriteLine($"Error loading course data: {ex.Message}");
@@ -445,6 +460,17 @@
 		<!-- L Sidebar area -->
 		<div class="col-12 col-lg-3 border-end bg-light">
 			<div>
+	@if (!string.IsNullOrEmpty(errorMessage))
+	{
+		<div class="alert alert-danger" role="alert">
+ 			<h4 class="alert-heading">Error</h4>
+ 			<p>@errorMessage</p>
+		</div>
+	}
+	<div class="row">
+		<!-- L Sidebar area -->
+		<div class="col-12 col-lg-3 border-end bg-light">
+			<div>
 				<DocumentComponent Documents="@DocumentDtos" />
 				<DocumentAddComponent ParentId=@Id ParentType="Course" OnUploadSuccess="HandleUploadSuccess"/>
 
@@ -453,8 +479,18 @@
 
         <!-- Main content area -->
         <div class="col-12 col-lg-6">
-            <h3>Kurs @CurrentCourse?.Name</h3>
-            <p>@CurrentCourse?.Description</p>
+			<ErrorBoundary>
+				<ChildContent>
+		            <h3>Kurs @CurrentCourse?.Name</h3>
+			        <p>@CurrentCourse?.Description</p>
+				</ChildContent>
+				<ErrorContent>
+					<div class="alert alert-danger" role="alert">
+						<h4 class="alert-heading">Error</h4>
+						<p>ERROR!!! @errorMessage</p>
+					</div>
+				</ErrorContent>
+			</ErrorBoundary>
 
             <button type="cancel" class="btn btn-primary" @onclick="EditCourse">Change course</button>
 
@@ -519,6 +555,7 @@
 	private IEnumerable<ModuleDto>? Modules { get; set; }
 	private IEnumerable<UserDto>? Members { get; set; }
 	private List<DocumentDto> DocumentDtos { get; set; } = new List<DocumentDto>();
+	private string? errorMessage;
 
 	protected override async Task OnInitializedAsync()
 	{
@@ -559,19 +596,19 @@
 		isEditingModule = true;
 		CurrentModuleGuid = myId;
 	}
-	
-    private void Refresh(CourseDto dto)
-    {
-        isEditingCourse = false;
-        if (CurrentCourse != null && CurrentCourse.Id == dto.Id)
-        {
-            CurrentCourse.Name = dto.Name;
-            CurrentCourse.Description = dto.Description;
-            CurrentCourse.StartDate = dto.StartDate;
-            CurrentCourse.EndDate = dto.EndDate;
-        }
+
+	private void Refresh(CourseDto dto)
+	{
 		isEditingCourse = false;
-        StateHasChanged();
+		if (CurrentCourse != null && CurrentCourse.Id == dto.Id)
+		{
+			CurrentCourse.Name = dto.Name;
+			CurrentCourse.Description = dto.Description;
+			CurrentCourse.StartDate = dto.StartDate;
+			CurrentCourse.EndDate = dto.EndDate;
+		}
+		isEditingCourse = false;
+		StateHasChanged();
 	}
 
 	private async Task LoadCourse()
@@ -591,8 +628,14 @@
 			DocumentDtos = respDocs?.ToList() ?? new List<DocumentDto>();
 
 		}
+		catch (HttpRequestException apiEx)
+		{
+			errorMessage = $"API Error: {apiEx.StatusCode} - {apiEx.Message}";
+			Console.WriteLine("there was an API error: " + apiEx.Message);
+		}
 		catch (Exception ex)
 		{
+			errorMessage = $"Something went wrong: {ex.Message}";
 			Console.WriteLine("there was an error: " + ex.Message);
 		}		
 	}

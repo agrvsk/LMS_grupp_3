@@ -4,6 +4,12 @@
 
 <AuthorizeView Roles="Teacher, Student">
     <Authorized>
+        @if (!string.IsNullOrEmpty(errorMessage))
+        {
+            <div class="alert alert-danger" role="alert">
+                <p>@errorMessage</p>
+            </div>
+        }
         @if (isTeacher)
         {
             <section class="p-4 bg-light rounded shadow-sm">
@@ -46,11 +52,11 @@
                         {
                           foreach (ModuleActivityDto activityDto in item.ModuleActivities)
                             {
-                                <small @onclick="Toggle">@GetActivityTypeName(@activityDto.ActivityTypeId)  @activityDto.Name - @activityDto.StartDate.ToShortTimeString() - @activityDto.EndDate.ToShortTimeString()</small>
+                                <small class="card-hover" @onclick="Toggle">@GetActivityTypeName(@activityDto.ActivityTypeId)  @activityDto.Name - @activityDto.StartDate.ToShortTimeString() - @activityDto.EndDate.ToShortTimeString()</small>
                                 <br />
                                 @if (isEditing)
                                 {
-                                    <SubmissionAddComponent/>
+                                    <SubmissionAddComponent OnUploadSuccess="HandleUploadSuccess" />
                                 }
                             }
                         }
@@ -121,6 +127,8 @@
 
     Guid? currentlyEditing;
     bool isEditing = false;
+    private string? errorMessage;
+
 
     protected override async Task OnInitializedAsync()
     {
@@ -152,7 +160,16 @@
     private async Task LoadAssignments(string CourseId)
     {
         if (!isStudent) return;
-        Assignments = await myApi.CallApiGetAsync<IEnumerable<AssignmentDto>>($"courses/{CourseId}/assignments");
+        try
+        {
+            Assignments = await myApi.CallApiGetAsync<IEnumerable<AssignmentDto>>($"courses/{CourseId}/assignments");
+        }
+        catch (HttpRequestException apiEx)
+        {
+            errorMessage = $"API Error: {apiEx.StatusCode} - {apiEx.Message}";
+            Console.WriteLine("there was an API error: " + apiEx.Message);
+        }
+
     }
 
     private async Task LoadActivities(string? courseIdAsString)
@@ -181,6 +198,11 @@
 
             Types = (await myApi.CallApiGetAsync<List<ActivityTypeDto>>("activity-types"));
 
+        }
+        catch (HttpRequestException apiEx)
+        {
+            errorMessage = $"API Error: {apiEx.StatusCode} - {apiEx.Message}";
+            Console.WriteLine("there was an API error: " + apiEx.Message);
         }
         catch (Exception ex)
         {

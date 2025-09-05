@@ -9,6 +9,7 @@ using Domain.Models.Entities;
 using LMS.Shared.DTOs.EntityDto;
 using Microsoft.AspNetCore.Http;
 using Service.Contracts;
+using Domain.Models.Exceptions;
 
 namespace LMS.Services;
 
@@ -29,6 +30,7 @@ public class ModuleActivityService : IModuleActivityService
     public async Task<ModuleActivityDto?> GetModuleActivityByIdAsync(Guid moduleActivityId)
     {
         var moduleActivity = await uow.ModuleActivityRepository.GetModuleActivityByIdAsync(moduleActivityId);
+        if(moduleActivity == null) throw new ActivityNotFoundException(moduleActivityId);
         var moduleActivityDto = mapper.Map<ModuleActivityDto>(moduleActivity);
 
         return moduleActivityDto;

@@ -6,9 +6,11 @@ using System.Threading.Tasks;
 using AutoMapper;
 using Domain.Contracts.Repositories;
 using Domain.Models.Entities;
+using Domain.Models.Exceptions;
 using LMS.Shared.DTOs.EntityDto;
 using Microsoft.AspNetCore.Http;
 using Service.Contracts;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace LMS.Services;
 
@@ -31,10 +33,11 @@ public class SubmissionService : ISubmissionService
         return await uow.SubmissionRepository.GetAllSubmissionsAsync();
     }
 
-    public async Task<Submission?> GetSubmissionByIdAsync(Guid submissionId)
+    public async Task<SubmissionDto?> GetSubmissionByIdAsync(Guid submissionId)
     {
-
-        return await uow.SubmissionRepository.GetSubmissionByIdAsync(submissionId);
+        var submission = await uow.SubmissionRepository.GetSubmissionByIdAsync(submissionId);
+        if(submission==null)throw new SubmissionNotFoundException(submissionId);
+        return mapper.Map<SubmissionDto>(submission);
     }
 
     public async Task<List<SubmissionDto>> GetSubmissionsByApplicationUserIdAsync(string userId)
