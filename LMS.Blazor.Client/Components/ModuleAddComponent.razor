@@ -36,13 +36,19 @@ else
 
                     <div class="mb-3">
                         <label for="moduleStartDate" class="form-label">Start Date</label>
-                        <InputDate id="moduleStartDate" class="form-control" @bind-Value="ModuleDto.StartDate" />
+                        <InputDate id="moduleStartDate" class="form-control"
+                                   @bind-Value="ModuleDto.StartDate"
+                                   min="@CourseStart.ToString("yyyy-MM-dd")"
+                                   max="@CourseEnd.ToString("yyyy-MM-dd")" />
                         <ValidationMessage For="@(() => ModuleDto.StartDate)" />
                     </div>
 
                     <div class="mb-3">
                         <label for="moduleEndDate" class="form-label">End Date</label>
-                        <InputDate id="moduleEndDate" class="form-control" @bind-Value="ModuleDto.EndDate" />
+                        <InputDate id="moduleEndDate" class="form-control"
+                                   @bind-Value="ModuleDto.EndDate"
+                                   min="@CourseStart.ToString("yyyy-MM-dd")"
+                                   max="@CourseEnd.ToString("yyyy-MM-dd")" />
                         <ValidationMessage For="@(() => ModuleDto.EndDate)" />
                     </div>
 
@@ -58,11 +64,11 @@ else
 
 @code {
     [Parameter] public Guid CourseId { get; set; }
+    [Parameter] public DateTime CourseStart { get; set; }
+    [Parameter] public DateTime CourseEnd { get; set; }
     [Parameter] public EventCallback<ModuleDto> OnModuleAdded { get; set; }
 
     private bool isAdding = false;
-
-    // DTO som skickas till backend
     private ModuleCreateDto ModuleDto { get; set; } = new ModuleCreateDto();
 
     private void Toggle()
@@ -71,12 +77,11 @@ else
 
         if (isAdding)
         {
-            // Initiera DTO med nödvändiga fält
             ModuleDto = new ModuleCreateDto
             {
                 CourseId = CourseId,
-                StartDate = DateTime.Today,
-                EndDate = DateTime.Today.AddMonths(1)
+                StartDate = CourseStart.Date,
+                EndDate = CourseEnd.Date
             };
         }
     }
@@ -85,23 +90,18 @@ else
     {
         try
         {
-            // Logga DTO för felsökning
-            var json = System.Text.Json.JsonSerializer.Serialize(ModuleDto, new System.Text.Json.JsonSerializerOptions { WriteIndented = true });
-            Console.WriteLine("Sending Module DTO to API:");
-            Console.WriteLine(json);
+            // Ta bort tid innan API-anrop
+            ModuleDto.StartDate = ModuleDto.StartDate.Date;
+            ModuleDto.EndDate = ModuleDto.EndDate.Date;
 
-            // Skicka till backend via proxy
             var newModule = await ApiService.CallApiPostAsync<ModuleCreateDto, ModuleDto>("modules", ModuleDto);
 
-            // Returnera resultatet till föräldrakomponenten
             await OnModuleAdded.InvokeAsync(newModule);
-
-            Toggle(); // Stäng formuläret
+            Toggle();
         }
         catch (Exception ex)
         {
             Console.Error.WriteLine($"Error adding module: {ex.Message}");
-            // Här kan du även visa ett toast/alert till användaren
         }
     }
 }

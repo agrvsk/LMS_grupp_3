@@ -56,7 +56,10 @@ else
             <div class="p-3 border rounded shadow-sm bg-white sticky-top" style="top: 1rem;">
                 <section class="mb-4">
                     <h5>Moduler</h5>
-                    <ModuleAddComponent CourseId="@Id" OnModuleAdded="AddModule" />
+                    <ModuleAddComponent CourseId="@Id" 
+                                        CourseStart="@currentCourse.StartDate.Date"
+                                        CourseEnd="@currentCourse.EndDate.Date"
+                                        OnModuleAdded="AddModule" />
 
                     @if (modules?.Any() == true)
                     {
@@ -68,6 +71,8 @@ else
                                     {
                                         <ModuleEditComponent Module="module"
                                                              CurrentCourseId="@currentCourse.Id"
+                                                             CourseStart="@currentCourse.StartDate.Date"
+                                                             CourseEnd="@currentCourse.EndDate.Date"
                                                              OnEditDone="StopEditingModule"
                                                              @key="module.Id" />
                                     }

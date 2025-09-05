@@ -15,13 +15,15 @@ public class DateValidationService : IDateValidationService
 
     private readonly IModuleService moduleService;
     private readonly IModuleActivityService moduleActivityService;
+    private readonly ICourseService courseService;
 
-    public DateValidationService(IMapper mapper, IModuleService moduleService, IModuleActivityService moduleActivityService)
+    public DateValidationService(IMapper mapper, IModuleService moduleService, IModuleActivityService moduleActivityService, ICourseService courseService)
     {
         this.mapper = mapper;
 
         this.moduleService = moduleService;
         this.moduleActivityService = moduleActivityService;
+        this.courseService = courseService;
     }
     public bool ValidateCourseDates(DateTime startDate, DateTime endDate)
     {
@@ -29,26 +31,48 @@ public class DateValidationService : IDateValidationService
     }
     public async Task<bool> ValidateModuleDatesAsync(DateTime startDate, DateTime endDate, Guid courseId, Guid? moduleId = null)
     {
-        //string message = "";
-        if (!validateDates(startDate, endDate))
-        {
-            //message = "Invalid date range.";
-            return (false/*, message*/);
-        }
+        if (startDate >= endDate)
+            return false;
+
+        var course = await courseService.GetCourseByIdAsync(courseId);
+        if (course == null)
+            return false;
+
+        // Kontrollera att modulen ligger inom kursens datumintervall
+        if (startDate.Date < course.StartDate.Date || endDate.Date > course.EndDate.Date)            
+            return false;
+
         var modules = await moduleService.GetModulesByCourseIdAsync(courseId);
         if (moduleId.HasValue)
-        {
             modules = modules.Where(m => m.Id != moduleId.Value).ToList();
-        }
+
         foreach (var module in modules)
         {
             if (OverlappingPeriods(startDate, endDate, module.StartDate, module.EndDate))
-            {
-                //message = $"Module dates overlap with existing module '{module.Title}' ({module.StartDate.ToShortDateString()} - {module.EndDate.ToShortDateString()}).";
-                return (false /*,message*/);
-            }
+                return false;
         }
-        return (true/*, message*/);
+
+        return true;
+        ////string message = "";
+        //if (!validateDates(startDate, endDate))
+        //{
+        //    //message = "Invalid date range.";
+        //    return (false/*, message*/);
+        //}
+        //var modules = await moduleService.GetModulesByCourseIdAsync(courseId);
+        //if (moduleId.HasValue)
+        //{
+        //    modules = modules.Where(m => m.Id != moduleId.Value).ToList();
+        //}
+        //foreach (var module in modules)
+        //{
+        //    if (OverlappingPeriods(startDate, endDate, module.StartDate, module.EndDate))
+        //    {
+        //        //message = $"Module dates overlap with existing module '{module.Title}' ({module.StartDate.ToShortDateString()} - {module.EndDate.ToShortDateString()}).";
+        //        return (false /*,message*/);
+        //    }
+        //}
+        //return (true/*, message*/);
     }
     public async Task<bool> ValidateModuleActivityDatesAsync(DateTime startDate, DateTime endDate, Guid moduleId, Guid? activityId = null)
     {
@@ -91,8 +115,8 @@ public class DateValidationService : IDateValidationService
                                       DateTime bStart, DateTime bEnd)
     {
 
-
-        return ((aEnd < bStart && aStart < bStart) ||
-                    (bEnd < aStart && bStart < aStart));
+         return aStart <= bEnd && bStart <= aEnd;
+        //return ((aEnd < bStart && aStart < bStart) ||
+        //            (bEnd < aStart && bStart < aStart));
     }
 }
