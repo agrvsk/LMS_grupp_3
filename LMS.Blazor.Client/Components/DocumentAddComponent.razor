@@ -92,9 +92,11 @@
 
 		// Add Dto as JSON
 		var json = JsonSerializer.Serialize(documentDto);
+		Console.WriteLine(json);
 		content.Add(new StringContent(json, Encoding.UTF8), "documentDtoJson");
 
 		var response = await ApiService.CallApiPostMultipartAsync<DocumentDto>("documents", content);
+		Console.WriteLine("Result from API: " + (response != null ? "Success" : "Failure"));
 
 		if(response != null)
 		{

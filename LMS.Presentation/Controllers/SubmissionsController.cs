@@ -45,8 +45,9 @@ namespace LMS.Presentation.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateSubmission([FromBody] string submissionDtoJson, IFormFile file)
+        public async Task<IActionResult> CreateSubmission([FromForm] string submissionDtoJson, IFormFile file)
         {
+            Console.WriteLine("Received submissionDtoJson: " + submissionDtoJson);
             if (string.IsNullOrEmpty(submissionDtoJson))
                 return BadRequest("Submission metadata missing.");
 

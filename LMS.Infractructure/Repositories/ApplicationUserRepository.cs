@@ -23,7 +23,7 @@ public class ApplicationUserRepository:RepositoryBase<ApplicationUser>, IApplica
     }
     public async Task<ApplicationUser?> GetUserByIdAsync(string userId)
     {
-        return await FindByConditionAsync(u => u.Id == userId, trackChanges: false)
+        return await FindByConditionAsync(u => u.Id == userId, trackChanges: true)
             .ContinueWith(task => task.Result.SingleOrDefault());
     }
     public async Task<List<ApplicationUser>> GetAllUsersAsync()

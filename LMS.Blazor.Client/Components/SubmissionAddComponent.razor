@@ -70,10 +70,16 @@
 
 	private async Task HandleValidSubmit()
 	{
+		Console.WriteLine("Trying to submit");
 		if (!model.SubmitterIds.Contains(UploaderId))
 			model.SubmitterIds.Insert(0, UploaderId);
 
 		using var content = new MultipartFormDataContent();
+
+		var fileContent = new ByteArrayContent(model.documentInfo.Content);
+		fileContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(model.documentInfo.ContentType ?? "application/octet-stream");
+		content.Add(fileContent, "File", model.documentInfo.FileName);
+
 		var sub = new
 		{
 			AssignmentId = AssignmentId,
@@ -81,14 +87,12 @@
 			Description = model.Comment
 		};
 		var submissionJson = JsonSerializer.Serialize(sub);
+		Console.WriteLine(submissionJson);
 
-		var fileContent = new ByteArrayContent(model.documentInfo.Content);
-		fileContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(model.documentInfo.ContentType ?? "application/octet-stream");
-		content.Add(fileContent, "File", model.documentInfo.FileName);
-
-		content.Add(new StringContent(submissionJson, Encoding.UTF8, "application/json"), "submissionDtoJson");
+		content.Add(new StringContent(submissionJson, Encoding.UTF8), "submissionDtoJson");
 
 		var result = await ApiService.CallApiPostMultipartAsync<SubmissionDto>("submissions", content);
+		Console.WriteLine("Result from API: " + (result != null ? "Success" : "Failure"));
 		if (result != null)
 		{
 			uploadSuccess = true;
@@ -124,9 +128,10 @@
 		{
 			model.SubmitterIds = selectedOptions.ToList();
 		}
+		Console.WriteLine("Selected SubmitterIds: " + string.Join(", ", model.SubmitterIds));
 	}
 	
-	protected override async Task OnInitializedAsync()
+	protected override async Task OnParametersSetAsync()
 	{
 		var authState = await AuthStateTask;
 		var user = authState.User;

@@ -10,7 +10,7 @@ public class Submission
 {
     public Guid Id { get; set; }
     public DateTime SubmissionDate { get; set; }
-    public List<ApplicationUser> Submitters { get; set; } 
+    public List<ApplicationUser> Submitters { get; set; } = new List<ApplicationUser>();
     public Guid DocumentId { get; set; } 
     public Document? SubmissionDocument { get; set; }
     public Guid AssignmentId { get; set; }

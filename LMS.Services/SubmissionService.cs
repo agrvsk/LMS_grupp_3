@@ -60,8 +60,9 @@ public class SubmissionService : ISubmissionService
 
         var submission = mapper.Map<Submission>(submissionCreateDto);
         submission.Id = Guid.NewGuid();
+        submission.SubmissionDate = DateTime.UtcNow;
 
-        foreach(var userId in submissionCreateDto.SubmitterIds)
+        foreach (var userId in submissionCreateDto.SubmitterIds)
         {
             var user = await uow.ApplicationUserRepository.GetUserByIdAsync(userId);
             if (user == null)
@@ -74,11 +75,13 @@ public class SubmissionService : ISubmissionService
             Id = Guid.NewGuid(),
             Name = file.FileName,
             FilePath = path.Result,
+            UploaderId = submissionCreateDto.SubmitterIds.First(),
             ParentId = submission.Id,
             ParentType = "Submission",
             UploadDate = DateTime.UtcNow
         };
-        
+        submission.DocumentId = document.Id;
+
         uow.DocumentRepository.Create(document);
         uow.SubmissionRepository.Create(submission);
 
