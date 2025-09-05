@@ -37,6 +37,7 @@ public class ClientApiService(IHttpClientFactory httpClientFactory, NavigationMa
             navigationManager.NavigateTo("AccessDenied");
         }
 
+        //Handle customized errors
         if (response.StatusCode == HttpStatusCode.NotFound)
         {
             var errorJson = await response.Content.ReadAsStringAsync();
@@ -58,53 +59,24 @@ public class ClientApiService(IHttpClientFactory httpClientFactory, NavigationMa
 
         var response = await httpClient.PostAsync($"proxy?endpoint={endpoint}", content, ct);
 
+        //Handle customized errors
         if (response.StatusCode == HttpStatusCode.BadRequest)
         {
             var errorJson = await response.Content.ReadAsStringAsync();
             if (!string.IsNullOrEmpty(errorJson))
             {
+                //ModelState
                 var errors = JsonSerializer.Deserialize<Dictionary<string, string[]>>(errorJson,
                 new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
                 if (errors != null)
                 {
-                    foreach (var kvp in errors)
-                    {
-                      Console.WriteLine($"{kvp.Key}: {string.Join(", ", kvp.Value)}");
-                        
-                        throw new ValidationException(string.Join(", ", kvp.Value ));
-                        break;
-                        //var field = new FieldIdentifier(Module, kvp.Key);
-                        //foreach (var error in kvp.Value)
-                        //{
-                        //    messageStore?.Add(field, error);
-                        //}
-                    }
-                    //editContext?.NotifyValidationStateChanged();
-                }
-
-                //throw new ValidationException(errors);
-
-            }
-        }
-        /*
-    if (response.StatusCode == HttpStatusCode.BadRequest)
-    {
-        if (errors != null)
-        {
-            foreach (var kvp in errors)
-            {
-                var field = new FieldIdentifier(Module, kvp.Key);
-                foreach (var error in kvp.Value)
-                {
-                    messageStore?.Add(field, error);
+                    var rrr = errors.FirstOrDefault();
+                    Console.WriteLine($"{rrr.Key}: {string.Join(", ", rrr.Value)}");
+                    throw new ValidationException(string.Join(", ", rrr.Value));
                 }
             }
-
-            editContext?.NotifyValidationStateChanged();
         }
-    }
-        */
 
         response.EnsureSuccessStatusCode();
 
@@ -121,6 +93,26 @@ public class ClientApiService(IHttpClientFactory httpClientFactory, NavigationMa
     {
         await authReady.WaitAsync();
         var response = await httpClient.PostAsync($"proxy/upload?endpoint={endpoint}", data, ct);
+
+        //Handle customized errors
+        if (response.StatusCode == HttpStatusCode.BadRequest)
+        {
+            var errorJson = await response.Content.ReadAsStringAsync();
+            if (!string.IsNullOrEmpty(errorJson))
+            {
+                //ModelState
+                var errors = JsonSerializer.Deserialize<Dictionary<string, string[]>>(errorJson,
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+                if (errors != null)
+                {
+                    var rrr = errors.FirstOrDefault();
+                    Console.WriteLine($"{rrr.Key}: {string.Join(", ", rrr.Value)}");
+                    throw new ValidationException(string.Join(", ", rrr.Value));
+                }
+            }
+        }
+
         response.EnsureSuccessStatusCode();
         
         var result = await JsonSerializer.DeserializeAsync<TResponse>(
@@ -141,6 +133,26 @@ public class ClientApiService(IHttpClientFactory httpClientFactory, NavigationMa
 
         var response = await httpClient.PutAsync($"proxy?endpoint={endpoint}", content, ct);
 
+        //Handle customized errors
+        if (response.StatusCode == HttpStatusCode.BadRequest)
+        {
+            var errorJson = await response.Content.ReadAsStringAsync();
+            if (!string.IsNullOrEmpty(errorJson))
+            {
+                //ModelState
+                var errors = JsonSerializer.Deserialize<Dictionary<string, string[]>>(errorJson,
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+                if (errors != null)
+                {
+                    var rrr = errors.FirstOrDefault();
+                    Console.WriteLine($"{rrr.Key}: {string.Join(", ", rrr.Value)}");
+                    throw new ValidationException(string.Join(", ", rrr.Value));
+                }
+
+
+            }
+        }
 
 
         response.EnsureSuccessStatusCode();

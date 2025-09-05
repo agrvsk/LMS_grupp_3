@@ -105,7 +105,15 @@
 			ModuleId = currentModuleId
 
 		};
-		Types = (await myApi.CallApiGetAsync<List<ActivityTypeDto>>("activity-types"));
+		try
+		{
+			Types = (await myApi.CallApiGetAsync<List<ActivityTypeDto>>("activity-types"));
+		}
+		catch(HttpRequestException ex)
+		{
+			errorMessage = $"API Error: {ex.StatusCode} - {ex.Message}";
+			Console.WriteLine("there was an API error: " + ex.Message);
+		}
 	}
 
 	private async Task StopEditing()
@@ -121,9 +129,9 @@
 			Console.WriteLine($"Course '{ActivityUpdDto.Name}' saved successfully!");
 			StopEditing();
 		}
-		catch (HttpRequestException apiEx)
+		catch (System.ComponentModel.DataAnnotations.ValidationException apiEx)
 		{
-			errorMessage = $"API Error: {apiEx.StatusCode} - {apiEx.Message}";
+			errorMessage = $"API Error:  - {apiEx.Message}";
 			Console.WriteLine("there was an API error: " + apiEx.Message);
 		}
 

@@ -67,8 +67,8 @@ else
 
 	private async Task HandleValidSubmit()
 	{
-		EditContext editContext = new EditContext(Module);
-		ValidationMessageStore messageStore = new ValidationMessageStore(editContext);
+		// EditContext editContext = new EditContext(Module);
+		// ValidationMessageStore messageStore = new ValidationMessageStore(editContext);
 		try
 		{
 			Module.CourseId = CourseId;
@@ -78,12 +78,11 @@ else
 		catch (System.ComponentModel.DataAnnotations.ValidationException ex)
 		{
 			errorMessage = $"API Error:  - {ex.Message}";
-
 			Console.WriteLine(ex.Message);
-			messageStore.Clear();
-			messageStore.Add(new FieldIdentifier(Module, nameof(Module.StartDate)), ex.Message);
-			editContext.NotifyValidationStateChanged();
-			//StateHasChanged();
+			// messageStore.Clear();
+			// messageStore.Add(new FieldIdentifier(Module, nameof(Module.StartDate)), ex.Message);
+			// editContext.NotifyValidationStateChanged();
+			StateHasChanged();
 
 		}
 

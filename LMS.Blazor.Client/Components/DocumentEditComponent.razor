@@ -22,6 +22,13 @@
     {
         <p class="text-success">Changes saved!</p>
     }
+    @if (!string.IsNullOrEmpty(errorMessage))
+    {
+        <div class="alert alert-danger" role="alert">
+            <p>@errorMessage</p>
+        </div>
+    }
+
 </EditForm>
 
 @code {
@@ -36,6 +43,7 @@
     private DocumentEditDto EditDocument = new();
     private bool isSaving = false;
     private bool saveSuccess = false;
+    private string? errorMessage;
 
     // protected override async Task OnInitializedAsync()
     // {
@@ -45,6 +53,10 @@
 
     protected override async Task OnParametersSetAsync()
     {
+        try
+        {
+
+
         EditDocument = await ApiService.CallApiGetAsync<DocumentEditDto>($"documents/{DocumentId}");
         if (EditDocument != null)
         {
@@ -52,10 +64,22 @@
         }
 
         saveSuccess = false;
+    
+        }
+        catch (HttpRequestException ApiEx)
+        {
+            errorMessage = $"API Error:  - {ApiEx.Message}";
+            Console.WriteLine(ApiEx.Message);
+            StateHasChanged();
+        }
+
     }
 
     private async Task OnSave()
     {
+        try
+        {
+
         isSaving = true;
         saveSuccess = false;
         StateHasChanged();
@@ -72,6 +96,16 @@
 
         isSaving = false;
         StateHasChanged();
+
+        }
+        catch (System.ComponentModel.DataAnnotations.ValidationException ex)
+        {
+            errorMessage = $"API Error:  - {ex.Message}";
+            Console.WriteLine(ex.Message);
+            StateHasChanged();
+
+        }
+
     }
 
     // private async Task OnSave()
