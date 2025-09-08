@@ -26,6 +26,7 @@ public class ClientApiService(IHttpClientFactory httpClientFactory, NavigationMa
 
     public async Task<T?> CallApiGetAsync<T>(string endpoint, CancellationToken ct = default)
     {
+        Console.WriteLine("try");
         await authReady.WaitAsync();
 
         var requestMessage = new HttpRequestMessage(HttpMethod.Get, $"proxy?endpoint={endpoint}");

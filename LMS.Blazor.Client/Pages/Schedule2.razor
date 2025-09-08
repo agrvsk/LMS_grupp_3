@@ -1,4 +1,4 @@
-﻿@page "/courses"
+﻿@page "/schedule"
 @using LMS.Blazor.Client.Services
 @using LMS.Shared.DTOs.EntityDTO
 @using LMS.Shared.DTOs.EntityDto
@@ -16,9 +16,16 @@
 	</div>
 }
 
-@if (Courses != null)
+@if (CourseId != null)
 {
-	<table class="table">
+	@* <Radzen.Blazor.RadzenScheduler Data="@MySchedule.Events"
+								 StartProperty="Start"
+								 EndProperty="End"
+								 TextProperty="Text"
+								 View="Month"
+							   TItem="ScheduleEvent">
+	</Radzen.Blazor.RadzenScheduler> *@
+	 <table class="table">
 		<thead>
 			<tr>
 				<th>Name</th>
@@ -44,23 +51,21 @@
 				</tr>
 			}
 		</tbody>
-	</table>
+	</table> 
 }
 
 @code
 {
-	public bool Loading { get; set; } = true;
-
-	private bool isAdding = false;
 
 	[Inject]
 	private IApiService myApi { get; set; } = default!;
 
-	
+
 
 	private List<CourseDto>? Courses { get; set; }
 	private string? errorMessage;
-
+	private ScheduleDto MySchedule { get; set; } = new();
+	private string CourseId = null;
 
 	protected override async Task OnInitializedAsync()
 	{
@@ -71,17 +76,17 @@
 		if (isTeacher)
 		{
 			await LoadCourse();
-			Loading = false;
 		}
 		else if (isStudent)
 		{
-			var courseIdAsString = user.FindFirst("CourseId")?.Value ?? null;
-			if (courseIdAsString != null) await InvokeAsync(() => Navigation.NavigateTo($"courses/{courseIdAsString}"));
+			CourseId = user.FindFirst("CourseId")?.Value ?? null;
 		}
 		else
 		{
 			await InvokeAsync(() => Navigation.NavigateTo("/account/login"));
 		}
+		MySchedule = await myApi.CallApiGetAsync<ScheduleDto>($"schedules/{CourseId}");
+		Console.WriteLine($"Schedule has {MySchedule.Modules.Count} modules.");
 	}
 
 	private async Task LoadCourse()
@@ -89,10 +94,9 @@
 		try
 		{
 			var response = await myApi.CallApiGetAsync<IEnumerable<CourseDto>>("courses");
-			var MySchedule = new ScheduleDto();
-			MySchedule = await myApi.CallApiGetAsync<ScheduleDto>($"schedules/b4ffc775-3855-44da-d258-08ddebc527a7");
 			Console.WriteLine($"Found {response?.Count()} courses.");
 			Courses = response?.ToList();
+			CourseId = response?.ToList()[0].Id.ToString();
 		}
 		catch (HttpRequestException apiEx)
 		{
@@ -103,17 +107,11 @@
 
 	}
 
-	private void ToggleAddCourse()
-	{
-		isAdding = !isAdding;
-	}
-
-
-    // New method to handle the event when a course is added CourseList.razor is parent to CourseAddComponent.razor
+	// New method to handle the event when a course is added CourseList.razor is parent to CourseAddComponent.razor
 	private void HandleCourseAdded(CourseDto newCourse)
 	{
-        Courses.Add(newCourse);
-        StateHasChanged();
+		Courses.Add(newCourse);
+		StateHasChanged();
 	}
 
 	private void NavigateToCourse(Guid courseId)
@@ -146,97 +144,3 @@
 		}
 	}
 }
-
-
-@* @page "/courses"
-@using LMS.Blazor.Client.Services
-@using LMS.Shared.DTOs.EntityDto
-@using Microsoft.AspNetCore.Authorization
-@inject NavigationManager Navigation
-@inject AuthenticationStateProvider AuthStateProvider
-@rendermode InteractiveWebAssembly
-
-<h3>CourseList</h3>
-
-
-@if (Loading)
-{
-	<p>Loading courses...</p>
-}
-else
-{
-	<CourseAddComponent />
-	@if (Courses != null)
-	{
-		@foreach (var course in Courses)
-		{
-			<CourseComponent Course=course />
-		}
-
-	}
-	else
-	{
-		<p>Loading courses...</p>
-	}
-
-}
-
-@code
-{
-	public bool Loading { get; set; } = true;
-
-	private bool isAdding = false;
-
-	[Inject]
-	private IApiService myApi { get; set; } = default!;
-
-	[Inject]
-	private AuthenticationStateProvider Auth { get; set; } = default!;
-
-
-	private List<CourseDto>? Courses { get; set; }
-
-	protected override async Task OnInitializedAsync()
-	{
-		var authState = await AuthStateProvider.GetAuthenticationStateAsync();
-		var user = authState.User;
-		var isTeacher = user.IsInRole("Teacher");
-		var isStudent = user.IsInRole("Student");
-		if (isTeacher)
-		{
-			await LoadCourse();
-			Loading = false;
-		}
-		else if (isStudent)
-		{
-			var courseIdAsString = user.FindFirst("CourseId")?.Value ?? null;
-			if (courseIdAsString != null) await InvokeAsync(() => Navigation.NavigateTo($"courses/{courseIdAsString}"));
-		}
-		else
-		{
-			await InvokeAsync(() => Navigation.NavigateTo("/account/login"));
-		}
-	}
-
-	private async Task LoadCourse()
-	{
-
-		var response = await myApi.CallApiGetAsync<IEnumerable<CourseDto>>("courses");
-		Courses = response?.ToList();
-
-	}
-
-	private void ToggleAddCourse()
-	{
-		isAdding = !isAdding;
-	}
-
-
-	// New method to handle the event when a course is added CourseList.razor is parent to CourseAddComponent.razor
-	private void HandleCourseAdded(CourseDto newCourse)
-	{
-		Courses.Add(newCourse);
-		StateHasChanged();
-	}
-}
- *@
