@@ -89,6 +89,7 @@ public static class ServiceExtensions
         services.AddScoped<ISubmissionRepository, SubmissionRepository>();
         services.AddScoped<IDocumentRepository, DocumentRepository>();
         services.AddScoped<IActivityTypeRepository, ActivityTypeRepository>();
+        
 
         services.AddLazy<ICourseRepository>();
         services.AddLazy<IModuleRepository>();
@@ -114,6 +115,7 @@ public static class ServiceExtensions
         services.AddScoped<ISubmissionService, SubmissionService>();
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<IActivityTypeService, ActivityTypeService>();
+        services.AddScoped<IScheduleService, ScheduleService>();
         services.AddScoped<IFileHandlerService>(provider =>
         {
             var env = provider.GetRequiredService<IWebHostEnvironment>();
