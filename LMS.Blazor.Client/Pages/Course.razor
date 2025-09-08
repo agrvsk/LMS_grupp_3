@@ -81,7 +81,9 @@ else
                             {
                                 <li class="list-group-item d-flex justify-content-between align-items-center">
                                     <div>
-                                        <strong>@module.Name</strong>
+                                        <strong style="cursor:pointer; color:blue;" @onclick="() => NavigateToModule(module.Id)">
+                                            @module.Name
+                                        </strong>
                                         <br />
                                         <small class="text-muted" style="font-size: 0.75rem;">
                                             Start: @currentCourse.StartDate.ToString("yyyy-MM-dd")
@@ -325,5 +327,10 @@ else
             Console.Error.WriteLine($"Fel vid borttagning av dokument: {ex.Message}");
         }
         StateHasChanged();
+    }
+
+    private void NavigateToModule(Guid moduleId)
+    {
+        Navigation.NavigateTo($"/modules/{moduleId}");
     }
 }
