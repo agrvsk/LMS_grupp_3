@@ -120,6 +120,7 @@ public static class ServiceExtensions
             var rootPath = env.ContentRootPath;
             return new FileHandlerService(rootPath);
         });
+        services.AddScoped<IScheduleService, ScheduleService>();
 
         services.AddScoped(provider => new Lazy<IAuthService>(() => provider.GetRequiredService<IAuthService>()));
         services.AddLazy<ICourseService>();
@@ -129,6 +130,8 @@ public static class ServiceExtensions
         services.AddLazy<ISubmissionService>();
         services.AddLazy<IUserService>();
         services.AddLazy<IActivityTypeService>();
+        services.AddLazy<IFileHandlerService>();
+        services.AddLazy<IScheduleService>();
 
 
     }

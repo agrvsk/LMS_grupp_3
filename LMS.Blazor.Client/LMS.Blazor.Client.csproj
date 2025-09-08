@@ -12,6 +12,7 @@
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="9.0.8" />
     <PackageReference Include="microsoft.aspnetcore.components.webassembly.authentication" Version="9.0.8" />
     <PackageReference Include="Microsoft.Extensions.Http" Version="9.0.8" />
+    <PackageReference Include="Radzen.Blazor" Version="7.3.3" />
 	  <PackageReference Include="System.Text.Json" Version="9.0.8" />
   </ItemGroup>
 

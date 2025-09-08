@@ -1,7 +1,80 @@
 ﻿@page "/schedule"
-@rendermode InteractiveWebAssembly
-<h3>Schedule</h3>
+@using Radzen
+@using Radzen.Blazor
+@using LMS.Shared.DTOs.EntityDTO
+@inject IApiService ApiService
+@inject AuthenticationStateProvider Auth
+
+<PageTitle>Schedule</PageTitle>
+
+<h3>Course Schedule</h3>
+
+<RadzenScheduler Data="@Events"
+                 StartProperty="Start"
+                 EndProperty="End"
+                 TextProperty="Text"
+                 View="Month"
+                 TItem="ScheduleEvent">
+</RadzenScheduler>
 
 @code {
+    // Event class for the scheduler
+    public class ScheduleEvent
+    {
+        public DateTime Start { get; set; }
+        public DateTime End { get; set; }
+        public string Text { get; set; }
+    }
 
+    private List<ScheduleEvent> Events = new();
+
+    private ScheduleDto MySchedule = new();
+
+    // This is just an example of loading your schedule — in real life you probably get it from your API
+
+
+    protected override async void OnInitialized()
+    {
+        var authState = await Auth.GetAuthenticationStateAsync();
+		var user = authState.User;
+        if (!user.Identity?.IsAuthenticated ?? true)
+        {
+            // User is not authenticated, handle accordingly (e.g., redirect to login)
+            return;
+		}
+		var CourseId = user.Claims.FirstOrDefault(c => c.Type == "CourseId")?.Value;
+
+        MySchedule = await ApiService.CallApiGetAsync<ScheduleDto>($"schedules/{CourseId}");
+
+        
+        // Add the course start as an event
+        Events.Add(new ScheduleEvent
+        {
+            Start = MySchedule.StartDate,
+            End = MySchedule.StartDate.AddHours(1), // Just a placeholder duration
+            Text = $"Course: {MySchedule.Course.Name}"
+        });
+
+        // Add each module
+        foreach (var module in MySchedule.Modules)
+        {
+            Events.Add(new ScheduleEvent
+            {
+                Start = module.StartDate,
+                End = module.StartDate.AddHours(1), // Only start time matters, so short duration
+                Text = $"Module: {module.Name}"
+            });
+
+            // Add each activity
+            foreach (var activity in module.ModuleActivities)
+            {
+                Events.Add(new ScheduleEvent
+                {
+                    Start = activity.StartDate,
+                    End = activity.StartDate.AddHours(1), // Single day, so just a short duration
+                    Text = $"Activity: {activity.Name}"
+                });
+            }
+        }
+    }
 }
