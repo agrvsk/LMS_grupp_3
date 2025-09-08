@@ -86,6 +86,7 @@
 			await InvokeAsync(() => Navigation.NavigateTo("/account/login"));
 		}
 		MySchedule = await myApi.CallApiGetAsync<ScheduleDto>($"schedules/{CourseId}");
+		if (MySchedule == null) return;
 		Console.WriteLine($"Schedule has {MySchedule.Modules.Count} modules.");
 	}
 
