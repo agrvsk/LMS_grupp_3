@@ -89,9 +89,6 @@
 		try
 		{
 			var response = await myApi.CallApiGetAsync<IEnumerable<CourseDto>>("courses");
-			var MySchedule = new ScheduleDto();
-			MySchedule = await myApi.CallApiGetAsync<ScheduleDto>($"schedules/b4ffc775-3855-44da-d258-08ddebc527a7");
-			Console.WriteLine($"Found {response?.Count()} courses.");
 			Courses = response?.ToList();
 		}
 		catch (HttpRequestException apiEx)
