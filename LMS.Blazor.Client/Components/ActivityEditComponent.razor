@@ -2,6 +2,13 @@
 @using LMS.Shared.DTOs.EntityDto
 
 <div class="container mt-4">
+	@if (!string.IsNullOrEmpty(errorMessage))
+	{
+		<div class="alert alert-danger" role="alert">
+			<p>@errorMessage</p>
+		</div>
+	}
+
 	@if(ActivityUpdDto == null)
 	{}
 	else{
@@ -79,10 +86,11 @@
 
 	public ModuleActivityUpdateDto ActivityUpdDto { get; set; } = new ModuleActivityUpdateDto();
 	public List<ActivityTypeDto> Types { get; set; } = new List<ActivityTypeDto>();
+	private string? errorMessage;
 
 	protected override async Task OnInitializedAsync()
 	{
-		
+
 
 		//await base.OnInitializedAsync();
 		ActivityUpdDto = new ModuleActivityUpdateDto
@@ -93,11 +101,19 @@
 			StartDate = Activity.StartDate,
 			EndDate = Activity.EndDate,
 			ActivityTypeId = Activity.ActivityTypeId,
-//			Type = Activity.Type,
+			//			Type = Activity.Type,
 			ModuleId = currentModuleId
 
 		};
-		Types = (await myApi.CallApiGetAsync<List<ActivityTypeDto>>("activity-types"));
+		try
+		{
+			Types = (await myApi.CallApiGetAsync<List<ActivityTypeDto>>("activity-types"));
+		}
+		catch(HttpRequestException ex)
+		{
+			errorMessage = $"API Error: {ex.StatusCode} - {ex.Message}";
+			Console.WriteLine("there was an API error: " + ex.Message);
+		}
 	}
 
 	private async Task StopEditing()
@@ -107,9 +123,18 @@
 
 	private async Task HandleValidSubmit()
 	{
-		Activity = await myApi.CallApiPutAsync<ModuleActivityUpdateDto, ModuleActivityDto>($"activities/{Activity.Id}", ActivityUpdDto);
-		Console.WriteLine($"Course '{ActivityUpdDto.Name}' saved successfully!");
-		StopEditing();
+		try
+		{
+			Activity = await myApi.CallApiPutAsync<ModuleActivityUpdateDto, ModuleActivityDto>($"activities/{Activity.Id}", ActivityUpdDto);
+			Console.WriteLine($"Course '{ActivityUpdDto.Name}' saved successfully!");
+			StopEditing();
+		}
+		catch (System.ComponentModel.DataAnnotations.ValidationException apiEx)
+		{
+			errorMessage = $"API Error:  - {apiEx.Message}";
+			Console.WriteLine("there was an API error: " + apiEx.Message);
+		}
+
 	}
 
 }

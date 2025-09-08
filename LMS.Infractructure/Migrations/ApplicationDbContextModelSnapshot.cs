@@ -22,6 +22,21 @@ namespace LMS.Infractructure.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("ApplicationUserSubmission", b =>
+                {
+                    b.Property<Guid>("SubmissionsId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("SubmittersId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("SubmissionsId", "SubmittersId");
+
+                    b.HasIndex("SubmittersId");
+
+                    b.ToTable("ApplicationUserSubmission");
+                });
+
             modelBuilder.Entity("Domain.Models.Entities.ActivityType", b =>
                 {
                     b.Property<int>("Id")
@@ -115,6 +130,35 @@ namespace LMS.Infractructure.Migrations
                     b.ToTable("ApplicationUser", (string)null);
                 });
 
+            modelBuilder.Entity("Domain.Models.Entities.Assignment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.PrimitiveCollection<string>("DocumentIds")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("DueDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("ModuleActivityId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ModuleActivityId");
+
+                    b.ToTable("Assignments");
+                });
+
             modelBuilder.Entity("Domain.Models.Entities.Course", b =>
                 {
                     b.Property<Guid>("Id")
@@ -146,6 +190,9 @@ namespace LMS.Infractructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid?>("AssignmentId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
 
@@ -169,10 +216,11 @@ namespace LMS.Infractructure.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("UploaderId")
-                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("AssignmentId");
 
                     b.HasIndex("UploaderId");
 
@@ -250,9 +298,8 @@ namespace LMS.Infractructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("ApplicationUserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<Guid>("AssignmentId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("DocumentId")
                         .HasColumnType("uniqueidentifier");
@@ -262,7 +309,7 @@ namespace LMS.Infractructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ApplicationUserId");
+                    b.HasIndex("AssignmentId");
 
                     b.HasIndex("DocumentId");
 
@@ -402,6 +449,21 @@ namespace LMS.Infractructure.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("ApplicationUserSubmission", b =>
+                {
+                    b.HasOne("Domain.Models.Entities.Submission", null)
+                        .WithMany()
+                        .HasForeignKey("SubmissionsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Domain.Models.Entities.ApplicationUser", null)
+                        .WithMany()
+                        .HasForeignKey("SubmittersId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Domain.Models.Entities.ApplicationUser", b =>
                 {
                     b.HasOne("Domain.Models.Entities.Course", null)
@@ -409,13 +471,23 @@ namespace LMS.Infractructure.Migrations
                         .HasForeignKey("CourseId");
                 });
 
+            modelBuilder.Entity("Domain.Models.Entities.Assignment", b =>
+                {
+                    b.HasOne("Domain.Models.Entities.ModuleActivity", null)
+                        .WithMany("Assignments")
+                        .HasForeignKey("ModuleActivityId");
+                });
+
             modelBuilder.Entity("Domain.Models.Entities.Document", b =>
                 {
+                    b.HasOne("Domain.Models.Entities.Assignment", null)
+                        .WithMany("Documents")
+                        .HasForeignKey("AssignmentId");
+
                     b.HasOne("Domain.Models.Entities.ApplicationUser", "Uploader")
                         .WithMany()
                         .HasForeignKey("UploaderId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.Navigation("Uploader");
                 });
@@ -448,9 +520,9 @@ namespace LMS.Infractructure.Migrations
 
             modelBuilder.Entity("Domain.Models.Entities.Submission", b =>
                 {
-                    b.HasOne("Domain.Models.Entities.ApplicationUser", null)
+                    b.HasOne("Domain.Models.Entities.Assignment", "Assignment")
                         .WithMany("Submissions")
-                        .HasForeignKey("ApplicationUserId")
+                        .HasForeignKey("AssignmentId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -459,6 +531,8 @@ namespace LMS.Infractructure.Migrations
                         .HasForeignKey("DocumentId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Assignment");
 
                     b.Navigation("SubmissionDocument");
                 });
@@ -514,8 +588,10 @@ namespace LMS.Infractructure.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Domain.Models.Entities.ApplicationUser", b =>
+            modelBuilder.Entity("Domain.Models.Entities.Assignment", b =>
                 {
+                    b.Navigation("Documents");
+
                     b.Navigation("Submissions");
                 });
 
@@ -529,6 +605,11 @@ namespace LMS.Infractructure.Migrations
             modelBuilder.Entity("Domain.Models.Entities.Module", b =>
                 {
                     b.Navigation("ModuleActivities");
+                });
+
+            modelBuilder.Entity("Domain.Models.Entities.ModuleActivity", b =>
+                {
+                    b.Navigation("Assignments");
                 });
 #pragma warning restore 612, 618
         }

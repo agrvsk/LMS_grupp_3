@@ -1,4 +1,6 @@
-﻿using LMS.Shared.DTOs.EntityDto;
+﻿using Domain.Models.Entities;
+using LMS.Shared.DTOs.EntityDto;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Service.Contracts;
 using System;
@@ -14,6 +16,7 @@ namespace LMS.Presentation.Controllers
     public class UsersController : ControllerBase
     {
         private readonly IServiceManager _serviceManager;
+        private readonly UserManager<ApplicationUser> _userManager;
         public UsersController(IServiceManager serviceManager)
         {
             _serviceManager = serviceManager;

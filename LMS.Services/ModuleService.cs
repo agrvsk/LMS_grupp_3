@@ -8,6 +8,7 @@ using Domain.Contracts.Repositories;
 using Domain.Models.Entities;
 using LMS.Shared.DTOs.EntityDto;
 using Service.Contracts;
+using Domain.Models.Exceptions;
 
 namespace LMS.Services;
 
@@ -33,6 +34,7 @@ public class ModuleService : IModuleService
     public async Task<ModuleDto?> GetModuleByIdAsync(Guid moduleId)
     {
         var module = await uow.ModuleRepository.GetModuleByIdAsync(moduleId);
+        if(module==null) throw new ModuleNotFoundException(moduleId);
         var moduleDto = mapper.Map<ModuleDto>(module);
         return moduleDto;
     }
@@ -43,6 +45,15 @@ public class ModuleService : IModuleService
         return mapper.Map<List<ModuleDto>>(await uow.ModuleRepository.GetModulesByCourseIdAsync(courseId));
 
     }
+    public async Task<List<ModuleDto>> GetActivitiesByCourseIdAsync(Guid courseId, string idag)
+    {
+        return mapper.Map<List<ModuleDto>>(await uow.ModuleRepository.GetModulesByCourseIdAndDateAsync(courseId,idag));
+    }
+    public async Task<List<ModuleDto>> GetAllActivitiesByDateAsync(string idag)
+    {
+        return mapper.Map<List<ModuleDto>>(await uow.ModuleRepository.GetAllModulesByDateAsync(idag));
+    }
+
     public async Task<Module> CreateModuleAsync(ModuleCreateDto moduleDto)
     {
         var module = mapper.Map<Module>(moduleDto);

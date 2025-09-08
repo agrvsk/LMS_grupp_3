@@ -1,0 +1,124 @@
+﻿==============================================================
+Dessa NuGets fordras för att få stöd för Entity FrameWork (EF)
+==============================================================
+Microsoft.EntityFrameworkCore.SqlServer
+Microsoft.EntityFrameworkCore.Tools
+
+
+======================================================================
+Nedan NuGets fordras för att få stöd för appsettings.json i en Console
+applikation (installeras automatiskt i ASP.NET Core MVC applikationer)
+======================================================================
+Microsoft.Extensions.Configuration
+Microsoft.Extensions.Configuration.FileExtensions
+Microsoft.Extensions.Configuration.Json
+
+
+======================
+Installation av NuGets
+======================
+I "Package Manager Console" fönstret, exekvera kommandot "Install-Package" för
+respektive NuGet:
+
+OBS! Rätt "Default project:" måste vara valt i "Package Manager Console"
+fönstret.
+
+	Install-Package Microsoft.EntityFrameworkCore.SqlServer
+	Install-Package Microsoft.EntityFrameworkCore.Tools
+	Install-Package Microsoft.Extensions.Configuration
+	Install-Package Microsoft.Extensions.Configuration.FileExtensions
+	Install-Package Microsoft.Extensions.Configuration.Json
+
+Tips! Package Manager Console fönstret stödjer [Tab]-tangenten. Skriv t.ex.
+"Install" + [Tab] för att hitta "Install-Package" kommandot.
+
+
+============================
+Scaffold-DbContext kommandot
+============================
+I "Package Manager Console" fönstret, exekvera kommandot "Scaffold-DbContext"
+för att skapa entitets-klasserna och kontext-klassen. Entiteterna
+representerar databasens tabeller och kontext-klassen representerar själva
+databasen.
+
+OBS! Din Solution måste kompilera för att Scaffold-DbContext ska fungera!
+                  ---------------
+
+===========================
+Scaffold-DbContext Exempel:
+===========================
+Scaffold-DbContext
+	-Connection "Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=Brights;Integrated Security=True;Connect Timeout=60;Encrypt=False;Trust Server Certificate=False;Application Intent=ReadWrite;Multi Subnet Failover=False"
+	-Provider "Microsoft.EntityFrameworkCore.SqlServer"
+	-OutputDir "Models/Entities"
+	-Context "BrightsContext"
+	-Schemas HR
+	-Tables ContactInfo, People
+	-Force
+	-NoOnConfiguring
+
+OBS! "Data Source=(localdb)\MSSQLLocalDB;..." får INTE innehålla
+dubbla backslash "\\" tecken endast ett backslash!
+
+=========================
+Scaffold-DbContext hjälp:
+=========================
+För en detaljerad beskrivning av respektive parameter och övriga parametrar,
+exekvera nedan kommando i "Package Manager Console" fönstret:
+
+	get-help Scaffold-DbContext -detailed
+
+
+=================================================================
+appsettings.json -
+Anger vilken connection-sträng som context-klassen ska arbeta mot
+=================================================================
+a. Skapa en "appsettings.json" fil i projektets rot:
+	Add -> New Item -> "JavaScript JSON Configuration File" (döp filen till
+	appsettings.json)
+
+VIKTIGT! Filegenskapen "Copy to output directory" måste sättas till
+"Copy Always" eller "Copy if newer" (högerklicka på appsettings.json ->
+properties).
+
+appsettings.json användas sedan för att lagra en ConnectionString (se nedan).
+ConnectionString finns i "Connection string"-egenskapen för databasen.
+
+TIPS: Klistra alltid in "Connection string"-egenskapens sträng mellan " och ".
+
+=========================
+appsettings.json Exempel:
+=========================
+{
+  "exclude": [
+    "**/bin",
+    "**/bower_components",
+    "**/jspm_packages",
+    "**/node_modules",
+    "**/obj",
+    "**/platforms"
+  ],
+  "ConnectionStrings": {
+    "DefaultConnection": "Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog=...o.s.v."
+  }
+}
+
+OBS! "Data Source=(localdb)\\MSSQLLocalDB;..." måste ha dubbla backslash-tecken "\\"
+ej endast ett backslash som när vi kör scaffold-dbcontext!
+
+==============================================================================
+Konstruktor och metod som behöver läggas till i den genererade Context-klassen
+Läggs med fördel in i en separat "partial class"-fil.
+==============================================================================
+    public EFIntroContext() : base()
+    {
+        var builder = new ConfigurationBuilder();
+        builder.AddJsonFile("appsettings.json", false);
+        var app = builder.Build();
+        connectionString = app.GetConnectionString("DefaultConnection");
+    }
+
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        optionsBuilder.UseSqlServer(connectionString);
+    }

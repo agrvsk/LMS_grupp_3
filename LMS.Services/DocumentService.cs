@@ -6,7 +6,10 @@ using System.Threading.Tasks;
 using AutoMapper;
 using Domain.Contracts.Repositories;
 using Domain.Models.Entities;
+using Domain.Models.Exceptions;
 using LMS.Shared.DTOs.EntityDto;
+using LMS.Shared.DTOs.EntityDTO;
+using Microsoft.AspNetCore.Identity;
 using Service.Contracts;
 
 namespace LMS.Services;
@@ -27,6 +30,7 @@ public class DocumentService : IDocumentService
     public async Task<DocumentDto?> GetDocumentByIdAsync(Guid documentId)
     {
         var document = await uow.DocumentRepository.GetDocumentByIdAsync(documentId);
+        if (document == null) throw new DocumentNotFoundException(documentId);
         var documentDto = mapper.Map<DocumentDto>(document);
         return documentDto;
     }
@@ -52,27 +56,90 @@ public class DocumentService : IDocumentService
         document.FilePath = filePath;
 
         uow.DocumentRepository.Create(document);
+
+        if (documentDto.Submissions != null && documentDto.Submissions.Count > 0)
+        {
+            foreach (var submissionDto in documentDto.Submissions)
+            {
+                var sub = mapper.Map<Submission>(submissionDto);
+                sub.DocumentId = document.Id;
+                uow.SubmissionRepository.Create(sub);
+            }
+        }
         await uow.CompleteAsync();
         return mapper.Map<DocumentDto>(document);
     }
-    public async Task<Document?> UpdateDocumentAsync(DocumentDto documentDto)
+    public async Task<Document?> UpdateDocumentAsync(DocumentEditDto documentDto)
     {
-        var document = mapper.Map<Document>(documentDto);
+        var document = await uow.DocumentRepository.GetDocumentByIdAsync(documentDto.Id);
+        if (document == null)
+            return null;
+
+        // Uppdatera bara de fält som får ändras
+        document.Name = documentDto.Name;
+        document.Description = documentDto.Description;
+
         uow.DocumentRepository.Update(document);
         await uow.CompleteAsync();
+
         return document;
+
+
+        //var document = mapper.Map<Document>(documentDto);
+        //uow.DocumentRepository.Update(document);
+        //await uow.CompleteAsync();
+        //return document;
     }
     public async Task<bool> DeleteDocumentAsync(Guid documentId)
     {
         var document = await uow.DocumentRepository.GetDocumentByIdAsync(documentId);
         if (document != null)
         {
+            await fileHandlerService.DeleteFileAsync(document.FilePath);
+            if (document.ParentType=="submission")
+            {
+                var submissions = await uow.SubmissionRepository.GetSubmissionsByDocumentIdAsync(document.Id);
+                foreach (var sub in submissions)
+                {
+                    uow.SubmissionRepository.Delete(sub);
+                }
+            }
             uow.DocumentRepository.Delete(document);
             await uow.CompleteAsync();
             return true;
         }
         return false;
     }
-
-
+    public async Task<bool> DeleteUserDocumentsAsync(string userId)
+    {
+        try
+        {
+            var documents = await uow.DocumentRepository.GetDocumentsByUploaderIdAsync(userId);
+            if (documents.Any())
+            {
+                foreach (var document in documents)
+                {
+                    await fileHandlerService.DeleteFileAsync(document.FilePath);
+                    if (document.ParentType=="submission")
+                        {
+                        var submissions = await uow.SubmissionRepository.GetSubmissionsByDocumentIdAsync(document.Id);
+                        foreach (var sub in submissions)
+                        {
+                            uow.SubmissionRepository.Delete(sub);
+                        }
+                    }
+                    
+                    uow.DocumentRepository.Delete(document);
+                }
+                await uow.CompleteAsync();
+            }
+                return true;
+            
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"An error occurred while deleting user documents: {ex.Message}");
+            return false;
+        }
+    }
 }

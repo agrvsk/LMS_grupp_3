@@ -1,90 +1,35 @@
-@implements IDisposable
 @inject NavigationManager NavigationManager
-<div class="top-row ps-3 navbar navbar-dark"> 
-    <div class="container-fluid">
-        <a class="navbar-brand" href="">LMS</a>
+<nav class="nav-scrollable d-flex align-items-center">
+    <div class="navbar-brand me-4">
+        LMS
     </div>
-</div>
 
-<input type="checkbox" title="Navigation menu" class="navbar-toggler" />
+    <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+        Home
+    </NavLink>
 
-<div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
-    <nav class="flex-column">
-        <div class="nav-item px-2">
-            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
-            </NavLink>
-        </div>
-        <AuthorizeView>
-             <NotAuthorized>
-                <div class="nav-item px-2">
-                    <NavLink class="nav-link" href="Account/Register">
-                        <span class="bi bi-person-nav-menu" aria-hidden="true"></span> Register
-                    </NavLink>
-                </div>
-                <div class="nav-item px-2">
-                    <NavLink class="nav-link" href="account/login" Match="NavLinkMatch.All">
-                        <span class="i bi-person-badge-nav-menu" aria-hidden="true"></span> Login
-                    </NavLink>
-                </div>
-            </NotAuthorized>
-            <Authorized> 
-                <div class="nav-item px-2">
-                    <NavLink class="nav-link" href="courses">
-                        <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Course
-                    </NavLink>
-                </div>
-                <div class="nav-item px-2">
-                    <NavLink class="nav-link" href="schedule">
-                        <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Schedule
-                    </NavLink>
-                </div>
-                <div class="nav-item px-2">
-                    <NavLink class="nav-link" href="demoauth2">
-                        <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Load data OnInitialized
-                    </NavLink>
-                </div>
-                <div class="nav-item px-2">
-                    <NavLink class="nav-link" href="demoauth">
-                        <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> DemoAuth 
-                    </NavLink>
-                </div>
-                <div class="nav-item px-2">
-                    <NavLink class="nav-link" href="Account/Manage">
-                        <span class="bi bi-person-fill-nav-menu" aria-hidden="true"></span> @context.User.Identity?.Name
-                    </NavLink>
-                </div>
-                    <div class="nav-item px-2">
-                    <form action="Account/Logout" method="post">
-                        <AntiforgeryToken />
-                        <input type="hidden" name="ReturnUrl" value="@currentUrl" />
-                        <button type="submit" class="nav-link">
-                            <span class="bi bi-arrow-bar-left-nav-menu" aria-hidden="true"></span> Logout 
-                        </button>
-                    </form>
-                </div>
-          </Authorized>
-        </AuthorizeView>
-    </nav>
-</div>
+    <AuthorizeView>
+        <NotAuthorized>
+            <div class="nav-right">
+            <NavLink class="nav-link" href="Account/Register">Register</NavLink>
+            <NavLink class="nav-link" href="Account/Login">Login</NavLink>
+            </div>
+        </NotAuthorized>
+        <Authorized>
+            <NavLink class="nav-link" href="courses">Courses</NavLink>
+            <NavLink class="nav-link" href="create">Create</NavLink>
+            <NavLink class="nav-link" href="schedule">Schedule</NavLink>
+			<NavLink class="nav-link" href="account/register">Register a new user</NavLink>
+            
+            <div class="nav-right">
+            <NavLink class="nav-link" href="Account/Manage">@context.User.Identity?.Name</NavLink>
 
-@code {
-    private string? currentUrl;
-    protected override void OnInitialized()
-    {
-        currentUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
-        NavigationManager.LocationChanged += OnLocationChanged;
-    }
-
-    private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
-    {
-        currentUrl = NavigationManager.ToBaseRelativePath(e.Location);
-        StateHasChanged();
-    }
-
-    public void Dispose()
-    {
-        NavigationManager.LocationChanged -= OnLocationChanged;
-    }
-
-}
+            <form action="Account/Logout" method="post" class="d-inline">
+                <AntiforgeryToken />
+                <input type="hidden" name="ReturnUrl" value="@NavigationManager.ToBaseRelativePath" />
+                <button type="submit" class="btn btn-link nav-link">Logout</button>
+            </form>
+            </div>
+        </Authorized>
+    </AuthorizeView>
+</nav>

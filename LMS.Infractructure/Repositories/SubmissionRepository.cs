@@ -6,13 +6,17 @@ using System.Threading.Tasks;
 using Domain.Contracts.Repositories;
 using Domain.Models.Entities;
 using LMS.Infractructure.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace LMS.Infractructure.Repositories;
 
 public class SubmissionRepository : RepositoryBase<Submission>, ISubmissionRepository
 {
+    private ApplicationDbContext context;
+
     public SubmissionRepository(ApplicationDbContext context) : base(context)
     {
+        this.context = context;
     }
 
     public async Task<List<Submission>> GetAllSubmissionsAsync()
@@ -31,7 +35,7 @@ public class SubmissionRepository : RepositoryBase<Submission>, ISubmissionRepos
     public async Task<List<Submission>> GetSubmissionsByApplicationUserIdAsync(string userId)
     {
         
-        return await FindByConditionAsync(s => s.ApplicationUserId == userId, trackChanges: false)
+        return await FindByConditionAsync(s => s.Submitters.Any(u => u.Id == userId), trackChanges: false)
             .ContinueWith(task => task.Result.ToList());
     }
 
@@ -41,4 +45,19 @@ public class SubmissionRepository : RepositoryBase<Submission>, ISubmissionRepos
         return await FindByConditionAsync(s => s.DocumentId == documentId, trackChanges: false)
             .ContinueWith(task => task.Result.ToList());
     }
+
+
+    public void CreateModule(Submission submission)
+    {
+        context.Submissions.Add(submission);
+    }
+    public void UpdateModule(Submission submission)
+    {
+        context.Submissions.Update(submission);
+    }
+    public void DeleteModule(Submission submission)
+    {
+        context.Submissions.Remove(submission);
+    }
+
 }

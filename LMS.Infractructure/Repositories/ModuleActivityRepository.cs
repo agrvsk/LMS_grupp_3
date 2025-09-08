@@ -6,10 +6,11 @@ using System.Threading.Tasks;
 using Domain.Contracts.Repositories;
 using Domain.Models.Entities;
 using LMS.Infractructure.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace LMS.Infractructure.Repositories;
 
-public class ModuleActivityRepository: RepositoryBase<ModuleActivity>, IModuleActivityRepository
+public class ModuleActivityRepository : RepositoryBase<ModuleActivity>, IModuleActivityRepository
 {
     private readonly ApplicationDbContext _context;
     public ModuleActivityRepository(ApplicationDbContext context) : base(context)
@@ -18,14 +19,32 @@ public class ModuleActivityRepository: RepositoryBase<ModuleActivity>, IModuleAc
     }
     public async Task<ModuleActivity?> GetModuleActivityByIdAsync(Guid moduleActivityId)
     {
-        return (await FindByConditionAsync(ma => ma.Id == moduleActivityId, trackChanges: false)).SingleOrDefault();
+        return await _context.Activities
+            .Include(ma => ma.Assignments)
+            .AsNoTracking()
+            .FirstOrDefaultAsync(ma => ma.Id == moduleActivityId);
     }
     public async Task<List<ModuleActivity>> GetAllModuleActivitiesAsync()
     {
-        return (await FindAllAsync(trackChanges: false)).ToList();
+        return await _context.Activities
+            .Include(ma => ma.Assignments)
+            .AsNoTracking()
+            .ToListAsync();
     }
     public async Task<List<ModuleActivity>> GetModuleActivitiesByModuleIdAsync(Guid moduleId)
     {
-        return (await FindByConditionAsync(ma => ma.ModuleId == moduleId, trackChanges: false)).ToList();
+        return await _context.Activities
+        .Include(ma => ma.Assignments)
+        .Where(ma => ma.ModuleId == moduleId)
+        .AsNoTracking()
+        .ToListAsync();
+    }
+    public async Task<List<Assignment>> GetAssignmentsByModuleActivityIdAsync(Guid moduleActivityId)
+    {
+        var moduleActivity = await _context.Activities
+            .Include(ma => ma.Assignments)
+            .AsNoTracking()
+            .FirstOrDefaultAsync(ma => ma.Id == moduleActivityId);
+        return moduleActivity?.Assignments ?? new List<Assignment>();
     }
 }

@@ -89,7 +89,7 @@ public static class ServiceExtensions
         services.AddScoped<ISubmissionRepository, SubmissionRepository>();
         services.AddScoped<IDocumentRepository, DocumentRepository>();
         services.AddScoped<IActivityTypeRepository, ActivityTypeRepository>();
-        
+        services.AddScoped<IAssignmentRepository, AssignmentRepository>();
 
         services.AddLazy<ICourseRepository>();
         services.AddLazy<IModuleRepository>();
@@ -98,6 +98,7 @@ public static class ServiceExtensions
         services.AddLazy<ISubmissionRepository>();
         services.AddLazy<IDocumentRepository>();
         services.AddLazy<IActivityTypeRepository>();
+        services.AddLazy<IAssignmentRepository>();
 
         services.AddScoped<IUnitOfWork, UnitOfWork>();
 
@@ -115,6 +116,7 @@ public static class ServiceExtensions
         services.AddScoped<ISubmissionService, SubmissionService>();
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<IActivityTypeService, ActivityTypeService>();
+        services.AddScoped<IDateValidationService, DateValidationService>();
         services.AddScoped<IScheduleService, ScheduleService>();
         services.AddScoped<IFileHandlerService>(provider =>
         {
@@ -122,7 +124,7 @@ public static class ServiceExtensions
             var rootPath = env.ContentRootPath;
             return new FileHandlerService(rootPath);
         });
-        services.AddScoped<IScheduleService, ScheduleService>();
+        services.AddScoped<IAssignmentService, AssignmentService>();
 
         services.AddScoped(provider => new Lazy<IAuthService>(() => provider.GetRequiredService<IAuthService>()));
         services.AddLazy<ICourseService>();
@@ -132,6 +134,8 @@ public static class ServiceExtensions
         services.AddLazy<ISubmissionService>();
         services.AddLazy<IUserService>();
         services.AddLazy<IActivityTypeService>();
+        services.AddLazy<IDateValidationService>();
+        services.AddLazy<IAssignmentService>();
         services.AddLazy<IFileHandlerService>();
         services.AddLazy<IScheduleService>();
 

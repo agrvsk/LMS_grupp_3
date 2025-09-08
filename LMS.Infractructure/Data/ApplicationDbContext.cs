@@ -18,6 +18,7 @@ namespace LMS.Infractructure.Data
         public DbSet<ModuleActivity> Activities { get; set; }
         public DbSet<Submission> Submissions { get; set; }
         public DbSet<ActivityType> ActivityTypes { get; set; }
+        public DbSet<Assignment> Assignments { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -27,7 +28,7 @@ namespace LMS.Infractructure.Data
         .HasOne(d => d.Uploader)
         .WithMany() // or .WithMany(u => u.Documents) if you add a collection
         .HasForeignKey(d => d.UploaderId)
-        .OnDelete(DeleteBehavior.Restrict);
+        .OnDelete(DeleteBehavior.SetNull);
 
             builder.ApplyConfiguration(new ApplicationUserConfigurations());
         }

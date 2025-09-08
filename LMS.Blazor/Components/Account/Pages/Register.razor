@@ -3,9 +3,14 @@
 @using System.ComponentModel.DataAnnotations
 @using System.Text
 @using System.Text.Encodings.Web
+@using LMS.Blazor.Client.Services
+@using LMS.Blazor.Services
+@using LMS.Shared.DTOs.EntityDto
+@using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Identity
 @using Microsoft.AspNetCore.WebUtilities
 @using LMS.Blazor.Data
+@using System.Text.Json
 
 @inject UserManager<ApplicationUser> UserManager
 @inject IUserStore<ApplicationUser> UserStore
@@ -14,133 +19,194 @@
 @inject ILogger<Register> Logger
 @inject NavigationManager NavigationManager
 @inject IdentityRedirectManager RedirectManager
+@inject IHttpClientFactory HttpClientFactory
+@inject ITokenStorage TokenStorage
+
+@attribute [Authorize(Roles = "Teacher")]
 
 <PageTitle>Register</PageTitle>
 
 <h1>Register</h1>
 
 <div class="row">
-    <div class="col-md-4">
-        <StatusMessage Message="@Message" />
-        <EditForm Model="Input" asp-route-returnUrl="@ReturnUrl" method="post" OnValidSubmit="RegisterUser" FormName="register">
-            <DataAnnotationsValidator />
-            <h2>Create a new account.</h2>
-            <hr />
-            <ValidationSummary class="text-danger" role="alert" />
-            <div class="form-floating mb-3">
-                <InputText @bind-Value="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="name@example.com" />
-                <label for="email">Email</label>
-                <ValidationMessage For="() => Input.Email" class="text-danger" />
-            </div>
-            <div class="form-floating mb-3">
-                <InputText type="password" @bind-Value="Input.Password" class="form-control" autocomplete="new-password" aria-required="true" placeholder="password" />
-                <label for="password">Password</label>
-                <ValidationMessage For="() => Input.Password" class="text-danger" />
-            </div>
-            <div class="form-floating mb-3">
-                <InputText type="password" @bind-Value="Input.ConfirmPassword" class="form-control" autocomplete="new-password" aria-required="true" placeholder="password" />
-                <label for="confirm-password">Confirm Password</label>
-                <ValidationMessage For="() => Input.ConfirmPassword" class="text-danger" />
-            </div>
-            <button type="submit" class="w-100 btn btn-lg btn-primary">Register</button>
-        </EditForm>
-    </div>
-    <div class="col-md-6 col-md-offset-2">
-        <section>
-            <h3>Use another service to register.</h3>
-            <hr />
-            <ExternalLoginPicker />
-        </section>
-    </div>
+	<div class="col-md-4">
+		<StatusMessage Message="@Message" />
+		<EditForm Model="Input" asp-route-returnUrl="@ReturnUrl" method="post" OnValidSubmit="RegisterUser" FormName="register">
+			<DataAnnotationsValidator />
+			<h2>Create a new account.</h2>
+			<hr />
+			<ValidationSummary class="text-danger" role="alert" />
+			<div class="form-floating mb-3">
+				<InputText @bind-Value="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="name@example.com" />
+				<label for="email">Email</label>
+				<ValidationMessage For="() => Input.Email" class="text-danger" />
+			</div>
+			<div class="form-floating mb-3">
+				<InputText type="password" @bind-Value="Input.Password" class="form-control" autocomplete="new-password" aria-required="true" placeholder="password" />
+				<label for="password">Password</label>
+				<ValidationMessage For="() => Input.Password" class="text-danger" />
+			</div>
+			<div class="form-floating mb-3">
+				<InputText type="password" @bind-Value="Input.ConfirmPassword" class="form-control" autocomplete="new-password" aria-required="true" placeholder="password" />
+				<label for="confirm-password">Confirm Password</label>
+				<ValidationMessage For="() => Input.ConfirmPassword" class="text-danger" />
+			</div>
+			<div class="form-floating mb-3">
+				
+				<InputSelect id="role" class="form-select" @bind-Value="Input.role">
+					<option value="">-- Select Role --</option>
+					@foreach (var role in Roles)
+					{
+
+						<option value="@role">@role</option>
+					}
+				</InputSelect>
+				<ValidationMessage For="@(() => Input.role)" />
+			</div>
+			<div class="form-floating mb-3">
+				
+				<InputSelect id="course" class="form-select" @bind-Value="Input.selectedCourseId">
+					<option value="">-- Select Course --</option>
+					@foreach (var course in Courses ?? new List<CourseDto>())
+					{
+						<option value="@course.Id">@course.Name</option>
+					}
+				</InputSelect>
+				<ValidationMessage For="@(() => Input.selectedCourseId)" />
+			</div>
+			<button type="submit" class="w-100 btn btn-lg btn-primary">Register</button>
+		</EditForm>
+	</div>
+	<div class="col-md-6 col-md-offset-2">
+		<section>
+			<h3>Use another service to register.</h3>
+			<hr />
+			<ExternalLoginPicker />
+		</section>
+	</div>
 </div>
 
 @code {
-    private IEnumerable<IdentityError>? identityErrors;
+	private IEnumerable<IdentityError>? identityErrors;
 
-    [SupplyParameterFromForm]
-    private InputModel Input { get; set; } = new();
+	[SupplyParameterFromForm]
+	private InputModel Input { get; set; } = new();
 
-    [SupplyParameterFromQuery]
-    private string? ReturnUrl { get; set; }
+	[SupplyParameterFromQuery]
+	private string? ReturnUrl { get; set; }
 
-    private string? Message => identityErrors is null ? null : $"Error: {string.Join(", ", identityErrors.Select(error => error.Description))}";
+	private string? Message => identityErrors is null ? null : $"Error: {string.Join(", ", identityErrors.Select(error => error.Description))}";
 
-    //Use API to add users!!!!
-    public async Task RegisterUser(EditContext editContext)
-    {
-        var user = CreateUser();
+	private List<string> Roles = new List<string> { "Student", "Teacher" };
 
-        await UserStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
-        var emailStore = GetEmailStore();
-        await emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
-        var result = await UserManager.CreateAsync(user, Input.Password);
 
-        if (!result.Succeeded)
-        {
-            identityErrors = result.Errors;
-            return;
-        }
 
-        Logger.LogInformation("User created a new account with password.");
+	private List<CourseDto>? Courses { get; set; }
 
-        var userId = await UserManager.GetUserIdAsync(user);
-        var code = await UserManager.GenerateEmailConfirmationTokenAsync(user);
-        code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
-        var callbackUrl = NavigationManager.GetUriWithQueryParameters(
-            NavigationManager.ToAbsoluteUri("Account/ConfirmEmail").AbsoluteUri,
-            new Dictionary<string, object?> { ["userId"] = userId, ["code"] = code, ["returnUrl"] = ReturnUrl });
+	//Use API to add users!!!!
+	public async Task RegisterUser(EditContext editContext)
+	{
+		var user = CreateUser();
+		if (Input.selectedCourseId == null) throw new InvalidOperationException("CourseId must be selected for students");
+		else user.CourseId = Input.selectedCourseId;
 
-        await EmailSender.SendConfirmationLinkAsync(user, Input.Email, HtmlEncoder.Default.Encode(callbackUrl));
 
-        if (UserManager.Options.SignIn.RequireConfirmedAccount)
-        {
-            RedirectManager.RedirectTo(
-                "Account/RegisterConfirmation",
-                new() { ["email"] = Input.Email, ["returnUrl"] = ReturnUrl });
-        }
+		await UserStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
+		var emailStore = GetEmailStore();
+		await emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
+		var result = await UserManager.CreateAsync(user, Input.Password);
 
-        //await SignInManager.SignInAsync(user, isPersistent: false);
-        RedirectManager.RedirectTo(ReturnUrl);
-    }
+		var roleResult = await UserManager.AddToRoleAsync(user, Input.role);
+		if (!roleResult.Succeeded) throw new InvalidOperationException("Could not add user to role: " + roleResult.Errors.ToString());
 
-    private ApplicationUser CreateUser()
-    {
-        try
-        {
-            return Activator.CreateInstance<ApplicationUser>();
-        }
-        catch
-        {
-            throw new InvalidOperationException($"Can't create an instance of '{nameof(ApplicationUser)}'. " +
-                $"Ensure that '{nameof(ApplicationUser)}' is not an abstract class and has a parameterless constructor.");
-        }
-    }
 
-    private IUserEmailStore<ApplicationUser> GetEmailStore()
-    {
-        if (!UserManager.SupportsUserEmail)
-        {
-            throw new NotSupportedException("The default UI requires a user store with email support.");
-        }
-        return (IUserEmailStore<ApplicationUser>)UserStore;
-    }
+		Logger.LogInformation("User created a new account with password.");
 
-    private sealed class InputModel
-    {
-        [Required]
-        [EmailAddress]
-        [Display(Name = "Email")]
-        public string Email { get; set; } = "";
+		var userId = await UserManager.GetUserIdAsync(user);
+		var code = await UserManager.GenerateEmailConfirmationTokenAsync(user);
+		code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
+		var callbackUrl = NavigationManager.GetUriWithQueryParameters(
+			NavigationManager.ToAbsoluteUri("Account/ConfirmEmail").AbsoluteUri,
+			new Dictionary<string, object?> { ["userId"] = userId, ["code"] = code, ["returnUrl"] = ReturnUrl });
 
-        [Required]
-        [StringLength(100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6)]
-        [DataType(DataType.Password)]
-        [Display(Name = "Password")]
-        public string Password { get; set; } = "";
+		await EmailSender.SendConfirmationLinkAsync(user, Input.Email, HtmlEncoder.Default.Encode(callbackUrl));
 
-        [DataType(DataType.Password)]
-        [Display(Name = "Confirm password")]
-        [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
-        public string ConfirmPassword { get; set; } = "";
-    }
+		if (UserManager.Options.SignIn.RequireConfirmedAccount)
+		{
+			RedirectManager.RedirectTo(
+				"Account/RegisterConfirmation",
+				new() { ["email"] = Input.Email, ["returnUrl"] = ReturnUrl });
+		}
+
+		//await SignInManager.SignInAsync(user, isPersistent: false);
+		RedirectManager.RedirectTo(ReturnUrl);
+	}
+
+	private ApplicationUser CreateUser()
+	{
+		try
+		{
+			return Activator.CreateInstance<ApplicationUser>();
+		}
+		catch
+		{
+			throw new InvalidOperationException($"Can't create an instance of '{nameof(ApplicationUser)}'. " +
+				$"Ensure that '{nameof(ApplicationUser)}' is not an abstract class and has a parameterless constructor.");
+		}
+	}
+
+	private IUserEmailStore<ApplicationUser> GetEmailStore()
+	{
+		if (!UserManager.SupportsUserEmail)
+		{
+			throw new NotSupportedException("The default UI requires a user store with email support.");
+		}
+		return (IUserEmailStore<ApplicationUser>)UserStore;
+	}
+
+	protected override async Task OnInitializedAsync()
+	{
+		var user = await UserManager.GetUserAsync(SignInManager.Context.User);
+		var userId = await UserManager.GetUserIdAsync(user);
+		var token = await TokenStorage.GetAccessTokenAsync(userId);
+		
+		
+		var client = HttpClientFactory.CreateClient("LmsAPIClient");
+		client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+		
+		var response = await client.GetAsync("courses");
+		if (response.IsSuccessStatusCode)
+		{
+			var responseStream = await response.Content.ReadAsStreamAsync();
+			Courses = await JsonSerializer.DeserializeAsync<List<CourseDto>>(responseStream, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+		}
+		else
+		{
+			Console.WriteLine($"Error fetching courses: {response.ReasonPhrase}");
+			Courses = new List<CourseDto>();
+		}
+	}
+
+	private sealed class InputModel
+	{
+		[Required]
+		[EmailAddress]
+		[Display(Name = "Email")]
+		public string Email { get; set; } = "";
+
+		[Required]
+		[StringLength(100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6)]
+		[DataType(DataType.Password)]
+		[Display(Name = "Password")]
+		public string Password { get; set; } = "";
+
+		[DataType(DataType.Password)]
+		[Display(Name = "Confirm password")]
+		[Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
+		public string ConfirmPassword { get; set; } = "";
+
+		public string role { get; set; } = "Student";
+		
+	public Guid? selectedCourseId { get; set; } = null;
+	}
 }

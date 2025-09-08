@@ -13,7 +13,12 @@ else
 {
 	<h3 style="text-align: center">New course:</h3>
 	<div class="container mt-4">
-
+		@if (!string.IsNullOrEmpty(errorMessage))
+		{
+			<div class="alert alert-danger" role="alert">
+				<p>@errorMessage</p>
+			</div>
+		}
 		<div class="card shadow-sm">
 			<div class="card-body">
 				<EditForm Model="@Course" OnValidSubmit="@(() => HandleValidSubmit())">
@@ -50,6 +55,8 @@ else
 @code {
 	public CourseCreateDto Course { get; set; } = new CourseCreateDto();
 	private bool isAdding = false;
+	private string? errorMessage;
+
 
 	[Inject]
 	private IApiService myApi { get; set; } = default!;
@@ -60,14 +67,24 @@ else
 
 	private async Task HandleValidSubmit()
 	{
-		var newCourseDto = await myApi.CallApiPostAsync<CourseCreateDto, CourseDto>("courses", Course);
+		try
+		{
+			var newCourseDto = await myApi.CallApiPostAsync<CourseCreateDto, CourseDto>("courses", Course);
 
-		Console.WriteLine($"Course '{Course.Name}' saved successfully!");
+			Console.WriteLine($"Course '{Course.Name}' saved successfully!");
 
-		// Added to notify parent component
-        await OnCourseAdded.InvokeAsync(newCourseDto);
+			// Added to notify parent component
+			await OnCourseAdded.InvokeAsync(newCourseDto);
 
-        Course = new CourseCreateDto();
+			Course = new CourseCreateDto();
+		}
+		catch (System.ComponentModel.DataAnnotations.ValidationException ex)
+		{
+			errorMessage = $"API Error:  - {ex.Message}";
+			Console.WriteLine(ex.Message);
+			StateHasChanged();
+		}
+
 	}
 
 	private void Toggle() => isAdding = !isAdding;

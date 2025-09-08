@@ -2,168 +2,328 @@
 @using LMS.Blazor.Client.Services
 @using LMS.Shared.DTOs.EntityDto
 @using Microsoft.AspNetCore.Authorization
+@inject NavigationManager Navigation
+@inject AuthenticationStateProvider AuthStateProvider
 @rendermode InteractiveWebAssembly
 
 @attribute [Authorize]
 
-<div class="container-fluid">
-	<div class="row">
-		<!-- L Sidebar area -->
-		<div class="col-12 col-lg-3 border-end bg-light">
-			<div>
-				<DocumentComponent Documents="@DocumentDtos" />
-				<DocumentAddComponent ParentId=Id ParentType="Course"/>
+<h3>@(currentCourse?.Name ?? "Kurs")</h3>
 
-            </div>
-        </div>
-        <!-- Main content area -->
-        <div class="col-12 col-lg-6">
-            <h3>Kurs @CurrentCourse?.Name</h3>
-            <p>@CurrentCourse?.Description</p>
+@if (loading)
+{
+    <div class="text-center my-5">
+        <div class="spinner-border text-primary" role="status"></div>
+        <p>Laddar kursdata...</p>
+    </div>
+}
+else if (currentCourse is null)
+{
+    <div class="alert alert-warning">Kursen kunde inte laddas.</div>
+}
+else
+{
+    <div class="row gx-4">
+        <!-- Left-Column: Kursinfo + Dokument -->
+        <div class="col-12 col-lg-7">
+            <section class="mb-4">
+                <p>@currentCourse.Description</p>
+                <small class="text-muted">
+                    Start: @currentCourse.StartDate.ToString("yyyy-MM-dd") &nbsp;|&nbsp; Slut: @currentCourse.EndDate.ToString("yyyy-MM-dd")
+                </small>
+            </section>
 
-            <button type="cancel" class="btn btn-primary" @onclick="EditCourse">Change course</button>
+            <button class="btn btn-outline-primary mb-3" @onclick="ToggleEditCourse">
+                @(isEditingCourse ? "Avbryt redigering" : "Redigera kurs")
+            </button>
 
-            @if(isEditingCourse){
-                <CourseEditComponent CourseDto="@CurrentCourse" OnEditDone="Refresh" />
+            @if (isEditingCourse)
+            {
+                <CourseEditComponent CourseDto="@currentCourse" OnEditDone="RefreshCourse" />
             }
- 
-            <div class="row">
-                <div class="col-12 col-lg-9">
-					<ModuleAddComponent CourseId=Id/>
-					@if (Modules != null)
-                    {
-                        @foreach (var module in Modules)
-                        {
-                            @if (isEditingModule && CurrentModuleGuid == module.Id)
-                            {
-                                <ModuleEditComponent OnEditDone="StopEditing" Module=module currentCourseId="@CurrentCourse.Id" />
-                            }
-                            else
-                            {
-                                <ModuleComponent OnMessageSent="StartEditing" Module=module />
-                            }
-                        }
-                    }
-    
-                </div>
-            </div>
+
+            <hr />
+
+            <section>
+                <h5>Dokument</h5>
+                <DocumentComponent Documents="@documentDtos" OnEditRequested="EditDocument" />
+
+                @foreach (var doc in documentDtos)
+                {
+                    <div class="d-flex justify-content-between align-items-center border p-2 mb-2">
+                        <span>@doc.Name</span>
+                        <ConfirmDelete ButtonText="Delete"
+                                       Title="Confirm Delete"
+                                       Message="Are you sure you want to delete this module?"
+                                       OnConfirm="() => DeleteDocument(doc.Id)" />
+                    </div>
+
+                }
+
+                <DocumentAddComponent ParentId="@Id" ParentType="Course" OnUploadSuccess="HandleUploadSuccess" />
+            </section>
         </div>
 
-		<!-- R Sidebar area -->
-		<div class="col-12 col-lg-3 border-start bg-light">
-			<div class="p-3 sticky-top">
-				@if (Members != null)
-				{
-					@foreach (var member in Members)
-					{
-						<MemberComponent Member=member />
-					}
-				}
-			</div>
-		</div>
-	</div>
+        <!-- Right-Column: Moduler + Deltagare in a box -->
+        <div class="col-12 col-lg-5">
+            <div class="p-3 border rounded shadow-sm bg-white sticky-top" style="top: 1rem;">
+                <section class="mb-4">
+                    <h5>Moduler</h5>
+                    <ModuleAddComponent CourseId="@Id"
+                                        CourseStart="@currentCourse.StartDate.Date"
+                                        CourseEnd="@currentCourse.EndDate.Date"
+                                        OnModuleAdded="AddModule" />
 
-</div>
+                    @if (modules?.Any() == true)
+                    {
+                        <ul class="list-group mt-2">
+                            @foreach (var module in modules)
+                            {
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <strong>@module.Name</strong>
+                                        <br />
+                                        <small class="text-muted" style="font-size: 0.75rem;">
+                                            Start: @currentCourse.StartDate.ToString("yyyy-MM-dd")
+                                            &nbsp;|&nbsp;
+                                            Slut: @currentCourse.EndDate.ToString("yyyy-MM-dd")
+                                        </small>
+                                    </div>
+                                    @if (isEditingModule && currentModuleGuid == module.Id)
+                                    {
+                                        <ModuleEditComponent Module="module"
+                                                             CurrentCourseId="@currentCourse.Id"
+                                                             CourseStart="@currentCourse.StartDate.Date"
+                                                             CourseEnd="@currentCourse.EndDate.Date"
+                                                             OnEditDone="StopEditingModule"
+                                                             @key="module.Id" />
+                                    }
+                                    else
+                                    {
+                                        <span>@module.Name</span>
+                                        <button class="btn btn-sm btn-outline-secondary" @onclick="() => StartEditingModule(module.Id)">Redigera</button>
+
+                                        <ConfirmDelete ButtonText="Delete"
+                                                       Title="Confirm Delete"
+                                                       Message="Are you sure you want to delete this module?"
+                                                       OnConfirm="() => DeleteModule(module.Id)" />
+
+                                    }
+                                </li>
+                            }
+                        </ul>
+                    }
+                    else
+                    {
+                        <p class="text-muted mt-2">Inga moduler tillagda än.</p>
+                    }
+                </section>
+
+                <hr />
+
+                <section>
+                    <h5>Deltagare</h5>
+                    @if (members?.Any() == true)
+                    {
+                        <ul class="list-group">
+                            @foreach (var member in members)
+                            {
+                                <li class="list-group-item">@member.Email</li>
+                            }
+                        </ul>
+                    }
+                    else
+                    {
+                        <p class="text-muted">Inga deltagare tillagda.</p>
+                    }
+                </section>
+            </div>
+        </div>
+    </div>
+
+    @if (isEditingDocument && editingDocumentId is Guid docId)
+    {
+        @DocumentEditModal(docId)
+    }
+}
 
 @code {
-	[SupplyParameterFromQuery]
-	[Parameter] public Guid Id { get; set; }
+    [Parameter]
+    public Guid Id { get; set; }
 
-    private bool isEditingCourse { get; set; } = false;
-    private bool isEditingModule { get; set; } = false;
-    private Guid? CurrentModuleGuid { get; set; } = null!;
+    [Inject] private IApiService ApiService { get; set; } = default!;
+    [Inject] private AuthenticationStateProvider AuthProvider { get; set; } = default!;
 
-    private void EditCourse()
+    private bool loading = true;
+
+    private string? errorMessage;
+    private CourseDto? currentCourse;
+    private List<ModuleDto>? modules;
+    private List<UserDto>? members;
+    private List<DocumentDto> documentDtos = new();
+
+    private bool isEditingCourse = false;
+    private bool isEditingModule = false;
+    private Guid? currentModuleGuid;
+
+    private bool isEditingDocument = false;
+    private Guid? editingDocumentId;
+
+    protected override async Task OnInitializedAsync()
+    {
+        loading = true;
+
+        var authState = await AuthProvider.GetAuthenticationStateAsync();
+        if (!(authState.User.Identity?.IsAuthenticated ?? false))
+        {
+            Navigation.NavigateTo("/account/login");
+            return;
+        }
+
+        await LoadCourseDataAsync();
+        loading = false;
+    }
+
+    private async Task LoadCourseDataAsync()
+    {
+        try
+        {
+            currentCourse = await ApiService.CallApiGetAsync<CourseDto>($"courses/{Id}");
+            modules = (await ApiService.CallApiGetAsync<IEnumerable<ModuleDto>>($"modules/course/{Id}"))?.ToList() ?? new();
+            members = (await ApiService.CallApiGetAsync<IEnumerable<UserDto>>($"users/course/{Id}"))?.ToList() ?? new();
+            documentDtos = (await ApiService.CallApiGetAsync<IEnumerable<DocumentDto>>($"documents/course/{Id}"))?.ToList() ?? new();
+        }
+        catch (HttpRequestException apiEx)
+        {
+            errorMessage = $"API Error: {apiEx.StatusCode} - {apiEx.Message}";
+            Console.WriteLine("there was an API error: " + apiEx.Message);
+        }
+
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Fel vid inläsning av kursdata: {ex.Message}");
+            currentCourse = null;
+        }
+    }
+
+    private void ToggleEditCourse()
     {
         isEditingCourse = !isEditingCourse;
     }
 
-    private void StopEditing(ModuleDto dto)
-    {
-        isEditingModule = false;
-        CurrentModuleGuid = null;
-
-		//Försök till instant refresh
-		ModuleDto? x = Modules.SingleOrDefault(o => o.Id == dto.Id);
-		if (x != null)
-		{
-			x.Name = dto.Name;
-			x.StartDate = dto.StartDate;
-			x.EndDate = dto.EndDate;
-		}
-		StateHasChanged();
-	}
-	private void StartEditing(Guid myId)
-	{
-		isEditingModule = true;
-		CurrentModuleGuid = myId;
-	}
-
-	public bool Loading { get; set; } = true;
-
-	[Inject]
-	private IApiService myApi { get; set; } = default!;
-
-	[Inject]
-	private AuthenticationStateProvider Auth { get; set; } = default!;
-
-	private CourseDto? CurrentCourse { get; set; }
-	private IEnumerable<ModuleDto>? Modules { get; set; }
-	private IEnumerable<UserDto>? Members { get; set; }
-	private List<DocumentDto> DocumentDtos { get; set; } = new List<DocumentDto>();
-
-	protected override async Task OnInitializedAsync()
-	{
-		Loading = true;
-		var state = await Auth.GetAuthenticationStateAsync();
-
-		if (!(state.User.Identity?.IsAuthenticated) ?? false)
-		{
-			return;
-		}
-		await LoadCourse();
-		Loading = false;
-
-    }
-    private void Refresh(CourseDto dto)
+    private void RefreshCourse(CourseDto updatedCourse)
     {
         isEditingCourse = false;
-        if (CurrentCourse != null && CurrentCourse.Id == dto.Id)
+        if (currentCourse is not null && currentCourse.Id == updatedCourse.Id)
         {
-            CurrentCourse.Name = dto.Name;
-            CurrentCourse.Description = dto.Description;
-            CurrentCourse.StartDate = dto.StartDate;
-            CurrentCourse.EndDate = dto.EndDate;
+            currentCourse.Name = updatedCourse.Name;
+            currentCourse.Description = updatedCourse.Description;
+            currentCourse.StartDate = updatedCourse.StartDate;
+            currentCourse.EndDate = updatedCourse.EndDate;
         }
-		isEditingCourse = false;
         StateHasChanged();
-	}
+    }
 
-	private async Task LoadCourse()
-	{
-		try
-		{
+    private void StartEditingModule(Guid moduleId)
+    {
+        isEditingModule = true;
+        currentModuleGuid = moduleId;
+    }
 
-			var response = await myApi.CallApiGetAsync<CourseDto>($"courses/{Id}");
-			CurrentCourse = (CourseDto)response;
+    private void StopEditingModule(ModuleDto updatedModule)
+    {
+        // isEditingModule = false;
+        // currentModuleGuid = null;
 
+        var moduleToUpdate = modules?.FirstOrDefault(m => m.Id == updatedModule.Id);
+        if (moduleToUpdate is not null)
+        {
+            moduleToUpdate.Name = updatedModule.Name;
+            moduleToUpdate.Description = updatedModule.Description;
+            moduleToUpdate.StartDate = updatedModule.StartDate;
+            moduleToUpdate.EndDate = updatedModule.EndDate;
+        }
 
-			var respModule = await myApi.CallApiGetAsync<IEnumerable<ModuleDto>>($"modules/course/{Id}");
-			Modules = respModule?.ToList();
+        isEditingModule = false;
+        currentModuleGuid = null;
+        StateHasChanged();
+    }
 
-			var respMembers = await myApi.CallApiGetAsync<IEnumerable<UserDto>>($"users/course/{Id}");
-			Members = respMembers?.ToList();
+    private void AddModule(ModuleDto newModule)
+    {
+        modules ??= new List<ModuleDto>();
+        modules.Add(newModule);
+        StateHasChanged();
+    }
 
-			var respDocs = await myApi.CallApiGetAsync<IEnumerable<DocumentDto>>($"documents/course/{Id}");
-			DocumentDtos = respDocs?.ToList() ?? new List<DocumentDto>();
+    private void EditDocument(Guid documentId)
+    {
+        editingDocumentId = documentId;
+        isEditingDocument = true;
+    }
 
+    private void CloseDocumentEdit()
+    {
+        isEditingDocument = false;
+        editingDocumentId = null;
+    }
 
+    private async Task OnDocumentSaved(DocumentDto updatedDoc)
+    {
+        var existing = documentDtos.FirstOrDefault(d => d.Id == updatedDoc.Id);
+        if (existing is not null)
+        {
+            existing.Name = updatedDoc.Name;
+            existing.Description = updatedDoc.Description;
+        }
+        CloseDocumentEdit();
+        await InvokeAsync(StateHasChanged);
+    }
 
-		}
-		catch (Exception ex)
-		{
-			Console.WriteLine("there was an error: " + ex.Message);
-		}
-	}
+    private void HandleUploadSuccess(DocumentDto newDoc)
+    {
+        documentDtos.Add(newDoc);
+        StateHasChanged();
+    }
 
+    private RenderFragment DocumentEditModal(Guid documentId) => __builder =>
+    {
+        <div class="modal-backdrop fade show"></div>
+        <div class="modal d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+            <div class="modal-dialog">
+                <div class="modal-content p-3">
+                    <button type="button" class="btn-close float-end" aria-label="Close" @onclick="CloseDocumentEdit"></button>
+                    <DocumentEditComponent DocumentId="@documentId" OnSaved="OnDocumentSaved" OnCancel="CloseDocumentEdit" />
+                </div>
+            </div>
+        </div>
+    };
+
+    private async Task DeleteModule(Guid moduleId)
+    {
+        try
+        {
+            await ApiService.CallApiDeleteAsync($"modules/{moduleId}");
+            modules?.RemoveAll(m => m.Id == moduleId);
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Fel vid borttagning av modul: {ex.Message}");
+        }
+        StateHasChanged();
+    }
+
+    private async Task DeleteDocument(Guid docId)
+    {
+        try
+        {
+            await ApiService.CallApiDeleteAsync($"documents/{docId}");
+            documentDtos.RemoveAll(d => d.Id == docId);
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Fel vid borttagning av dokument: {ex.Message}");
+        }
+        StateHasChanged();
+    }
 }

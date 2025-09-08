@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Domain.Contracts.Repositories;
 using Domain.Models.Entities;
 using LMS.Infractructure.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace LMS.Infractructure.Repositories;
 
@@ -37,6 +38,48 @@ public class ModuleRepository : RepositoryBase<Module>, IModuleRepository
         return await FindByConditionAsync(m => m.CourseId == courseId, trackChanges: false)
             .ContinueWith(task => task.Result.ToList());
     }
+    public async Task<List<Module>> GetModulesByCourseIdAndDateAsync(Guid courseId, string idag)
+    {
+        DateTime parsedDate = DateTime.Parse(idag);
+        var modules = await context.Modules
+        .Where(m => m.CourseId == courseId &&
+                parsedDate.Date >= m.StartDate.Date &&
+                parsedDate.Date <= m.EndDate.Date)
+        .Include(ma => ma.ModuleActivities)
+        .AsNoTracking()
+        .ToListAsync();
+
+        // Filter subcollection
+        foreach (var module in modules)
+        {
+            module.ModuleActivities = module.ModuleActivities
+            .Where(mb => parsedDate.Date >= mb.StartDate.Date && parsedDate.Date <= mb.EndDate)
+            .ToList();
+        }
+        return modules;
+    }
+    public async Task<List<Module>> GetAllModulesByDateAsync(string idag)
+    {
+        DateTime parsedDate = DateTime.Parse(idag);
+        var modules = await context.Modules
+        .Where(m => parsedDate.Date >= m.StartDate.Date &&
+                    parsedDate.Date <= m.EndDate.Date)
+        .Include(m => m.ModuleActivities)
+        .AsNoTracking()
+        .ToListAsync();
+
+        // Filter subcollection
+        foreach (var module in modules)
+        {
+            module.ModuleActivities = module.ModuleActivities
+            .Where(mb => parsedDate.Date >= mb.StartDate.Date && parsedDate.Date <= mb.EndDate)
+            .ToList();
+        }
+        return modules;
+
+    }
+
+
     public void CreateModule(Module module)
     {
         context.Modules.Add(module);

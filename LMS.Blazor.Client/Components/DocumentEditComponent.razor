@@ -1,0 +1,154 @@
+﻿@using System.ComponentModel.DataAnnotations
+@using LMS.Shared.DTOs.EntityDTO
+<EditForm Model="@EditDocument" OnValidSubmit="OnSave">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="form-group">
+        <label for="name">Document Name</label>
+        <InputText id="name" class="form-control" @bind-Value="EditDocument.Name" />
+        <ValidationMessage For="@(() => EditDocument.Name)" />
+    </div>
+
+    <div class="form-group">
+        <label for="description">Description</label>
+        <InputTextArea id="description" class="form-control" @bind-Value="EditDocument.Description" />
+    </div>
+
+    <button type="submit" class="btn btn-primary" disabled="@isSaving">Save</button>
+    <button type="button" class="btn btn-secondary ms-2" @onclick="CancelEdit" disabled="@isSaving">Cancel</button>
+
+    @if (saveSuccess)
+    {
+        <p class="text-success">Changes saved!</p>
+    }
+    @if (!string.IsNullOrEmpty(errorMessage))
+    {
+        <div class="alert alert-danger" role="alert">
+            <p>@errorMessage</p>
+        </div>
+    }
+
+</EditForm>
+
+@code {
+
+    [Parameter] public Guid DocumentId { get; set; }
+    [Parameter] public EventCallback<DocumentDto> OnSaved { get; set; }
+    // [Parameter] public EventCallback OnSaved { get; set; }
+    [Parameter] public EventCallback OnCancel { get; set; }
+
+    [Inject] IApiService ApiService { get; set; }
+
+    private DocumentEditDto EditDocument = new();
+    private bool isSaving = false;
+    private bool saveSuccess = false;
+    private string? errorMessage;
+
+    // protected override async Task OnInitializedAsync()
+    // {
+    //     // Hämta dokumentdata från API
+    //     EditDocument = await ApiService.CallApiGetAsync<DocumentEditDto>($"documents/{DocumentId}");
+    // }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        try
+        {
+
+
+        EditDocument = await ApiService.CallApiGetAsync<DocumentEditDto>($"documents/{DocumentId}");
+        if (EditDocument != null)
+        {
+            EditDocument.Id = DocumentId;
+        }
+
+        saveSuccess = false;
+    
+        }
+        catch (HttpRequestException ApiEx)
+        {
+            errorMessage = $"API Error:  - {ApiEx.Message}";
+            Console.WriteLine(ApiEx.Message);
+            StateHasChanged();
+        }
+
+    }
+
+    private async Task OnSave()
+    {
+        try
+        {
+
+        isSaving = true;
+        saveSuccess = false;
+        StateHasChanged();
+
+        var updated = await ApiService.CallApiPutAsync<DocumentEditDto, DocumentDto>(
+            $"documents/{DocumentId}", EditDocument
+        );
+
+        if (updated != null)
+        {
+            saveSuccess = true;
+            await OnSaved.InvokeAsync(updated);
+        }
+
+        isSaving = false;
+        StateHasChanged();
+
+        }
+        catch (System.ComponentModel.DataAnnotations.ValidationException ex)
+        {
+            errorMessage = $"API Error:  - {ex.Message}";
+            Console.WriteLine(ex.Message);
+            StateHasChanged();
+
+        }
+
+    }
+
+    // private async Task OnSave()
+    // {
+    //     isSaving = true;
+    //     saveSuccess = false;
+    //     StateHasChanged();
+    //     var updated = await ApiService.CallApiPutAsync<DocumentEditDto, DocumentDto>($"documents/{DocumentId}", EditDocument);
+    //     if (updated != null)
+    //     {
+    //         saveSuccess = true;
+    //         await OnSaved.InvokeAsync();
+    //     }
+    //     // var result = await ApiService.CallApiPutAsync<DocumentEditDto, bool>($"documents/{DocumentId}", EditDocument);
+    //     // if (result)
+    //     // {
+    //     //     saveSuccess = true;
+    //     //     await OnSaved.InvokeAsync();
+    //     // }
+    //     else
+    //     {
+    //         // Hantera fel, visa meddelande etc.
+    //     }
+    //     isSaving = false;
+    //     StateHasChanged();
+    // }
+
+    private async Task CancelEdit()
+    {
+        await OnCancel.InvokeAsync();
+    }
+
+
+    // public class DocumentEditDto
+    // {
+    //     public Guid Id { get; set; }
+
+    //     [Required]
+    //     [StringLength(100)]
+    //     public string? Name { get; set; }
+
+    //     [StringLength(500)]
+    //     public string? Description { get; set; }
+
+    // }
+}

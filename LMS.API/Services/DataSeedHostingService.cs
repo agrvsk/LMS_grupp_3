@@ -257,7 +257,7 @@ public class DataSeedHostingService : IHostedService
                 SubmissionDocument = doc,
                 SubmissionDate = doc.UploadDate,
                 DocumentId = doc.Id,
-                ApplicationUserId = student.Id,
+                //ApplicationUserId = student.Id,
                 Id = Guid.NewGuid()
             };
             doc.ParentId = submission.Id;
@@ -266,7 +266,7 @@ public class DataSeedHostingService : IHostedService
             allSubmissions.Add(submission);
         }
 
-        context.Submissions.AddRange(allSubmissions);
+        //context.Submissions.AddRange(allSubmissions);
         await context.SaveChangesAsync();
     }
 

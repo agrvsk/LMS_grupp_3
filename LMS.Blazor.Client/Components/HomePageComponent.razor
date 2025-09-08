@@ -1,0 +1,225 @@
+﻿@using System.Security.Claims
+@rendermode InteractiveWebAssembly
+@inject NavigationManager Navigation
+
+<AuthorizeView Roles="Teacher, Student">
+    <Authorized>
+        @if (!string.IsNullOrEmpty(errorMessage))
+        {
+            <div class="alert alert-danger" role="alert">
+                <p>@errorMessage</p>
+            </div>
+        }
+        @if (isTeacher)
+        {
+            <section class="p-4 bg-light rounded shadow-sm">
+                <header class="mb-3">
+                    <small class="text-muted">Teacher Dashboard</small><br />
+                    <small class="text-primary">Welcome, @userName!</small>
+                </header>
+            <article>
+                <p class="lead">Here’s what’s happening today:</p>
+                @if (Modules != null && Modules.Count() > 0)
+                {
+                    foreach (ModuleDto item in Modules)
+                    {
+                            <small class="text-muted">@item.Name - @item.StartDate.ToShortDateString() - @item.EndDate.ToShortDateString()</small>
+                            <br />
+                        foreach (ModuleActivityDto activityDto in item.ModuleActivities)
+                        {
+                                <small class="ml-4">@GetActivityTypeName(@activityDto.ActivityTypeId) @activityDto.Name - @activityDto.StartDate.ToShortTimeString() - @activityDto.EndDate.ToShortTimeString()</small>
+                             <br />
+                        }
+                    }
+                }
+            </article>
+            </section>
+
+        }
+        else if (isStudent)
+        {
+            <section class="p-4 bg-light rounded shadow-sm">
+                <header class="mb-3">
+                    <small class="text-muted"   >Student Dashboard</small><br/>
+                    <small class="text-primary">Welcome, @userName!</small><br />
+                    <small class="text-muted">Courseid:@courseIdAsString</small>
+                </header>
+            <article>
+                <p class="lead">Here’s what’s happening today:</p>
+                    @if (Modules != null && Modules.Count() > 0)
+                    {
+                        foreach (ModuleDto item in Modules)
+                        {
+                          foreach (ModuleActivityDto activityDto in item.ModuleActivities)
+                            {
+                                <small class="card-hover" @onclick="Toggle">@GetActivityTypeName(@activityDto.ActivityTypeId)  @activityDto.Name - @activityDto.StartDate.ToShortTimeString() - @activityDto.EndDate.ToShortTimeString()</small>
+                                <br />
+                                @if (isEditing)
+                                {
+                                    <SubmissionAddComponent />
+                                }
+                            }
+                        }
+                    }
+                    @if (Assignments != null && Assignments.Any())
+                    {
+                        <div class="row g-3">
+                            @foreach (var item in Assignments)
+                            {
+                                <div class="col-md-4">
+                                    <div class="card shadow-sm h-100 assignment-card"
+                                         style="cursor: pointer;"
+                                         @onclick="@(() => NavigateTo($"assignments/{item.Id}"))">
+
+                                        <div class="card-body">
+                                            <h5 class="card-title">@item.Name</h5>
+                                            <p class="card-text text-muted mb-1">
+                                                Due: @item.DueDate.ToShortDateString()
+                                            </p>
+                                            @if (!string.IsNullOrWhiteSpace(item.Description))
+                                            {
+                                                <p class="card-text text-truncate">
+                                                    @item.Description
+                                                </p>
+                                            }
+                                        </div>
+                                        <div class="card-footer text-end">
+                                            <span class="text-primary">View Details →</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-muted">No assignments available.</p>
+                    }
+
+                </article>
+            </section>
+
+
+        }
+    </Authorized>
+    <NotAuthorized>
+        <h3>You are not authorized - please log in.</h3>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code 
+{
+    [Inject]
+    private IApiService myApi { get; set; } = default!;
+    [Inject]
+    AuthenticationStateProvider AuthenticationStateProvider { get; set; } = default!;
+
+    private IEnumerable<ModuleDto>? Modules { get; set; }
+    private IEnumerable<AssignmentDto>? Assignments { get; set; }
+    public List<ActivityTypeDto> Types { get; set; } = new List<ActivityTypeDto>();
+
+    private bool isTeacher;
+    private bool isStudent;
+    private bool isLoading;
+    private string? userName;
+    string? courseIdAsString;
+    private string? UserId;
+
+    Guid? currentlyEditing;
+    bool isEditing = false;
+    private string? errorMessage;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        userName = user.Identity?.Name;
+        if (!user.Identity.IsAuthenticated || user==null) return;
+
+        UserId = user.FindFirst(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+
+
+        courseIdAsString = user.FindFirst("CourseId")?.Value;
+
+        isLoading = true;
+
+        isTeacher = user.IsInRole("Teacher");
+        isStudent = user.IsInRole("Student");
+
+        await LoadActivities(courseIdAsString);
+        await LoadAssignments(courseIdAsString);
+
+        isLoading = false;
+    }
+    private void NavigateTo(string path)
+    {
+        Navigation.NavigateTo(path);
+    }
+
+    private async Task LoadAssignments(string CourseId)
+    {
+        if (!isStudent) return;
+        try
+        {
+            Assignments = await myApi.CallApiGetAsync<IEnumerable<AssignmentDto>>($"courses/{CourseId}/assignments");
+        }
+        catch (HttpRequestException apiEx)
+        {
+            errorMessage = $"API Error: {apiEx.StatusCode} - {apiEx.Message}";
+            Console.WriteLine("there was an API error: " + apiEx.Message);
+        }
+
+    }
+
+    private async Task LoadActivities(string? courseIdAsString)
+    {
+        try
+        {
+            DateTime idag = DateTime.UtcNow;
+            string timeString = idag.ToString("yyyy-MM-dd");
+            if (isStudent )
+            {
+                if (courseIdAsString != null && courseIdAsString.Length > 0)
+                {
+                    if (Guid.TryParse(courseIdAsString, out var courseId))
+                    {
+                        Console.WriteLine(courseId);
+                        Modules = await myApi.CallApiGetAsync<IEnumerable<ModuleDto>>($"modules/course/{courseId}/today/{timeString}");
+                    }
+
+                }
+
+            }
+            else if(isTeacher)
+            {
+                Modules = await myApi.CallApiGetAsync<IEnumerable<ModuleDto>>($"modules/today/{timeString}");
+            }
+
+            Types = (await myApi.CallApiGetAsync<List<ActivityTypeDto>>("activity-types"));
+
+        }
+        catch (HttpRequestException apiEx)
+        {
+            errorMessage = $"API Error: {apiEx.StatusCode} - {apiEx.Message}";
+            Console.WriteLine("there was an API error: " + apiEx.Message);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("there was an error: " + ex.Message);
+        }
+
+
+    }
+
+    public string GetActivityTypeName(int activityTypeId)
+    {
+        return Types.FirstOrDefault(t => t.Id == activityTypeId)?.Name ?? "  ";
+
+    }
+    private void Toggle()
+    {
+        isEditing = !isEditing;
+    }
+}
+

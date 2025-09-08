@@ -1,0 +1,150 @@
+﻿@using System.Security.Claims
+@using System.Text.Json
+@using Domain.Models.Entities
+@using LMS.Blazor.Client.Models
+@using System.Text
+@using Microsoft.AspNetCore.Identity
+@rendermode InteractiveWebAssembly
+@inject IApiService ApiService
+
+
+<div class="border">
+	<EditForm Model="@model" OnValidSubmit=HandleValidSubmit>
+		<DataAnnotationsValidator />
+		<ValidationSummary />
+		<div class="form-group">
+			<label for="document">Document</label>
+			<InputFile id="document" class="form-control" OnChange="OnFileSelected" />
+		</div>
+		<div class="form-group">
+			<label for="description">Document Description</label>
+			<InputTextArea id="description" class="form-control" @bind-Value="model.documentInfo.Description" />
+		</div>
+		<div class="mb-3">
+			<label>Group Members</label>
+			<select multiple class="form-select" @onchange="OnGroupMembersChanged">
+				@foreach (var u in Users)
+				{
+					<option value="@u.Id" selected="@model.SubmitterIds.Contains(u.Id)">@u.Email</option>
+				}
+			</select>
+			<small class="form-text text-muted">
+				Hold Ctrl (Windows) or Cmd (Mac) to select multiple users.
+			</small>
+		</div>
+		<div class="form-group">
+			<label for="description">Comment</label>
+			<InputTextArea id="description" class="form-control" @bind-Value="model.Comment" />
+		</div>
+		<button type="submit" class="btn btn-primary">Add Document</button>
+
+		@if (uploadSuccess)
+		{
+			<p class="text-success">Submission uploaded!</p>
+		}
+
+	</EditForm>
+</div>
+
+@code 
+{
+	[Parameter] public EventCallback<DocumentDto> OnUploadSuccess { get; set; }
+	[CascadingParameter] private Task<AuthenticationState> AuthStateTask { get; set; }
+	[Parameter]
+	public Guid AssignmentId { get; set; }
+	private string? UploaderId;
+	private List<SubmissionCreateDto> MyDtoArr;
+	private SubmissionCreateDto dto;
+	private List<UserDto> Users = new();
+
+	private Model model = new();
+	private bool uploadSuccess = false;
+
+	private class Model
+	{
+		public string? Comment { get; set; }
+		public List<string> SubmitterIds { get; set; } = new();
+		public DocumentInfo documentInfo { get; set; } = new();
+	}
+
+
+	private async Task HandleValidSubmit()
+	{
+		Console.WriteLine("Trying to submit");
+		if (!model.SubmitterIds.Contains(UploaderId))
+			model.SubmitterIds.Insert(0, UploaderId);
+
+		using var content = new MultipartFormDataContent();
+
+		var fileContent = new ByteArrayContent(model.documentInfo.Content);
+		fileContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(model.documentInfo.ContentType ?? "application/octet-stream");
+		content.Add(fileContent, "File", model.documentInfo.FileName);
+
+		var sub = new
+		{
+			AssignmentId = AssignmentId,
+			SubmitterIds = model.SubmitterIds,
+			Description = model.Comment
+		};
+		var submissionJson = JsonSerializer.Serialize(sub);
+		Console.WriteLine(submissionJson);
+
+		content.Add(new StringContent(submissionJson, Encoding.UTF8), "submissionDtoJson");
+
+		var result = await ApiService.CallApiPostMultipartAsync<SubmissionDto>("submissions", content);
+		Console.WriteLine("Result from API: " + (result != null ? "Success" : "Failure"));
+		if (result != null)
+		{
+			uploadSuccess = true;
+			model = new Model();
+			StateHasChanged();
+		}
+		else
+		{
+			uploadSuccess = false;
+		}
+	}
+	private async void OnFileSelected(InputFileChangeEventArgs e)
+	{
+		var file = e.File;
+
+		// Read into byte[]
+		using var stream = file.OpenReadStream(maxAllowedSize: 10_000_000);
+		using var ms = new MemoryStream();
+		await stream.CopyToAsync(ms);
+
+		model.documentInfo.FileName = file.Name;
+		model.documentInfo.ContentType = file.ContentType;
+		model.documentInfo.Content = ms.ToArray();
+
+
+		uploadSuccess = false;
+	}
+
+	private void OnGroupMembersChanged(ChangeEventArgs e)
+	{
+		var selectedOptions = e.Value as IEnumerable<string>;
+		if (selectedOptions != null)
+		{
+			model.SubmitterIds = selectedOptions.ToList();
+		}
+		Console.WriteLine("Selected SubmitterIds: " + string.Join(", ", model.SubmitterIds));
+	}
+	
+	protected override async Task OnParametersSetAsync()
+	{
+		var authState = await AuthStateTask;
+		var user = authState.User;
+		if (user.Identity?.IsAuthenticated == true)
+		{
+			UploaderId = user.FindFirst(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+			if (!string.IsNullOrEmpty(UploaderId) && !model.SubmitterIds.Contains(UploaderId))
+			{
+				model.SubmitterIds.Add(UploaderId);
+			}
+		}
+		var courseIdAsString = user.FindFirst("CourseId")?.Value;
+		Users = await ApiService.CallApiGetAsync<List<UserDto>>($"users/course/{courseIdAsString}") ?? new List<UserDto>();
+
+	}
+}

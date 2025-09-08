@@ -31,6 +31,22 @@ namespace LMS.Presentation.Controllers
             var modules = await _serviceManager.ModuleService.GetModulesByCourseIdAsync(courseId);
             return Ok(modules);
         }
+
+        [HttpGet("course/{courseId}/today/{idag}")]
+        public async Task<IActionResult> GetActivitiesByCourseIdAsync(Guid courseId, string idag)
+        {
+            var modules = await _serviceManager.ModuleService.GetActivitiesByCourseIdAsync(courseId, idag);
+            return Ok(modules);
+        }
+
+        [HttpGet("today/{idag}")]
+        public async Task<IActionResult> GetAllActivitiesByDateAsync(string idag)
+        {
+            var modules = await _serviceManager.ModuleService.GetAllActivitiesByDateAsync(idag);
+            return Ok(modules);
+        }
+
+
         [HttpGet("{id}")]
         public async Task<IActionResult> GetModuleById(Guid id)
         {
@@ -44,7 +60,12 @@ namespace LMS.Presentation.Controllers
         {
             if (moduleDto == null)
                 return BadRequest("Module data is null");
-            var createdModule = await _serviceManager.ModuleService.CreateModuleAsync(moduleDto);
+            if (!await _serviceManager.DateValidationService.ValidateModuleDatesAsync(moduleDto.StartDate, moduleDto.EndDate, moduleDto.CourseId))
+            {
+                ModelState.AddModelError("DateValidation", "End date must be greater than start date and within the course date range.");
+                return BadRequest(ModelState);
+            }
+                var createdModule = await _serviceManager.ModuleService.CreateModuleAsync(moduleDto);
             return CreatedAtAction(nameof(GetModuleById), new { id = createdModule.Id }, createdModule);
         }
         [HttpPut("{id}")]
@@ -52,9 +73,15 @@ namespace LMS.Presentation.Controllers
         {
             if (moduleUpdDto == null || id != moduleUpdDto.Id)
                 return BadRequest("Module data is invalid");
+            if (!await _serviceManager.DateValidationService.ValidateModuleDatesAsync(moduleUpdDto.StartDate, moduleUpdDto.EndDate, moduleUpdDto.CourseId, moduleUpdDto.Id))
+            {
+                ModelState.AddModelError("DateValidation", "End date must be greater than start date and within the course date range.");
+                return BadRequest(ModelState);
+            }
             var updatedModule = await _serviceManager.ModuleService.UpdateModuleAsync(moduleUpdDto);
             if (updatedModule == null)
                 return NotFound();
+            
             return Ok(updatedModule);
         }
         [HttpDelete("{id}")]

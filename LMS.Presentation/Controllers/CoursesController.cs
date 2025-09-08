@@ -1,4 +1,5 @@
-﻿using LMS.Shared.DTOs.EntityDto;
+﻿using Domain.Models.Exceptions;
+using LMS.Shared.DTOs.EntityDto;
 using Microsoft.AspNetCore.Mvc;
 using Service.Contracts;
 
@@ -7,11 +8,11 @@ namespace LMS.Presentation.Controllers
     [Route("/courses")]
     [ApiController]
     public class CoursesController : ControllerBase
-    {        
+    {
         private readonly IServiceManager _serviceManager;
 
         public CoursesController(IServiceManager serviceManager)
-        {            
+        {
             _serviceManager = serviceManager;
         }
 
@@ -28,9 +29,19 @@ namespace LMS.Presentation.Controllers
             var course = await _serviceManager.CourseService.GetCourseByIdAsync(id);
             if (course == null)
             {
-                return NotFound();
+                throw new CourseNotFoundException(id);
             }
             return Ok(course);
+        }
+        [HttpGet("{id}/assignments")]
+        public async Task<IActionResult> GetAssignmentsByCourseId(Guid id)
+        {
+            var assignments = await _serviceManager.CourseService.GetAssignmentsByCourseIdAsync(id);
+            if (assignments == null)
+            {
+                return NotFound();
+            }
+            return Ok(assignments);
         }
 
         [HttpPost]
@@ -40,8 +51,21 @@ namespace LMS.Presentation.Controllers
             {
                 return BadRequest("Course data is null");
             }
-            var createdCourse = await _serviceManager.CourseService.CreateCourseAsync(courseDto);
-            return CreatedAtAction(nameof(GetCourseById), new { id = createdCourse.Id }, createdCourse);
+            if (!_serviceManager.DateValidationService.ValidateCourseDates(courseDto.StartDate, courseDto.EndDate))
+            {
+                ModelState.AddModelError("DateValidation", "End date must be greater than start date.");
+                return BadRequest(ModelState);
+            }
+            try
+            {
+                var createdCourse = await _serviceManager.CourseService.CreateCourseAsync(courseDto);
+                
+                return CreatedAtAction(nameof(GetCourseById), new { id = createdCourse.Id }, createdCourse);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
         }
 
         [HttpPut("{id}")]
@@ -50,6 +74,11 @@ namespace LMS.Presentation.Controllers
             if (courseDto == null || id != courseDto.Id)
             {
                 return BadRequest("Course data is invalid");
+            }
+            if (!_serviceManager.DateValidationService.ValidateCourseDates(courseDto.StartDate, courseDto.EndDate))
+            {
+                ModelState.AddModelError("DateValidation", "End date must be greater than start date.");
+                return BadRequest(ModelState);
             }
             var updatedCourse = await _serviceManager.CourseService.UpdateCourseAsync(courseDto);
             if (updatedCourse == null)
