@@ -2,8 +2,7 @@
 @using Radzen
 @using Radzen.Blazor
 @using LMS.Shared.DTOs.EntityDTO
-@inject IApiService ApiService
-@inject AuthenticationStateProvider Auth
+@inject NavigationManager Navigation
 
 <PageTitle>Schedule</PageTitle>
 
@@ -18,6 +17,12 @@
 </RadzenScheduler>
 
 @code {
+    [Inject]
+    private IApiService myApi { get; set; } = default!;
+    [Inject]
+    private AuthenticationStateProvider Auth { get; set; } = default!;
+    private string CourseId;
+
     // Event class for the scheduler
     public class ScheduleEvent
     {
@@ -27,24 +32,56 @@
     }
 
     private List<ScheduleEvent> Events = new();
+    private bool Loading = true;
 
     private ScheduleDto MySchedule = new();
 
     // This is just an example of loading your schedule — in real life you probably get it from your API
+    private bool hasLoaded = false;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && !hasLoaded)
+        {
+            hasLoaded = true;
+            await OnInitializedAsync(); // Retry now that client is ready
+            StateHasChanged();
+        }
+    }
 
 
-    protected override async void OnInitialized()
+    private async Task HandleTeacher()
+    {
+        var response = await myApi.CallApiGetAsync<IEnumerable<CourseDto>>("courses");
+        Console.WriteLine($"Found {response?.Count()} courses.");
+        CourseId = response?.ToList()[0].Id.ToString();
+        Console.WriteLine($"Using CourseId: {CourseId}");
+    }
+
+    private void HandleStudent(System.Security.Claims.ClaimsPrincipal user)
+    {
+        CourseId = user.Claims.FirstOrDefault(c => c.Type == "CourseId")?.Value;
+    }
+    protected override async Task OnInitializedAsync()
     {
         var authState = await Auth.GetAuthenticationStateAsync();
-		var user = authState.User;
-        if (!user.Identity?.IsAuthenticated ?? true)
+        var user = authState.User;
+        var isTeacher = user.IsInRole("Teacher");
+        var isStudent = user.IsInRole("Student");
+        if (isTeacher)
         {
-            // User is not authenticated, handle accordingly (e.g., redirect to login)
-            return;
-		}
-		var CourseId = user.Claims.FirstOrDefault(c => c.Type == "CourseId")?.Value;
-
-        MySchedule = await ApiService.CallApiGetAsync<ScheduleDto>($"schedules/{CourseId}");
+            await HandleTeacher();
+        }
+        else if (isStudent)
+        {
+            HandleStudent(user);
+        }
+        else
+        {
+            await InvokeAsync(() => Navigation.NavigateTo("/account/login"));
+        }
+        
+        MySchedule = await myApi.CallApiGetAsync<ScheduleDto>($"schedules/{CourseId}");
 
         
         // Add the course start as an event

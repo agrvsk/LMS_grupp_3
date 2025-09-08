@@ -4,5 +4,5 @@ namespace Service.Contracts;
 
     public interface IScheduleService
     {
-        ScheduleDto GetSchedule(Guid coursId, DateTime start, DateTime end);
+        Task<ScheduleDto> GetSchedule(Guid coursId, DateTime start, DateTime end);
     }

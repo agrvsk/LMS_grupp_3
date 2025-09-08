@@ -31,11 +31,11 @@ public class ScheduleService : IScheduleService
     //{
     //    throw new NotImplementedException();
     //}
-    public ScheduleDto GetSchedule(Guid courseId, DateTime start, DateTime end)
+    public async Task<ScheduleDto> GetSchedule(Guid courseId, DateTime start, DateTime end)
     {
-        CourseDto course = courseService.GetCourseByIdAsync(courseId).Result;
-        List<ModuleDto> modules = moduleService
-            .GetModulesByCourseIdAsync(courseId).Result
+        CourseDto course = await courseService.GetCourseByIdAsync(courseId);
+        List<ModuleDto> modules = (await moduleService
+            .GetModulesByCourseIdAsync(courseId))
             .Where(m => m.StartDate <= end && m.EndDate >= start)
             .ToList();
         List<ModuleActivityDto> moduleActivities = modules.SelectMany(m => m.ModuleActivities

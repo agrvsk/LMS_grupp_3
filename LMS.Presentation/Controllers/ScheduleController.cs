@@ -19,17 +19,17 @@ public class ScheduleController : ControllerBase
     {
         _serviceManager = serviceManager;
     }
-    [HttpGet("{coursId}")]
-    public IActionResult GetSchedule(Guid coursId )
+    [HttpGet("{courseId}")]
+    public async Task<IActionResult> GetSchedule(Guid courseId )
     {
         
-        var schedules =  _serviceManager.ScheduleService.GetSchedule( coursId, DateTime.Today, DateTime.Today.AddMonths(1));
+        var schedules =  await _serviceManager.ScheduleService.GetSchedule( courseId, DateTime.Today, DateTime.Today.AddMonths(1));
         return Ok(schedules);
     }
-    [HttpGet("{coursId}/{start}")]
-    public IActionResult GetScheduleByDate(Guid coursId, DateTime start)
+    [HttpGet("{courseId}/{start}")]
+    public async Task<IActionResult> GetScheduleByDate(Guid courseId, DateTime start)
     {
-        var schedules = _serviceManager.ScheduleService.GetSchedule(coursId, start, start.AddMonths(1));
+        var schedules = await _serviceManager.ScheduleService.GetSchedule(courseId, start, start.AddMonths(1));
         return Ok(schedules);
     }
 }
