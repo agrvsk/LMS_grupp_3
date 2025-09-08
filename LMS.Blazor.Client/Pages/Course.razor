@@ -47,6 +47,19 @@ else
             <section>
                 <h5>Dokument</h5>
                 <DocumentComponent Documents="@documentDtos" OnEditRequested="EditDocument" />
+
+                @foreach (var doc in documentDtos)
+                {
+                    <div class="d-flex justify-content-between align-items-center border p-2 mb-2">
+                        <span>@doc.Name</span>
+                        <ConfirmDelete ButtonText="Delete"
+                                       Title="Confirm Delete"
+                                       Message="Are you sure you want to delete this module?"
+                                       OnConfirm="() => DeleteDocument(doc.Id)" />
+                    </div>
+
+                }
+
                 <DocumentAddComponent ParentId="@Id" ParentType="Course" OnUploadSuccess="HandleUploadSuccess" />
             </section>
         </div>
@@ -89,6 +102,12 @@ else
                                     {
                                         <span>@module.Name</span>
                                         <button class="btn btn-sm btn-outline-secondary" @onclick="() => StartEditingModule(module.Id)">Redigera</button>
+
+                                        <ConfirmDelete ButtonText="Delete"
+                                                       Title="Confirm Delete"
+                                                       Message="Are you sure you want to delete this module?"
+                                                       OnConfirm="() => DeleteModule(module.Id)" />
+
                                     }
                                 </li>
                             }
@@ -279,4 +298,32 @@ else
             </div>
         </div>
     };
+
+    private async Task DeleteModule(Guid moduleId)
+    {
+        try
+        {
+            await ApiService.CallApiDeleteAsync($"modules/{moduleId}");
+            modules?.RemoveAll(m => m.Id == moduleId);
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Fel vid borttagning av modul: {ex.Message}");
+        }
+        StateHasChanged();
+    }
+
+    private async Task DeleteDocument(Guid docId)
+    {
+        try
+        {
+            await ApiService.CallApiDeleteAsync($"documents/{docId}");
+            documentDtos.RemoveAll(d => d.Id == docId);
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Fel vid borttagning av dokument: {ex.Message}");
+        }
+        StateHasChanged();
+    }
 }
