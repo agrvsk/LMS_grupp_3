@@ -1,6 +1,7 @@
 using LMS.Blazor.Client.Services;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
+using Radzen;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 
@@ -14,6 +15,7 @@ builder.Services.AddHttpClient("BffClient", cfg =>
 
 builder.Services.AddSingleton<AuthenticationStateProvider,
     PersistentAuthenticationStateProvider>();
+builder.Services.AddScoped<DialogService>();
 
 builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddOptions();

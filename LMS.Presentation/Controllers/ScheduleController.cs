@@ -23,7 +23,7 @@ public class ScheduleController : ControllerBase
     public async Task<IActionResult> GetSchedule(Guid courseId )
     {
         
-        var schedules =  await _serviceManager.ScheduleService.GetSchedule( courseId, DateTime.Today, DateTime.Today.AddMonths(1));
+        var schedules =  await _serviceManager.ScheduleService.GetSchedule( courseId, DateTime.Today, DateTime.Today.AddMonths(12));
         return Ok(schedules);
     }
     [HttpGet("{courseId}/{start}")]

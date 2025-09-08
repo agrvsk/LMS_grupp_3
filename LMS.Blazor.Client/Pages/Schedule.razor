@@ -1,127 +1,126 @@
-﻿
-@using LMS.Shared.DTOs.EntityDTO
-
+﻿@page "/schedule"
+@using Radzen
+@using Radzen.Blazor
 @using LMS.Blazor.Client.Services
-
+@using LMS.Shared.DTOs.EntityDTO
+@using LMS.Shared.DTOs.EntityDto
 @using Microsoft.AspNetCore.Authorization
 @inject NavigationManager Navigation
-@inject AuthenticationStateProvider Auth
+@inject AuthenticationStateProvider AuthStateProvider
 @rendermode InteractiveWebAssembly
 
-<PageTitle>Schedule</PageTitle>
+<h3>CourseList</h3>
 
-<h3>Course Schedule</h3>
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+	<div class="alert alert-danger" role="alert">
+		<p>@errorMessage</p>
+	</div>
+}
 
-@* <RadzenScheduler Data="@Events"
-                 StartProperty="Start"
-                 EndProperty="End"
-                 TextProperty="Text"
-                 View="Month"
-                 TItem="ScheduleEvent">
-</RadzenScheduler> *@
-
-@code {
-    [Inject]
-    private IApiService myApi { get; set; } = default!;
-    private string CourseId;
-
-    // Event class for the scheduler
-    public class ScheduleEvent
-    {
-        public DateTime Start { get; set; }
-        public DateTime End { get; set; }
-        public string Text { get; set; }
-    }
-
-    private List<ScheduleEvent> Events = new();
-    private bool Loading = true;
-
-    private ScheduleDto MySchedule { get; set; } = new();
-
-    // This is just an example of loading your schedule — in real life you probably get it from your API
-    private bool hasLoaded = false;
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender && !hasLoaded)
-        {
-            hasLoaded = true;
-            await OnInitializedAsync(); // Retry now that client is ready
-            StateHasChanged();
-        }
-    }
+@if (Events != null && Events.Count > 0)
+{
+	<RadzenScheduler Data="@Events"
+					 StartProperty="Start"
+					 EndProperty="End"
+					 TextProperty="Text">
+		<RadzenMonthView />
+		<RadzenWeekView />
+		<RadzenDayView />
 
 
-    private async Task HandleTeacher()
-    {
-        try
-        {
-            
-        }
-        catch(Exception ex)
-        {
-            Console.WriteLine($"Error fetching courses: {ex.Message}");
-        }
-    }
+	</RadzenScheduler>
 
-    private void HandleStudent(System.Security.Claims.ClaimsPrincipal user)
-    {
-        CourseId = user.Claims.FirstOrDefault(c => c.Type == "CourseId")?.Value;
-    }
-    protected override async Task OnInitializedAsync()
-    {
-        var authState = await Auth.GetAuthenticationStateAsync();
-        var user = authState.User;
-        var isTeacher = user.IsInRole("Teacher");
-        var isStudent = user.IsInRole("Student");
-        if (isTeacher)
-        {
-            var response = await myApi.CallApiGetAsync<IEnumerable<CourseDto>>("courses");
+}
 
-            Console.WriteLine($"Found {response?.Count()} courses.");
-            CourseId = response?.ToList()[0].Id.ToString();
-            Console.WriteLine($"Using CourseId: {CourseId}");
-        }
-        else if (isStudent)
-        {
-            HandleStudent(user);
-        }
-        else
-        {
-            await InvokeAsync(() => Navigation.NavigateTo("/account/login"));
-        }
-        
-        MySchedule = await myApi.CallApiGetAsync<ScheduleDto>($"schedules/b4ffc775-3855-44da-d258-08ddebc527a7");
+@code
+{
+	[Inject]
+	private IApiService myApi { get; set; } = default!;
 
-        
-        // Add the course start as an event
-        Events.Add(new ScheduleEvent
-        {
-            Start = MySchedule.StartDate,
-            End = MySchedule.StartDate.AddHours(1),
-            Text = $"Course: {MySchedule.Course.Name}"
-        });
+	private class ScheduleEvent
+	{
+		public DateTime Start { get; set; }
+		public DateTime End { get; set; }
+		public string Text { get; set; }
+	}
+	private List<AppointmentData> Events = new();
 
-        // Add each module
-        foreach (var module in MySchedule.Modules)
-        {
-            Events.Add(new ScheduleEvent
-            {
-                Start = module.StartDate,
-                End = module.StartDate.AddHours(1),
-                Text = $"Module: {module.Name}"
-            });
+	private List<CourseDto>? Courses { get; set; }
+	private string? errorMessage;
+	private ScheduleDto MySchedule { get; set; }
+	private string CourseId = null;
 
-            // Add each activity
-            foreach (var activity in module.ModuleActivities)
-            {
-                Events.Add(new ScheduleEvent
-                {
-                    Start = activity.StartDate,
-                    End = activity.StartDate.AddHours(1),
-                    Text = $"Activity: {activity.Name}"
-                });
-            }
-        }
-    }
+	protected override async Task OnInitializedAsync()
+	{
+		var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+		var user = authState.User;
+		var isTeacher = user.IsInRole("Teacher");
+		var isStudent = user.IsInRole("Student");
+		if (isTeacher)
+		{
+			await LoadCourse();
+		}
+		else if (isStudent)
+		{
+			CourseId = user.FindFirst("CourseId")?.Value ?? null;
+		}
+		else
+		{
+			await InvokeAsync(() => Navigation.NavigateTo("/account/login"));
+		}
+		MySchedule = await myApi.CallApiGetAsync<ScheduleDto>($"schedules/{CourseId}");
+		if (MySchedule == null) return;
+
+		FlattenScheduleDto(MySchedule);
+	}
+	private void FlattenScheduleDto(ScheduleDto schedule)
+	{
+		Events.Add(new AppointmentData
+		{
+			Start = schedule.Course.StartDate,
+			End = schedule.Course.StartDate.AddHours(1),
+			Text = $"Course start: {schedule.Course.Name}"
+		});
+		if (schedule.Modules != null && schedule.Modules.Count > 0)
+			foreach (var module in schedule.Modules)
+			{
+				Events.Add(new AppointmentData
+				{
+					Start = module.StartDate,
+					End = module.StartDate.AddHours(1),
+					Text = $"Module: {module.Name}"
+				});
+			}
+		if (schedule.ModuleActivities != null && schedule.ModuleActivities.Count > 0)
+			foreach (var act in schedule.ModuleActivities)
+			{
+				Events.Add(new AppointmentData
+				{
+					Start = act.StartDate,
+					End = act.EndDate,
+					Text = $"Activity: {act.Name}"
+				});
+			}
+		foreach (var e in Events)
+			Console.WriteLine($"Event: {e.Text}, {e.Start} - {e.End}");
+	}
+
+	private async Task LoadCourse()
+	{
+		try
+		{
+			var response = await myApi.CallApiGetAsync<IEnumerable<CourseDto>>("courses");
+			Console.WriteLine($"Found {response?.Count()} courses.");
+			Courses = response?.ToList();
+			CourseId = response?.ToList()[0].Id.ToString();
+		}
+		catch (HttpRequestException apiEx)
+		{
+			errorMessage = $"API Error: {apiEx.StatusCode} - {apiEx.Message}";
+			Console.WriteLine("there was an API error: " + apiEx.Message);
+		}
+
+
+	}
 }
