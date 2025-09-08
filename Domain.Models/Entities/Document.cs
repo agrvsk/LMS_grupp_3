@@ -19,6 +19,6 @@ public class Document
     public string FilePath { get; set; }
     public string ParentType { get; set; }// e.g., "Course", "Module", "Activity", "Submission"
     public Guid ParentId { get; set; }
-    public string UploaderId { get; set; }
-    public ApplicationUser Uploader { get; set; }
+    public string? UploaderId { get; set; }
+    public ApplicationUser? Uploader { get; set; }
 }

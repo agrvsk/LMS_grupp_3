@@ -28,7 +28,7 @@ namespace LMS.Infractructure.Data
         .HasOne(d => d.Uploader)
         .WithMany() // or .WithMany(u => u.Documents) if you add a collection
         .HasForeignKey(d => d.UploaderId)
-        .OnDelete(DeleteBehavior.Restrict);
+        .OnDelete(DeleteBehavior.SetNull);
 
             builder.ApplyConfiguration(new ApplicationUserConfigurations());
         }
