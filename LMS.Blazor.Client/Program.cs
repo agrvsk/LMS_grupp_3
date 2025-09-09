@@ -16,6 +16,7 @@ builder.Services.AddHttpClient("BffClient", cfg =>
 builder.Services.AddSingleton<AuthenticationStateProvider,
     PersistentAuthenticationStateProvider>();
 builder.Services.AddScoped<DialogService>();
+builder.Services.AddRadzenComponents();
 
 builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddOptions();

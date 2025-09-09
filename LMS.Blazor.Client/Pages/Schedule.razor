@@ -7,7 +7,7 @@
 @inject AuthenticationStateProvider AuthStateProvider
 @rendermode InteractiveWebAssembly
 
-<h3>CourseList</h3>
+<h3>Schedule</h3>
 
 @if (!string.IsNullOrEmpty(errorMessage))
 {
@@ -21,13 +21,16 @@
 	<RadzenScheduler Data="@Events"
 					 StartProperty="Start"
 					 EndProperty="End"
-					 TextProperty="Text">
+					 TextProperty="Text"
+					 AppointmentRender="@OnAppointmentRender">
+
 		<RadzenMonthView />
 		<RadzenWeekView />
 		<RadzenDayView />
 
 
 	</RadzenScheduler>
+
 
 }
 <p>test</p>
@@ -37,12 +40,7 @@
 	[Inject]
 	private IApiService myApi { get; set; } = default!;
 
-	private class ScheduleEvent
-	{
-		public DateTime Start { get; set; }
-		public DateTime End { get; set; }
-		public string Text { get; set; }
-	}
+	
 	private List<AppointmentData> Events = new();
 
 	private List<CourseDto>? Courses { get; set; }
@@ -78,7 +76,7 @@
 		Events.Add(new AppointmentData
 		{
 			Start = schedule.Course.StartDate,
-			End = schedule.Course.StartDate.AddHours(1),
+			End = schedule.Course.EndDate,
 			Text = $"Course start: {schedule.Course.Name}"
 		});
 		if (schedule.Modules != null && schedule.Modules.Count > 0)
@@ -87,7 +85,7 @@
 				Events.Add(new AppointmentData
 				{
 					Start = module.StartDate,
-					End = module.StartDate.AddHours(1),
+					End = module.EndDate,
 					Text = $"Module: {module.Name}"
 				});
 			}
@@ -121,5 +119,21 @@
 		}
 
 
+	}
+	public void OnAppointmentRender(SchedulerAppointmentRenderEventArgs<AppointmentData> args)
+	{
+        
+		if (args.Data.Text.StartsWith("Course"))
+		{
+			args.Attributes["style"] = "background: #4CAF50; color: white"; // green
+		}
+		else if (args.Data.Text.StartsWith("Module"))
+		{
+			args.Attributes["style"] = "background: #2196F3; color: white"; // blue
+		}
+		else if (args.Data.Text.StartsWith("Activity"))
+		{
+			args.Attributes["style"] = "background: #F44336; color: white"; // red
+		}
 	}
 }
