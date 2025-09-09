@@ -10,5 +10,6 @@ namespace Service.Contracts
     {
         Task<string> UploadFileAsync(Stream fileStream, string fileName, string folder);
         Task<bool> DeleteFileAsync(string fileUrl);
+        Task<(Stream Stream, string ContentType, string FileName)?> GetFileByPathAsync(string path);
     }
 }

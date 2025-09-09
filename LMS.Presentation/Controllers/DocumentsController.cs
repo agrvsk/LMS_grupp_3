@@ -114,5 +114,16 @@ namespace LMS.Presentation.Controllers
             }
             return NoContent();
         }
+        [HttpGet("{id}/download")]
+        public async Task<IActionResult> DownloadDocument(Guid id)
+        {
+            var fileData = await _serviceManager.DocumentService.DownloadDocumentAsync(id);
+            if (fileData == null)
+            {
+                return NotFound("The download failed because the document wasn't found");
+            }
+
+            return File(fileData.Value.Stream, fileData.Value.ContentType, fileData.Value.FileName);
+        }
     }
 }

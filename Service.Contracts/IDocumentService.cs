@@ -13,4 +13,5 @@ public interface IDocumentService
     Task<Document> UpdateDocumentAsync(DocumentEditDto document);
     Task<bool> DeleteDocumentAsync(Guid documentId);
     Task<bool> DeleteUserDocumentsAsync(string userId);
+    Task<(Stream Stream, string ContentType, string FileName)?> DownloadDocumentAsync(Guid docId);
 }
