@@ -21,4 +21,5 @@ public class Document
     public Guid ParentId { get; set; }
     public string? UploaderId { get; set; }
     public ApplicationUser? Uploader { get; set; }
+    public string FileType { get; set; }
 }
