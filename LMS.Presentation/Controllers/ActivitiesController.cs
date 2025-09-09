@@ -48,7 +48,7 @@ namespace LMS.Presentation.Controllers
         {
             if (activityDto == null)
                 return BadRequest("Activity data is null");
-            if (!await _serviceManager.DateValidationService.ValidateModuleActivityDatesAsync(activityDto.StartDate, activityDto.EndDate, activityDto.ModuleId))
+            if (!await _serviceManager.DateValidationService.ValidateModuleActivityUppdateDatesAsync(activityDto.StartDate, activityDto.EndDate, activityDto.ModuleId))
             {
                 ModelState.AddModelError("DateValidation", "End date must be greater than start date and within module dates.");
                 return BadRequest(ModelState);
@@ -81,7 +81,7 @@ namespace LMS.Presentation.Controllers
         {
             if (activityDto == null || id != activityDto.Id)
                 return BadRequest("Activity data is invalid");
-            if (!await _serviceManager.DateValidationService.ValidateModuleActivityDatesAsync(activityDto.StartDate, activityDto.EndDate, activityDto.ModuleId, activityDto.Id))
+            if (!await _serviceManager.DateValidationService.ValidateModuleActivityUppdateDatesAsync(activityDto.StartDate, activityDto.EndDate, activityDto.ModuleId, activityDto.Id))
             {
                 ModelState.AddModelError("DateValidation", "End date must be greater than start date and within module dates.");
                 return BadRequest(ModelState);

@@ -56,10 +56,32 @@ namespace LMS.Presentation.Controllers
                 ModelState.AddModelError("DateValidation", "End date must be greater than start date.");
                 return BadRequest(ModelState);
             }
+
+            if (courseDto.Modules.Count > 0) if (!_serviceManager.DateValidationService.ValidateListOfDateRanges(courseDto.Modules.Select(m => (m.StartDate, m.EndDate)).ToList(),
+                 courseDto.StartDate, courseDto.EndDate))
+                {
+                    ModelState.AddModelError("DateValidation", $"Module '' has invalid dates: ");
+                    return BadRequest(ModelState);
+
+                }
+                else
+                {
+                    foreach (var module in courseDto.Modules)
+                    {
+                        if (module.ModuleActivities.Count > 0 && !_serviceManager.DateValidationService.ValidateListOfDateRanges(module.ModuleActivities.Select(a => (a.StartDate, a.EndDate)).ToList(),
+                            module.StartDate, module.EndDate))
+                        {
+                            ModelState.AddModelError("DateValidation", $"Module activity in module '{module.Name}' has invalid dates: ");
+                            return BadRequest(ModelState);
+                        }
+                    }
+
+                    
+                }
             try
             {
                 var createdCourse = await _serviceManager.CourseService.CreateCourseAsync(courseDto);
-                
+
                 return CreatedAtAction(nameof(GetCourseById), new { id = createdCourse.Id }, createdCourse);
             }
             catch (Exception ex)
