@@ -76,12 +76,13 @@ public class SubmissionService : ISubmissionService
         var document = new Document
         {
             Id = Guid.NewGuid(),
-            Name = file.FileName,
+            Name = Path.GetFileNameWithoutExtension(file.FileName),
             FilePath = path.Result,
             UploaderId = submissionCreateDto.SubmitterIds.First(),
             ParentId = submission.Id,
             ParentType = "Submission",
-            UploadDate = DateTime.UtcNow
+            UploadDate = DateTime.UtcNow,
+            FileType = Path.GetExtension(file.FileName)
         };
         submission.DocumentId = document.Id;
 

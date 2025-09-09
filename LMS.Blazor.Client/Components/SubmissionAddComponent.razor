@@ -6,6 +6,7 @@
 @using Microsoft.AspNetCore.Identity
 @rendermode InteractiveWebAssembly
 @inject IApiService ApiService
+@inject NavigationManager NavigationManager
 
 
 <div class="border">
@@ -90,17 +91,24 @@
 		Console.WriteLine(submissionJson);
 
 		content.Add(new StringContent(submissionJson, Encoding.UTF8), "submissionDtoJson");
-
-		var result = await ApiService.CallApiPostMultipartAsync<SubmissionDto>("submissions", content);
-		Console.WriteLine("Result from API: " + (result != null ? "Success" : "Failure"));
-		if (result != null)
+		try
 		{
-			uploadSuccess = true;
-			model = new Model();
-			StateHasChanged();
+			var result = await ApiService.CallApiPostMultipartAsync<SubmissionDto>("submissions", content);
+			Console.WriteLine("Result from API: " + (result != null ? "Success" : "Failure"));
+			if (result != null)
+			{
+				uploadSuccess = true;
+				model = new Model();
+				StateHasChanged();
+			}
+			else
+			{
+				uploadSuccess = false;
+			}
 		}
-		else
+		catch (Exception ex)
 		{
+			Console.WriteLine("Exception during API call: " + ex.Message);
 			uploadSuccess = false;
 		}
 	}
@@ -113,10 +121,10 @@
 		using var ms = new MemoryStream();
 		await stream.CopyToAsync(ms);
 
-		model.documentInfo.FileName = file.Name;
+		model.documentInfo.FileName = Path.GetFileNameWithoutExtension(file.Name);
 		model.documentInfo.ContentType = file.ContentType;
 		model.documentInfo.Content = ms.ToArray();
-
+		model.documentInfo.FileType = Path.GetExtension(file.Name).ToLowerInvariant();
 
 		uploadSuccess = false;
 	}

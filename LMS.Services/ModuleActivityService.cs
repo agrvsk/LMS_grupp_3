@@ -95,7 +95,8 @@ public class ModuleActivityService : IModuleActivityService
                     FilePath = filePath,
                     ParentType = "Activity",
                     ParentId = activity.Id,   // <--- activity link
-                    UploaderId = docMeta.UploaderId!
+                    UploaderId = docMeta.UploaderId!,
+                    FileType = docMeta.FileType
                 };
 
                 uow.DocumentRepository.Create(document);
