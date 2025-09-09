@@ -34,9 +34,8 @@ public class ModuleRepository : RepositoryBase<Module>, IModuleRepository
 
     public async Task<List<Module>> GetModulesByCourseIdAsync(Guid courseId)
     {
-        
-        return await FindByConditionAsync(m => m.CourseId == courseId, trackChanges: false)
-            .ContinueWith(task => task.Result.ToList());
+
+        return await context.Modules.Where(m => m.CourseId == courseId).Include(m => m.ModuleActivities).AsNoTracking().ToListAsync();
     }
     public async Task<List<Module>> GetModulesByCourseIdAndDateAsync(Guid courseId, string idag)
     {

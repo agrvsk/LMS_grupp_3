@@ -1,0 +1,17 @@
+﻿:deep(.rz-scheduler .rz-scheduler-month .rz-scheduler-month-slot) {
+    height: auto !important;
+    min-height: 150px !important;
+    overflow: visible !important;
+}
+
+:deep(.rz-scheduler .rz-scheduler-appointment) {
+    font-size: 0.78rem !important;
+    line-height: 1 !important;
+    padding: 2px 6px !important;
+    white-space: normal !important;
+    margin-bottom: 2px !important;
+}
+
+:deep(.rz-scheduler) {
+    outline: 3px dashed hotpink; /* debug border to confirm it loads */
+}

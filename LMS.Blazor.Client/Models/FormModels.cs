@@ -174,7 +174,7 @@ namespace LMS.Blazor.Client.Models
             {
                 if (TimeSpan.TryParse(value, out var ts))
                 {
-                    EndDate = EndDate.Date + ts;
+                    EndDate = StartDate.Date + ts;
                 }
             }
         }

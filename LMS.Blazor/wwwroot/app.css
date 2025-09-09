@@ -59,3 +59,8 @@ h1:focus {
         border: 2px solid #d60000;
         transition: border-color 0.3s;
     }
+
+.rz-scheduler {
+    height: 750px;
+    overflow: auto;
+}
