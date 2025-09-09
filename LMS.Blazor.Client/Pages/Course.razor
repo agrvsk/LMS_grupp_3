@@ -48,7 +48,7 @@ else
                 <h5>Dokument</h5>
                 <DocumentComponent Documents="@documentDtos" OnEditRequested="EditDocument" />
 
-                @foreach (var doc in documentDtos)
+                @* @foreach (var doc in documentDtos)
                 {
                     <div class="d-flex justify-content-between align-items-center border p-2 mb-2">
                         <span>@doc.Name</span>
@@ -58,7 +58,7 @@ else
                                        OnConfirm="() => DeleteDocument(doc.Id)" />
                     </div>
 
-                }
+                } *@
 
                 <DocumentAddComponent ParentId="@Id" ParentType="Course" OnUploadSuccess="HandleUploadSuccess" />
             </section>
@@ -295,7 +295,10 @@ else
             <div class="modal-dialog">
                 <div class="modal-content p-3">
                     <button type="button" class="btn-close float-end" aria-label="Close" @onclick="CloseDocumentEdit"></button>
-                    <DocumentEditComponent DocumentId="@documentId" OnSaved="OnDocumentSaved" OnCancel="CloseDocumentEdit" />
+                    <DocumentEditComponent DocumentId="@documentId" 
+                                           OnSaved="OnDocumentSaved" 
+                                           OnCancel="CloseDocumentEdit"
+                                           OnDeleted="OnDocumentDeleted"/>
                 </div>
             </div>
         </div>
@@ -328,6 +331,20 @@ else
         }
         StateHasChanged();
     }
+
+
+
+
+    private async Task OnDocumentDeleted(Guid docId)
+    {
+        documentDtos.RemoveAll(d => d.Id == docId);
+        CloseDocumentEdit();
+        await InvokeAsync(StateHasChanged);
+    }
+
+
+
+
 
     private void NavigateToModule(Guid moduleId)
     {

@@ -1,6 +1,125 @@
 ﻿@using System.ComponentModel.DataAnnotations
 @using LMS.Shared.DTOs.EntityDTO
+
 <EditForm Model="@EditDocument" OnValidSubmit="OnSave">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="form-group mb-3">
+        <label for="name">Document Name</label>
+        <InputText id="name" class="form-control" @bind-Value="EditDocument.Name" />
+        <ValidationMessage For="@(() => EditDocument.Name)" />
+    </div>
+
+    <div class="form-group mb-3">
+        <label for="description">Description</label>
+        <InputTextArea id="description" class="form-control" @bind-Value="EditDocument.Description" />
+    </div>
+
+    <!-- Action-knappar -->
+    <div class="d-flex gap-2 mt-3">
+        <button type="submit" class="btn btn-primary" disabled="@isSaving">Save</button>
+        <button type="button" class="btn btn-secondary" @onclick="CancelEdit" disabled="@isSaving">Cancel</button>        
+    </div>
+    
+
+    @if (saveSuccess)
+    {
+        <p class="text-success mt-2">Changes saved!</p>
+    }
+    @if (!string.IsNullOrEmpty(errorMessage))
+    {
+        <div class="alert alert-danger mt-2" role="alert">
+            <p>@errorMessage</p>
+        </div>
+    }
+</EditForm>
+
+<ConfirmDelete ButtonText="Delete"
+               Title="Confirm Delete"
+               Message="Are you sure you want to delete this document?"
+               OnConfirm="OnDeleteConfirmed" />
+
+@code {
+    [Parameter] public Guid DocumentId { get; set; }
+    [Parameter] public EventCallback<DocumentDto> OnSaved { get; set; }
+    [Parameter] public EventCallback OnCancel { get; set; }
+    [Parameter] public EventCallback<Guid> OnDeleted { get; set; }
+
+    [Inject] IApiService ApiService { get; set; } = default!;
+
+    private DocumentEditDto EditDocument = new();
+    private bool isSaving = false;
+    private bool saveSuccess = false;
+    private string? errorMessage;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        try
+        {
+            EditDocument = await ApiService.CallApiGetAsync<DocumentEditDto>($"documents/{DocumentId}");
+            if (EditDocument != null)
+                EditDocument.Id = DocumentId;
+
+            saveSuccess = false;
+        }
+        catch (HttpRequestException apiEx)
+        {
+            errorMessage = $"API Error: {apiEx.Message}";
+            Console.WriteLine(apiEx.Message);
+        }
+    }
+
+    private async Task OnSave()
+    {
+        try
+        {
+            isSaving = true;
+            saveSuccess = false;
+
+            var updated = await ApiService.CallApiPutAsync<DocumentEditDto, DocumentDto>(
+                $"documents/{DocumentId}", EditDocument);
+
+            if (updated != null)
+            {
+                saveSuccess = true;
+                await OnSaved.InvokeAsync(updated);
+            }
+        }
+        catch (ValidationException ex)
+        {
+            errorMessage = $"Validation error: {ex.Message}";
+            Console.WriteLine(ex.Message);
+        }
+        finally
+        {
+            isSaving = false;
+        }
+    }
+
+    private async Task CancelEdit()
+    {
+        await OnCancel.InvokeAsync();
+    }
+
+    private async Task OnDeleteConfirmed()
+    {
+        try
+        {
+            await ApiService.CallApiDeleteAsync($"documents/{DocumentId}");
+            await OnDeleted.InvokeAsync(DocumentId);
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Delete failed: {ex.Message}";
+            Console.WriteLine(ex.Message);
+        }
+    }
+}
+
+
+
+@* <EditForm Model="@EditDocument" OnValidSubmit="OnSave">
     <DataAnnotationsValidator />
     <ValidationSummary />
 
@@ -15,8 +134,16 @@
         <InputTextArea id="description" class="form-control" @bind-Value="EditDocument.Description" />
     </div>
 
-    <button type="submit" class="btn btn-primary" disabled="@isSaving">Save</button>
-    <button type="button" class="btn btn-secondary ms-2" @onclick="CancelEdit" disabled="@isSaving">Cancel</button>
+    <div class="d-flex gap-2 mt-3">
+        <button type="submit" class="btn btn-primary" disabled="@isSaving">Save</button>
+        <button type="button" class="btn btn-secondary" @onclick="CancelEdit" disabled="@isSaving">Cancel</button>
+
+        <!-- Inline confirm delete -->
+        <ConfirmDelete ButtonText="Delete"
+                       Title="Confirm Delete"
+                       Message="Are you sure you want to delete this document?"
+                       OnConfirm="DeleteDocument" />
+    </div>
 
     @if (saveSuccess)
     {
@@ -37,6 +164,7 @@
     [Parameter] public EventCallback<DocumentDto> OnSaved { get; set; }
     // [Parameter] public EventCallback OnSaved { get; set; }
     [Parameter] public EventCallback OnCancel { get; set; }
+    [Parameter] public EventCallback<Guid> OnDeleted { get; set; }
 
     [Inject] IApiService ApiService { get; set; }
 
@@ -108,6 +236,64 @@
 
     }
 
+
+
+    private async Task OnDeleteConfirmed()
+    {
+        try
+        {
+            isSaving = true;
+            errorMessage = null;
+
+            await ApiService.CallApiDeleteAsync($"documents/{DocumentId}");
+
+            if (OnDeleted.HasDelegate)
+                await OnDeleted.InvokeAsync(DocumentId);
+        }
+        catch (HttpRequestException apiEx)
+        {
+            errorMessage = $"Delete failed: {apiEx.StatusCode} - {apiEx.Message}";
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Delete failed: {ex.Message}";
+        }
+        finally
+        {
+            isSaving = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task DeleteDocument()
+    {
+        try
+        {
+            await ApiService.CallApiDeleteAsync($"documents/{DocumentId}");
+            await OnDeleted.InvokeAsync(DocumentId);  // 🔹 meddelar parent (Course.razor)
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Delete failed: {ex.Message}";
+            Console.Error.WriteLine(ex.Message);
+        }
+    }
+
+
+    // private async Task DeleteDocument()
+    // {
+    //     try
+    //     {
+    //         await ApiService.CallApiDeleteAsync($"documents/{DocumentId}");
+    //         // Efter borttagning stäng popupen
+    //         await OnCancel.InvokeAsync();
+    //     }
+    //     catch (Exception ex)
+    //     {
+    //         errorMessage = $"Delete Error: {ex.Message}";
+    //     }
+    // }
+
     // private async Task OnSave()
     // {
     //     isSaving = true;
@@ -151,4 +337,4 @@
     //     public string? Description { get; set; }
 
     // }
-}
+} *@
