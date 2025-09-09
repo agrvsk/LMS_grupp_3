@@ -33,9 +33,11 @@ else
                 </small>
             </section>
 
-            <button class="btn btn-outline-primary mb-3" @onclick="ToggleEditCourse">
-                @(isEditingCourse ? "Avbryt redigering" : "Redigera kurs")
-            </button>
+            <AuthorizeView Roles="Teacher">
+                <button class="btn btn-outline-primary mb-3" @onclick="ToggleEditCourse">
+                    @(isEditingCourse ? "Avbryt redigering" : "Redigera kurs")
+                </button>
+            </AuthorizeView>
 
             @if (isEditingCourse)
             {
@@ -45,22 +47,11 @@ else
             <hr />
 
             <section>
-                <h5>Dokument</h5>
-                <DocumentComponent Documents="@documentDtos" OnEditRequested="EditDocument" />
-
-                @* @foreach (var doc in documentDtos)
-                {
-                    <div class="d-flex justify-content-between align-items-center border p-2 mb-2">
-                        <span>@doc.Name</span>
-                        <ConfirmDelete ButtonText="Delete"
-                                       Title="Confirm Delete"
-                                       Message="Are you sure you want to delete this module?"
-                                       OnConfirm="() => DeleteDocument(doc.Id)" />
-                    </div>
-
-                } *@
-
-                <DocumentAddComponent ParentId="@Id" ParentType="Course" OnUploadSuccess="HandleUploadSuccess" />
+                <h5>Dokument</h5>                
+                    <DocumentComponent Documents="@documentDtos" OnEditRequested="EditDocument" />
+                <AuthorizeView Roles="Teacher">
+                    <DocumentAddComponent ParentId="@Id" ParentType="Course" OnUploadSuccess="HandleUploadSuccess" />
+                </AuthorizeView>
             </section>
         </div>
 
@@ -69,10 +60,13 @@ else
             <div class="p-3 border rounded shadow-sm bg-white sticky-top" style="top: 1rem;">
                 <section class="mb-4">
                     <h5>Moduler</h5>
-                    <ModuleAddComponent CourseId="@Id"
-                                        CourseStart="@currentCourse.StartDate.Date"
-                                        CourseEnd="@currentCourse.EndDate.Date"
-                                        OnModuleAdded="AddModule" />
+
+                    <AuthorizeView Roles="Teacher">
+                        <ModuleAddComponent CourseId="@Id"
+                                            CourseStart="@currentCourse.StartDate.Date"
+                                            CourseEnd="@currentCourse.EndDate.Date"
+                                            OnModuleAdded="AddModule" />
+                    </AuthorizeView>
 
                     @if (modules?.Any() == true)
                     {
@@ -93,23 +87,26 @@ else
                                     </div>
                                     @if (isEditingModule && currentModuleGuid == module.Id)
                                     {
-                                        <ModuleEditComponent Module="module"
-                                                             CurrentCourseId="@currentCourse.Id"
-                                                             CourseStart="@currentCourse.StartDate.Date"
-                                                             CourseEnd="@currentCourse.EndDate.Date"
-                                                             OnEditDone="StopEditingModule"
-                                                             @key="module.Id" />
+                                        <AuthorizeView Roles="Teacher">
+                                            <ModuleEditComponent Module="module"
+                                                                 CurrentCourseId="@currentCourse.Id"
+                                                                 CourseStart="@currentCourse.StartDate.Date"
+                                                                 CourseEnd="@currentCourse.EndDate.Date"
+                                                                 OnEditDone="StopEditingModule"
+                                                                 @key="module.Id" />
+                                        </AuthorizeView>
                                     }
                                     else
                                     {
                                         <span>@module.Name</span>
-                                        <button class="btn btn-sm btn-outline-secondary" @onclick="() => StartEditingModule(module.Id)">Redigera</button>
+                                        <AuthorizeView Roles="Teacher">
+                                            <button class="btn btn-sm btn-outline-secondary" @onclick="() => StartEditingModule(module.Id)">Redigera</button>
 
-                                        <ConfirmDelete ButtonText="Delete"
-                                                       Title="Confirm Delete"
-                                                       Message="Are you sure you want to delete this module?"
-                                                       OnConfirm="() => DeleteModule(module.Id)" />
-
+                                            <ConfirmDelete ButtonText="Delete"
+                                                           Title="Confirm Delete"
+                                                           Message="Are you sure you want to delete this module?"
+                                                           OnConfirm="() => DeleteModule(module.Id)" />
+                                        </AuthorizeView>
                                     }
                                 </li>
                             }
@@ -295,10 +292,10 @@ else
             <div class="modal-dialog">
                 <div class="modal-content p-3">
                     <button type="button" class="btn-close float-end" aria-label="Close" @onclick="CloseDocumentEdit"></button>
-                    <DocumentEditComponent DocumentId="@documentId" 
-                                           OnSaved="OnDocumentSaved" 
+                    <DocumentEditComponent DocumentId="@documentId"
+                                           OnSaved="OnDocumentSaved"
                                            OnCancel="CloseDocumentEdit"
-                                           OnDeleted="OnDocumentDeleted"/>
+                                           OnDeleted="OnDocumentDeleted" />
                 </div>
             </div>
         </div>

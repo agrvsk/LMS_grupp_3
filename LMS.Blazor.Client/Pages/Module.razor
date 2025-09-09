@@ -7,141 +7,145 @@
 @attribute [Authorize]
 
 <div class="container-fluid">
-	@if (!string.IsNullOrEmpty(errorMessage))
-	{
-		<div class="alert alert-danger" role="alert">
-			<p>@errorMessage</p>
-		</div>
-	}
-	<div class="row">
-		<!-- Main content area -->
-		<div class="col-12 col-lg-9">
-			<h3>Module @CurrentModule?.Name</h3>
-			<p>@CurrentModule?.Description</p>
-			<div class="row">
-				<div class="col-12 col-lg-9">
-					<h4>Documents</h4> @* This line should probably be in the doc component *@
-					
-					
-						<DocumentComponent Documents = "@DocumentDtos"/>
-					<DocumentAddComponent ParentId=Id ParentType="Module" />
-					
-				</div>
-			</div>
-		</div>
-		<!-- Sidebar area -->
-		<div class="col-12 col-lg-3 border-start bg-light">
-			<div class="p-3 sticky-top">
-				@if (ModuleActivities != null)
-				{
-					<ActivityAddComponent ModuleId=Id/>
-					@foreach (var moduleact in ModuleActivities)
-					{
-						@if (isEditingActivity && CurrentActivityGuid == moduleact.Id)
-						{
-							<ActivityEditComponent OnEditDone="StopActivityEditing" Activity=moduleact currentModuleId="@CurrentModule.Id" />
-						}
-						else
-						{
-							<ActivityComponent OnMessageSent="StartActivityEditing" Activity=moduleact />
-						}				
-					}
-				}
+    @if (!string.IsNullOrEmpty(errorMessage))
+    {
+        <div class="alert alert-danger" role="alert">
+            <p>@errorMessage</p>
+        </div>
+    }
+    <div class="row">
+        <!-- Main content area -->
+        <div class="col-12 col-lg-9">
+            <h3>Module @CurrentModule?.Name</h3>
+            <p>@CurrentModule?.Description</p>
+            <div class="row">
+                <div class="col-12 col-lg-9">
+                    <h4>Documents</h4> @* This line should probably be in the doc component *@
 
-			</div>
-		</div>
-	</div>
+
+                    <DocumentComponent Documents="@DocumentDtos" />
+                    <DocumentAddComponent ParentId=Id ParentType="Module" />
+
+                </div>
+            </div>
+        </div>
+        <!-- Sidebar area -->
+        <div class="col-12 col-lg-3 border-start bg-light">
+            <div class="p-3 sticky-top">
+                @if (ModuleActivities != null)
+                {
+                    <AuthorizeView Roles="Teacher">
+                        <ActivityAddComponent ModuleId=Id />
+                    </AuthorizeView>
+                    @foreach (var moduleact in ModuleActivities)
+                    {
+                        @if (isEditingActivity && CurrentActivityGuid == moduleact.Id)
+                        {
+                            <AuthorizeView Roles="Teacher">
+                                <ActivityEditComponent OnEditDone="StopActivityEditing" Activity=moduleact currentModuleId="@CurrentModule.Id" />
+                            </AuthorizeView>
+                        }
+                        else
+                        {
+                            <ActivityComponent OnMessageSent="StartActivityEditing" Activity=moduleact />
+                        }
+                    }
+                }
+
+            </div>
+        </div>
+    </div>
 </div>
 
 @code {
-	[SupplyParameterFromQuery]
-	[Parameter]
-	public Guid Id { get; set; }
+    [SupplyParameterFromQuery]
+    [Parameter]
+    public Guid Id { get; set; }
 
-	private bool isEditingActivity { get; set; } = false;
-	private Guid? CurrentActivityGuid { get; set; } = null!;
+    private bool isEditingActivity { get; set; } = false;
+    private Guid? CurrentActivityGuid { get; set; } = null!;
 
-	public bool Loading { get; set; } = true;
+    public bool Loading { get; set; } = true;
 
-	[Inject]
-	private IApiService myApi { get; set; } = default!;
+    [Inject]
+    private IApiService myApi { get; set; } = default!;
 
-	[Inject]
-	private AuthenticationStateProvider Auth { get; set; } = default!;
+    [Inject]
+    private AuthenticationStateProvider Auth { get; set; } = default!;
 
-	private ModuleDto? CurrentModule { get; set; }
+    private ModuleDto? CurrentModule { get; set; }
 
-	private IEnumerable<ModuleActivityDto>? ModuleActivities { get; set; }
-	private List<DocumentDto>? DocumentDtos { get; set; } = new List<DocumentDto>();
-	private string? errorMessage;
+    private IEnumerable<ModuleActivityDto>? ModuleActivities { get; set; }
+    private List<DocumentDto>? DocumentDtos { get; set; } = new List<DocumentDto>();
+    private string? errorMessage;
 
-	protected override async Task OnInitializedAsync()
-	{
+    protected override async Task OnInitializedAsync()
+    {
 
-		var state = await Auth.GetAuthenticationStateAsync();
+        var state = await Auth.GetAuthenticationStateAsync();
 
-		if (!(state.User.Identity?.IsAuthenticated) ?? false)
-		{
-			return;
-		}
-		await LoadModule();
+        if (!(state.User.Identity?.IsAuthenticated) ?? false)
+        {
+            return;
+        }
+        await LoadModule();
 
-	}
+    }
 
-	private async Task LoadModule()
-	{
-		try
-		{
-			Loading = true;
+    private async Task LoadModule()
+    {
+        try
+        {
+            Loading = true;
 
-			var response = await myApi.CallApiGetAsync<ModuleDto?>($"modules/{Id}");
-			CurrentModule = (ModuleDto)response;
+            var response = await myApi.CallApiGetAsync<ModuleDto?>($"modules/{Id}");
+            CurrentModule = (ModuleDto)response;
 
-			var respAct = await myApi.CallApiGetAsync<IEnumerable<ModuleActivityDto>>($"activities/module/{Id}");
-			ModuleActivities = respAct?.ToList();
+            var respAct = await myApi.CallApiGetAsync<IEnumerable<ModuleActivityDto>>($"activities/module/{Id}");
+            ModuleActivities = respAct?.ToList();
 
-			var respDocs = await myApi.CallApiGetAsync<IEnumerable<DocumentDto>>($"documents/Module/{Id}");
-			DocumentDtos = respDocs?.ToList();
+            var respDocs = await myApi.CallApiGetAsync<IEnumerable<DocumentDto>>($"documents/Module/{Id}");
+            DocumentDtos = respDocs?.ToList();
 
 
-			Loading = false;
+            Loading = false;
 
-		}
-		catch (HttpRequestException apiEx)
-		{
-			errorMessage = $"API Error: {apiEx.StatusCode} - {apiEx.Message}";
-			Console.WriteLine("there was an API error: " + apiEx.Message);
-		}
-		catch (Exception ex)
-		{
-			Loading = false;
+        }
+        catch (HttpRequestException apiEx)
+        {
+            errorMessage = $"API Error: {apiEx.StatusCode} - {apiEx.Message}";
+            Console.WriteLine("there was an API error: " + apiEx.Message);
+        }
+        catch (Exception ex)
+        {
+            Loading = false;
 
-		}
-	}
+        }
+    }
 
-	private void StartActivityEditing(Guid myId)
-	{
-		isEditingActivity = true;
-		CurrentActivityGuid = myId;
-	}
-	private void StopActivityEditing(ModuleActivityDto dto)
-	{
-		isEditingActivity = false;
-		CurrentActivityGuid = null;
+    private void StartActivityEditing(Guid myId)
+    {
+        isEditingActivity = true;
+        CurrentActivityGuid = myId;
+    }
+    private void StopActivityEditing(ModuleActivityDto dto)
+    {
+        isEditingActivity = false;
+        CurrentActivityGuid = null;
 
-		//Försök till instant refresh
-		ModuleActivityDto? x = ModuleActivities.SingleOrDefault(o => o.Id == dto.Id);
-		if (x != null)
-		{
-			x.Name = dto.Name;
-			x.Description = dto.Description;
-			x.StartDate = dto.StartDate;
-			x.EndDate = dto.EndDate;
-			//x.ActivityTypeId = dto.ActivityTypeId
-			//x.ModuleId = dto.ModuleId;
-		}
-		StateHasChanged();
-	}
+        //Försök till instant refresh
+        ModuleActivityDto? x = ModuleActivities.SingleOrDefault(o => o.Id == dto.Id);
+        if (x != null)
+        {
+            x.Name = dto.Name;
+            x.Description = dto.Description;
+            x.StartDate = dto.StartDate;
+            x.EndDate = dto.EndDate;
+            //x.ActivityTypeId = dto.ActivityTypeId
+            //x.ModuleId = dto.ModuleId;
+        }
+        StateHasChanged();
+    }
 
 
 }

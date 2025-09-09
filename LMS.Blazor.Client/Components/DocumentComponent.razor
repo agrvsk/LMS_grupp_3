@@ -30,9 +30,11 @@
                         <td>@(string.IsNullOrWhiteSpace(Doc.UploaderName) ? "Name N." : Doc.UploaderName)</td>
                         <td>@Doc.UploadDate.ToString("m")</td>
                         <td>
+                            <AuthorizeView Roles="Teacher">
                             <button class="btn btn-sm btn-outline-primary" @onclick="() => EditClicked(Doc.Id)" title="Edit document">
                                 <i class="bi bi-pencil"></i> Edit
                             </button>
+                            </AuthorizeView>
                         </td>
                     </tr>
                 }
