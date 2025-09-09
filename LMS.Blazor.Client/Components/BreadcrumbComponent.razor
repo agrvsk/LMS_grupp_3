@@ -1,0 +1,72 @@
+﻿@using LMS.Blazor.Client.Models
+@inject NavigationManager NavManager
+
+<nav aria-label="breadcrumb" class="ms-4 ps-4" >
+    <AuthorizeView>
+    <Authorized>
+    <ol class="breadcrumb p-l5">
+        @foreach (var item in Items)
+        {
+            if (item.IsActive)
+            {
+                <li class="breadcrumb-item active" aria-current="page">@item.Text</li>
+            }
+            else
+            {
+                <li class="breadcrumb-item">
+                    <a href="@item.Href">@item.Text</a>
+                </li>
+            }
+        }
+    </ol
+    </Authorized>
+    </AuthorizeView>
+
+</nav>
+
+@code {
+    [Parameter]
+    public List<BreadcrumbItem> Items { get; set; } = new();
+
+    protected override void OnInitialized()
+    {
+        var uri = NavManager.Uri;
+        var baseUri = NavManager.BaseUri;
+        var relativePath = uri.Replace(baseUri, "").Trim('/');
+        var segments = relativePath.Split('/', StringSplitOptions.RemoveEmptyEntries);
+
+        Items = new List<BreadcrumbItem>();
+        Items.Insert(0, new BreadcrumbItem { Text = "Home", Href = "/", IsActive = false });
+
+        var path = "";
+
+        foreach (var segment in segments)
+        {
+            path += "/" + segment;
+            Items.Add(new BreadcrumbItem
+            {
+                Text = SkipGuid(segment),
+                Href = path,
+                IsActive = false
+            });
+        }
+
+        if (Items.Count > 0)
+        {
+            Items[^1].IsActive = true;
+        }
+    }
+
+    private string SkipGuid(string input)
+    {
+        return Guid.TryParse(input, out _) ? "Id" : Capitalize(input);
+    }
+
+    private string Capitalize(string input)
+    {
+        return string.IsNullOrWhiteSpace(input)
+            ? ""
+            : char.ToUpper(input[0]) + input.Substring(1);
+    }
+}
+
