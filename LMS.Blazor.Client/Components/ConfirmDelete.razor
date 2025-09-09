@@ -1,4 +1,47 @@
-﻿<button class="btn btn-danger" @onclick="ShowDialog">@ButtonText</button>
+﻿<button type="button" class="btn btn-danger" @onclick="ShowDialog">@ButtonText</button>
+
+@if (isOpen)
+{
+    <div class="modal-backdrop fade show"></div>
+    <div class="modal d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+        <div class="modal-dialog">
+            <div class="modal-content p-3">
+                <h5 class="modal-title">@Title</h5>
+                <p>@Message</p>
+                <div class="d-flex justify-content-end gap-2 mt-3">
+                    <button type="button" class="btn btn-secondary" @onclick="CloseDialog">Cancel</button>
+                    <button type="button" class="btn btn-danger" @onclick="Confirm">Delete</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private bool isOpen = false;
+
+    [Parameter] public string Title { get; set; } = "Confirm delete";
+    [Parameter] public string Message { get; set; } = "Are you sure?";
+    [Parameter] public string ButtonText { get; set; } = "Delete";
+    [Parameter] public EventCallback OnConfirm { get; set; }
+
+    private void ShowDialog() => isOpen = true;
+    private void CloseDialog() => isOpen = false;
+
+    private async Task Confirm()
+    {
+        if (OnConfirm.HasDelegate)
+            await OnConfirm.InvokeAsync();
+
+        isOpen = false;
+    }
+}
+
+
+
+
+
+@* <button class="btn btn-danger" @onclick="ShowDialog">@ButtonText</button>
 
 @if (isOpen)
 {
@@ -34,3 +77,4 @@
         isOpen = false;
     }
 }
+ *@
