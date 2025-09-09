@@ -12,5 +12,6 @@ namespace LMS.Blazor.Client.Models
         public string ContentType { get; set; } = default!;
         public byte[] Content { get; set; } = default!;
         public string? Description { get; set; }
+        public string FileType { get; set; }
     }
 }

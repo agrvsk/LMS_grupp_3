@@ -19,6 +19,7 @@ namespace LMS.Shared.DTOs.EntityDto
         public Guid ParentId { get; set; }
 
         public IFormFile File { get; set; }
+        public string FileType { get; set; }
 
         public List<SubmissionCreateDto> Submissions { get; set; } = new List<SubmissionCreateDto>();
 

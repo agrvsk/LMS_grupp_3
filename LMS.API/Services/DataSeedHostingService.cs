@@ -188,6 +188,7 @@ public class DataSeedHostingService : IHostedService
         // Document faker
         var documentFaker = new Faker<Document>("sv")
             .RuleFor(d => d.Name, f => f.System.FileName())
+            .RuleFor(d => d.FileType, f => f.System.CommonFileType())
             .RuleFor(d => d.Description, f => f.Lorem.Sentence(6))
             .RuleFor(d => d.UploadDate, f => f.Date.Recent(90)) // last 3 months
             .RuleFor(d => d.FilePath, f => $"/uploads/{f.System.FileName()}")

@@ -75,7 +75,7 @@
         }
     }
 
-    private readonly string[] permittedExtensions = { ".pdf", ".docx", ".xlsx", ".png", ".jpg" };
+    private readonly string[] permittedExtensions = { ".pdf", ".docx", ".xlsx", ".png", ".jpg", ".json" };
     private const long maxFileSize = 10_000_000; // 10 MB
     private string? fileError;
     private async void OnFileSelected(InputFileChangeEventArgs e)
@@ -106,6 +106,7 @@
             await stream.CopyToAsync(ms);
 
             DocumentInfo.FileName = file.Name;
+            DocumentInfo.FileType = ext;
             DocumentInfo.ContentType = file.ContentType;
             DocumentInfo.Content = ms.ToArray();
 
@@ -128,44 +129,45 @@
         try
         {
 
-        using var content = new MultipartFormDataContent();
+            using var content = new MultipartFormDataContent();
 
-        var fileContent = new ByteArrayContent(DocumentInfo.Content);
-        fileContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(DocumentInfo.ContentType ?? "application/octet-stream");
-        content.Add(fileContent, "File", DocumentInfo.FileName);
+            var fileContent = new ByteArrayContent(DocumentInfo.Content);
+            fileContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(DocumentInfo.ContentType ?? "application/octet-stream");
+            content.Add(fileContent, "File", DocumentInfo.FileName);
 
-		//DocumentCreateDto - utan IFormFile!
-		var documentDto = new
-		{
-			Name = DocumentInfo.FileName,
-			Description = DocumentInfo.Description ?? string.Empty,
-			UploaderId = UploaderId,
-			ParentType = ParentType,
-			ParentId = ParentId.ToString(),
-			Submissions = Submissions,
-		};
+            //DocumentCreateDto - utan IFormFile!
+            var documentDto = new
+            {
+                Name = DocumentInfo.FileName,
+                FileType = DocumentInfo.FileType,
+                Description = DocumentInfo.Description ?? string.Empty,
+                UploaderId = UploaderId,
+                ParentType = ParentType,
+                ParentId = ParentId.ToString(),
+                Submissions = Submissions,
+            };
 
-        // Add Dto as JSON
-        var json = JsonSerializer.Serialize(documentDto);
-        content.Add(new StringContent(json, Encoding.UTF8), "documentDtoJson");
+            // Add Dto as JSON
+            var json = JsonSerializer.Serialize(documentDto);
+            content.Add(new StringContent(json, Encoding.UTF8), "documentDtoJson");
 
-        var response = await ApiService.CallApiPostMultipartAsync<DocumentDto>("documents", content);
+            var response = await ApiService.CallApiPostMultipartAsync<DocumentDto>("documents", content);
 
-        if (response != null)
-        {
-            // Handle success (e.g., show a message, clear the form, etc.)
-            uploadSuccess = true;
-            DocumentInfo = new(); // Reset form
-            await OnUploadSuccess.InvokeAsync(response);
+            if (response != null)
+            {
+                // Handle success (e.g., show a message, clear the form, etc.)
+                uploadSuccess = true;
+                DocumentInfo = new(); // Reset form
+                await OnUploadSuccess.InvokeAsync(response);
 
-            Console.WriteLine("Document uploaded successfully.");
-        }
-        else
-        {
-            // Handle error (e.g., show an error message)
-            Console.WriteLine("Error uploading document");
-        }
-        isUploading = false;
+                Console.WriteLine("Document uploaded successfully.");
+            }
+            else
+            {
+                // Handle error (e.g., show an error message)
+                Console.WriteLine("Error uploading document");
+            }
+            isUploading = false;
         }
         catch (System.ComponentModel.DataAnnotations.ValidationException ex)
         {
