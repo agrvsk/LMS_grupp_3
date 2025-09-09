@@ -10,7 +10,10 @@
 		</div>
 		<a href="activities/@Activity.Id" class="stretched-link"></a>
 	</div>
+
+	<AuthorizeView Roles="Teacher">
 	<button @onclick="StartEditing">Edit</button>
+    </AuthorizeView>
 
 </div>
 
