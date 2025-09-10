@@ -39,13 +39,13 @@ public class ModuleActivityService : IModuleActivityService
     {
         var moduleActivities = await uow.ModuleActivityRepository.GetAllModuleActivitiesAsync();
         var moduleActivityDtos = mapper.Map<List<ModuleActivityDto>>(moduleActivities);
-        return moduleActivityDtos;
+        return moduleActivityDtos.OrderBy(c => c.StartDate).ToList();
     }
     public async Task<List<ModuleActivityDto>> GetModuleActivitiesByModuleIdAsync(Guid moduleId)
     {
         var moduleActivities = await uow.ModuleActivityRepository.GetModuleActivitiesByModuleIdAsync(moduleId);
         var moduleActivityDtos = mapper.Map<List<ModuleActivityDto>>(moduleActivities);
-        return moduleActivityDtos;
+        return moduleActivityDtos.OrderBy(c => c.StartDate).ToList();
     }
     public async Task<ModuleActivity> CreateActivityAsync(ModuleActivityCreateDto moduleActivity)
     {
