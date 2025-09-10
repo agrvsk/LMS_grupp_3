@@ -53,14 +53,14 @@ namespace LMS.Presentation.Controllers
             }
             if (!_serviceManager.DateValidationService.ValidateCourseDates(courseDto.StartDate, courseDto.EndDate))
             {
-                ModelState.AddModelError("DateValidation", "End date must be greater than start date.");
+                ModelState.AddModelError("DateValidation", "Slutdatum måste vara efter startdatum.");
                 return BadRequest(ModelState);
             }
 
             if (courseDto.Modules.Count > 0) if (!_serviceManager.DateValidationService.ValidateListOfDateRanges(courseDto.Modules.Select(m => (m.StartDate, m.EndDate)).ToList(),
                  courseDto.StartDate, courseDto.EndDate))
                 {
-                    ModelState.AddModelError("DateValidation", $"Module '' has invalid dates: ");
+                    ModelState.AddModelError("DateValidation", $"En modul har otillåtna datum: ");
                     return BadRequest(ModelState);
 
                 }
@@ -71,7 +71,7 @@ namespace LMS.Presentation.Controllers
                         if (module.ModuleActivities.Count > 0 && !_serviceManager.DateValidationService.ValidateListOfDateRanges(module.ModuleActivities.Select(a => (a.StartDate, a.EndDate)).ToList(),
                             module.StartDate, module.EndDate))
                         {
-                            ModelState.AddModelError("DateValidation", $"Module activity in module '{module.Name}' has invalid dates: ");
+                            ModelState.AddModelError("DateValidation", $"Aktivitet i modul '{module.Name}' har otillåtna datum: ");
                             return BadRequest(ModelState);
                         }
                     }
@@ -99,7 +99,7 @@ namespace LMS.Presentation.Controllers
             }
             if (!_serviceManager.DateValidationService.ValidateCourseDates(courseDto.StartDate, courseDto.EndDate))
             {
-                ModelState.AddModelError("DateValidation", "End date must be greater than start date.");
+                ModelState.AddModelError("DateValidation", "Slutdatum måste vara efter startdatum.");
                 return BadRequest(ModelState);
             }
             var updatedCourse = await _serviceManager.CourseService.UpdateCourseAsync(courseDto);

@@ -62,7 +62,7 @@ namespace LMS.Presentation.Controllers
                 return BadRequest("Module data is null");
             if (!await _serviceManager.DateValidationService.ValidateModuleUppdateDatesAsync(moduleDto.StartDate, moduleDto.EndDate, moduleDto.CourseId))
             {
-                ModelState.AddModelError("DateValidation", "End date must be greater than start date and within the course date range.");
+                ModelState.AddModelError("DateValidation", "Moduler får inte överlappa och slutdatum måste vara efter startdatum.");
                 return BadRequest(ModelState);
             }
                 var createdModule = await _serviceManager.ModuleService.CreateModuleAsync(moduleDto);
@@ -75,7 +75,7 @@ namespace LMS.Presentation.Controllers
                 return BadRequest("Module data is invalid");
             if (!await _serviceManager.DateValidationService.ValidateModuleUppdateDatesAsync(moduleUpdDto.StartDate, moduleUpdDto.EndDate, moduleUpdDto.CourseId, moduleUpdDto.Id))
             {
-                ModelState.AddModelError("DateValidation", "End date must be greater than start date and within the course date range.");
+                ModelState.AddModelError("DateValidation", "Moduler får inte överlappa och slutdatum måste vara efter startdatum.");
                 return BadRequest(ModelState);
             }
             var updatedModule = await _serviceManager.ModuleService.UpdateModuleAsync(moduleUpdDto);
