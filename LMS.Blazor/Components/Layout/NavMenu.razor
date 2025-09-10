@@ -11,16 +11,23 @@
     <AuthorizeView>
         <NotAuthorized>
             <div class="nav-right">
-                <NavLink class="nav-link" href="Account/Register">Register</NavLink>
                 <NavLink class="nav-link" href="Account/Login">Login</NavLink>
             </div>
         </NotAuthorized>
-        <Authorized>
-            <NavLink class="nav-link" href="courses">Courses</NavLink>                         
-            <NavLink class="nav-link" href="create">Create</NavLink>           
-            <NavLink class="nav-link" href="schedule">Schedule</NavLink>
-            <NavLink class="nav-link" href="account/register">Register a new user</NavLink>
 
+        <Authorized>
+            <NavLink class="nav-link" href="courses">Courses</NavLink>
+            <NavLink class="nav-link" href="schedule">Schedule</NavLink>
+        </Authorized>
+    </AuthorizeView>
+
+    <AuthorizeView Roles="Teacher">
+        <NavLink class="nav-link" href="create">Create</NavLink>
+        <NavLink class="nav-link" href="account/register">Register a new user</NavLink>        
+    </AuthorizeView>
+
+    <AuthorizeView>
+        <Authorized>
             <div class="nav-right">
                 <NavLink class="nav-link" href="Account/Manage">@context.User.Identity?.Name</NavLink>
 
