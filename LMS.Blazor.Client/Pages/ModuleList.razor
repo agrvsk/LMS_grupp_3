@@ -2,6 +2,7 @@
 @using LMS.Blazor.Client.Services
 @using LMS.Shared.DTOs.EntityDto
 @using Microsoft.AspNetCore.Authorization
+@inject NavigationManager Navigation
 @rendermode InteractiveWebAssembly
 @attribute [Authorize]
 <h3>ModuleList</h3>
@@ -52,12 +53,28 @@ else
     {
 
         var state = await Auth.GetAuthenticationStateAsync();
-
+		var user = state.User;
+        var isTeacher = user.IsInRole("Teacher");
+        var isStudent = user.IsInRole("Student");
+        if (isTeacher)
+        {
+            await LoadModule();
+            Loading = false;
+        }
+        else if (isStudent)
+        {
+            var courseIdAsString = user.FindFirst("CourseId")?.Value ?? null;
+            if (courseIdAsString != null) await InvokeAsync(() => Navigation.NavigateTo($"courses/{courseIdAsString}"));
+        }
+        else
+        {
+            await InvokeAsync(() => Navigation.NavigateTo("/account/login"));
+        }
         if (!(state.User.Identity?.IsAuthenticated) ?? false)
         {
             return;
         }
-        await LoadModule();
+        
 
     }
 
