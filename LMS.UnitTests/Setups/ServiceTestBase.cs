@@ -24,11 +24,12 @@ namespace LMS.UnitTests.Setups
         // Repository Mocks
         protected readonly Mock<IActivityTypeRepository> MockActivityTypeRepo;
         protected readonly Mock<IApplicationUserRepository> MockApplicationUserRepo;
+        protected readonly Mock<IAssignmentRepository> MockAssignmentRepo;
         protected readonly Mock<ICourseRepository> MockCourseRepo;
         protected readonly Mock<IDocumentRepository> MockDocumentRepo;
         protected readonly Mock<IModuleRepository> MockModuleRepo;
         protected readonly Mock<IModuleActivityRepository> MockModuleActivityRepo;
-        protected readonly Mock<ISubmissionRepository> MockSubmissionRepo;
+        protected readonly Mock<ISubmissionRepository> MockSubmissionRepo;        
 
         // UserManager Mock
         protected readonly Mock<UserManager<ApplicationUser>> MockUserManager;
@@ -46,6 +47,9 @@ namespace LMS.UnitTests.Setups
         protected readonly Mock<IScheduleService> MockScheduleService;
         protected readonly Mock<ISubmissionService> MockSubmissionService;
         protected readonly Mock<IUserService> MockUserService;
+        protected readonly Mock<IDateValidationService> MockDateValidationService;
+        protected readonly Mock<IAssignmentService> MockAssignmentService;
+        protected readonly Mock<IFileHandlerService> MockFileHandlerService;
 
 
         protected ServiceManager ServiceManager;
@@ -59,19 +63,21 @@ namespace LMS.UnitTests.Setups
             // Initialize repository mocks
             MockActivityTypeRepo = new Mock<IActivityTypeRepository>();
             MockApplicationUserRepo = new Mock<IApplicationUserRepository>();
+            MockAssignmentRepo = new Mock<IAssignmentRepository>();
             MockCourseRepo = new Mock<ICourseRepository>();
             MockDocumentRepo = new Mock<IDocumentRepository>();
             MockModuleActivityRepo = new Mock<IModuleActivityRepository>();
-            MockModuleRepo = new Mock<IModuleRepository>();            
+            MockModuleRepo = new Mock<IModuleRepository>();
             MockSubmissionRepo = new Mock<ISubmissionRepository>();
 
             // Setup the UnitOfWork to return the repository mocks
             MockUow.SetupGet(u => u.ActivityTypeRepository).Returns(MockActivityTypeRepo.Object);
             MockUow.SetupGet(u => u.ApplicationUserRepository).Returns(MockApplicationUserRepo.Object);
+            MockUow.SetupGet(u => u.AssignmentRepository).Returns(MockAssignmentRepo.Object);
             MockUow.SetupGet(u => u.CourseRepository).Returns(MockCourseRepo.Object);
             MockUow.SetupGet(u => u.DocumentRepository).Returns(MockDocumentRepo.Object);
             MockUow.SetupGet(u => u.ModuleActivityRepository).Returns(MockModuleActivityRepo.Object);
-            MockUow.SetupGet(u => u.ModuleRepository).Returns(MockModuleRepo.Object);            
+            MockUow.SetupGet(u => u.ModuleRepository).Returns(MockModuleRepo.Object);
             MockUow.SetupGet(u => u.SubmissionRepository).Returns(MockSubmissionRepo.Object);
 
             // Setup UnitOfWork CompleteAsync to return a completed task
@@ -118,10 +124,13 @@ namespace LMS.UnitTests.Setups
             MockCourseService = new Mock<ICourseService>();
             MockDocumentService = new Mock<IDocumentService>();
             MockModuleActivityService = new Mock<IModuleActivityService>();
-            MockModuleService = new Mock<IModuleService>();            
+            MockModuleService = new Mock<IModuleService>();
             MockSubmissionService = new Mock<ISubmissionService>();
             MockUserService = new Mock<IUserService>();
-            
+            MockDateValidationService = new Mock<IDateValidationService>();
+            MockAssignmentService = new Mock<IAssignmentService>();
+            MockFileHandlerService = new Mock<IFileHandlerService>();
+
 
             // Initialize the ServiceManager with the service mocks
             ServiceManager = new ServiceManager(
@@ -133,7 +142,9 @@ namespace LMS.UnitTests.Setups
                 new Lazy<ISubmissionService>(() => MockSubmissionService.Object),
                 new Lazy<IUserService>(() => MockUserService.Object),
                 new Lazy<IActivityTypeService>(() => MockActivityTypeService.Object),
-                new Lazy<IScheduleService>(() => MockScheduleService.Object)
+                new Lazy<IScheduleService>(() => MockScheduleService.Object),
+                new Lazy<IDateValidationService>(() => MockDateValidationService.Object),
+                new Lazy<IAssignmentService>(() => MockAssignmentService.Object)
                 );
 
         }

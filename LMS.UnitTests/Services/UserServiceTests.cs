@@ -1,4 +1,5 @@
 ﻿using Domain.Models.Entities;
+using Domain.Models.Exceptions;
 using LMS.Services;
 using LMS.Shared.DTOs.EntityDto;
 using LMS.UnitTests.Setups;
@@ -42,41 +43,19 @@ namespace LMS.UnitTests.Services
             Assert.Equal("test@user.com", result.Email);
         }
 
-        /*
-        [Fact]
-        public async Task GetUserByIdAsync_UserExists_ReturnsCorrectId()
-        {
-            var userId = "abc123";
-            var user = new ApplicationUser { Id = userId, UserName = "TestUser" };
-            var userDto = new UserDto { Id = userId, Name = "TestUser", Email = "test@user.com", Role = "Student" };
-
-            MockUow.Setup(u => u.ApplicationUserRepository.GetUserByIdAsync(userId))
-                   .ReturnsAsync(user);
-
-            MockMapper.Setup(m => m.Map<UserDto>(user))
-                      .Returns(userDto);
-
-            var result = await _service.GetUserByIdAsync(userId);
-
-            Assert.Equal(userId, result.Id);
-        }
-        */
-
         [Fact]
         [Trait("UserService", "GetUserById")]
-        public async Task GetUserByIdAsync_UserDoesNotExist_ReturnsNull()
+        public async Task GetUserByIdAsync_UserDoesNotExist_ThrowsException()
         {
             var userId = "usertest";
 
             MockUow.Setup(u => u.ApplicationUserRepository.GetUserByIdAsync(userId))
                    .ReturnsAsync((ApplicationUser?)null);
 
-            MockMapper.Setup(m => m.Map<UserDto>(null))
-                      .Returns((UserDto?)null);
-
-            var result = await _service.GetUserByIdAsync(userId);
-
-            Assert.Null(result);
+            await Assert.ThrowsAsync<UserNotFoundException>(async () =>
+            {
+                await _service.GetUserByIdAsync(userId);
+            });
         }
 
         [Fact]

@@ -1,4 +1,5 @@
 ﻿using Domain.Models.Entities;
+using Domain.Models.Exceptions;
 using LMS.Services;
 using LMS.Shared.DTOs.EntityDto;
 using LMS.UnitTests.Setups;
@@ -16,8 +17,8 @@ namespace LMS.UnitTests.Services
         private readonly ModuleActivityService _service;
 
         public ModuleActivityServiceTests()
-        {           
-            _service = new ModuleActivityService(MockUow.Object, MockMapper.Object);
+        {
+            _service = new ModuleActivityService(MockUow.Object, MockMapper.Object, MockFileHandlerService.Object);
         }
 
         #region [GetModuleActivityByIdAsync]
@@ -46,7 +47,7 @@ namespace LMS.UnitTests.Services
 
         [Fact]
         [Trait("ModuleActivityService", "Get By Id")]
-        public async Task GetModuleActivityByIdAsync_ActivityDoesNotExist_ReturnsNull()
+        public async Task GetModuleActivityByIdAsync_ActivityDoesNotExist_ThrowsException()
         {
             var id = Guid.NewGuid();
 
@@ -54,13 +55,9 @@ namespace LMS.UnitTests.Services
                 .Setup(r => r.GetModuleActivityByIdAsync(id))
                 .ReturnsAsync((ModuleActivity?)null);
 
-            MockMapper
-                .Setup(m => m.Map<ModuleActivityDto>(null))
-                .Returns((ModuleActivityDto?)null);
-
-            var result = await _service.GetModuleActivityByIdAsync(id);
-
-            Assert.Null(result);
+            await Assert.ThrowsAsync<ActivityNotFoundException>(
+                () => _service.GetModuleActivityByIdAsync(id)
+            );
         }
         #endregion
 
