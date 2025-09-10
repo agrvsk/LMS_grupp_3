@@ -28,7 +28,7 @@ public class ModuleService : IModuleService
     {
         var modules = await uow.ModuleRepository.GetAllModulesAsync();
         var moduleDtos = mapper.Map<List<ModuleDto>>(modules);
-        return moduleDtos;
+        return moduleDtos.OrderBy(c => c.StartDate).ToList();
     }
 
     public async Task<ModuleDto?> GetModuleByIdAsync(Guid moduleId)
@@ -42,16 +42,16 @@ public class ModuleService : IModuleService
     public async Task<List<ModuleDto>> GetModulesByCourseIdAsync(Guid courseId)
     {
 
-        return mapper.Map<List<ModuleDto>>(await uow.ModuleRepository.GetModulesByCourseIdAsync(courseId));
+        return mapper.Map<List<ModuleDto>>(await uow.ModuleRepository.GetModulesByCourseIdAsync(courseId)).OrderBy(c => c.StartDate).ToList();
 
     }
     public async Task<List<ModuleDto>> GetActivitiesByCourseIdAsync(Guid courseId, string idag)
     {
-        return mapper.Map<List<ModuleDto>>(await uow.ModuleRepository.GetModulesByCourseIdAndDateAsync(courseId,idag));
+        return mapper.Map<List<ModuleDto>>(await uow.ModuleRepository.GetModulesByCourseIdAndDateAsync(courseId,idag)).OrderBy(c => c.StartDate).ToList();
     }
     public async Task<List<ModuleDto>> GetAllActivitiesByDateAsync(string idag)
     {
-        return mapper.Map<List<ModuleDto>>(await uow.ModuleRepository.GetAllModulesByDateAsync(idag));
+        return mapper.Map<List<ModuleDto>>(await uow.ModuleRepository.GetAllModulesByDateAsync(idag)).OrderBy(c => c.StartDate).ToList();
     }
 
     public async Task<Module> CreateModuleAsync(ModuleCreateDto moduleDto)

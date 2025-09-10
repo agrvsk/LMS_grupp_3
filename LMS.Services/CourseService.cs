@@ -34,7 +34,7 @@ public class CourseService : ICourseService
     {
         var courses = await uow.CourseRepository.GetAllCoursesAsync();
         var courseDtos = mapper.Map<List<CourseDto>>(courses);
-        return courseDtos;
+        return courseDtos.OrderBy(c=> c.StartDate).ToList();
     }
     public async Task<List<AssignmentDto>> GetAssignmentsByCourseIdAsync(Guid courseId)
     {
@@ -50,7 +50,7 @@ public class CourseService : ICourseService
             }
         }
         var assignmentDtos = mapper.Map<List<AssignmentDto>>(allAssignments);
-        return assignmentDtos;
+        return assignmentDtos.OrderBy(c => c.DueDate).ToList();
     }
     public async Task<CourseDto> CreateCourseAsync(CourseCreateDto courseDto)
     {

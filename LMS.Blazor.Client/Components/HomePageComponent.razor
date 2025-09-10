@@ -135,7 +135,7 @@
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         var user = authState.User;
         userName = user.Identity?.Name;
-        if (!user.Identity.IsAuthenticated || user==null) return;
+        if (!user.Identity.IsAuthenticated || user == null) return;
 
         UserId = user.FindFirst(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
 

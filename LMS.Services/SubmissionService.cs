@@ -30,7 +30,7 @@ public class SubmissionService : ISubmissionService
 
     public async Task<List<Submission>> GetAllSubmissionsAsync()
     {
-        return await uow.SubmissionRepository.GetAllSubmissionsAsync();
+        return (await uow.SubmissionRepository.GetAllSubmissionsAsync()).OrderBy(c => c.SubmissionDate).ToList();
     }
 
     public async Task<SubmissionDto?> GetSubmissionByIdAsync(Guid submissionId)
@@ -43,13 +43,13 @@ public class SubmissionService : ISubmissionService
     public async Task<List<SubmissionDto>> GetSubmissionsByApplicationUserIdAsync(string userId)
     {
         var data = await uow.SubmissionRepository.GetSubmissionsByApplicationUserIdAsync(userId);
-        return mapper.Map<List<SubmissionDto>>(data);
+        return mapper.Map<List<SubmissionDto>>(data).OrderBy(c => c.SubmissionDate).ToList();
     }
 
     public async Task<List<Submission>> GetSubmissionsByDocumentIdAsync(Guid documentId)
     {
 
-        return await uow.SubmissionRepository.GetSubmissionsByDocumentIdAsync(documentId);
+        return (await uow.SubmissionRepository.GetSubmissionsByDocumentIdAsync(documentId)).OrderBy(c => c.SubmissionDate).ToList();
     }
 
     public async Task<SubmissionDto> CreateSubmissionAsync(SubmissionCreateDto submissionCreateDto, IFormFile file)

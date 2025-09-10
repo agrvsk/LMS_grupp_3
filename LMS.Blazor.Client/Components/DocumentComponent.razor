@@ -2,6 +2,12 @@
 @inject NavigationManager Nav
 
 <div class="container mt-4">
+
+    @if (!string.IsNullOrEmpty(errorMessage))
+    {
+        <div><strong>@errorMessage</strong></div>
+    }
+
     <h4 style="text-align: center">Documents</h4>
     <table class="table table-hover table-sm align-middle" style="table-layout: fixed; width: 100%;">
         <thead>
@@ -54,6 +60,8 @@
     [Parameter]
     public EventCallback<Guid> OnEditRequested { get; set; }
 
+    private string? errorMessage;
+
     private async Task EditClicked(Guid documentId)
     {
         if (OnEditRequested.HasDelegate)
@@ -63,9 +71,17 @@
     }
     private void DownloadClicked(Guid documentId)
     {
-		var documentIdstring = documentId.ToString();
-        var url = Nav.ToAbsoluteUri($"/proxy?endpoint=documents/{documentIdstring}/download");
-        Nav.NavigateTo(url.ToString(), forceLoad: true);
+        try
+        {
+            var documentIdstring = documentId.ToString();
+            var url = Nav.ToAbsoluteUri($"/proxy?endpoint=documents/{documentIdstring}/download");
+            Nav.NavigateTo(url.ToString(), forceLoad: true);
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+        }
+
 	}
 }
 

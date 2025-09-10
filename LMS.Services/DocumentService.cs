@@ -38,7 +38,7 @@ public class DocumentService : IDocumentService
     {
         var documents = await uow.DocumentRepository.GetAllDocumentsAsync();
         var documentDtos = mapper.Map<List<DocumentDto>>(documents);
-        return documentDtos;
+        return documentDtos.OrderBy(c => c.UploadDate).ToList();
     }
     public async Task<List<DocumentDto>> GetDocumentsByParentAsync(Guid parentId, string parentType)
     {
