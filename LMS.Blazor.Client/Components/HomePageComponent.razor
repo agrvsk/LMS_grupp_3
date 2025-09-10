@@ -3,15 +3,15 @@
 @inject NavigationManager Navigation
 
 <AuthorizeView Roles="Teacher, Student">
-    <Authorized>
-        @if (!string.IsNullOrEmpty(errorMessage))
-        {
-            <div class="alert alert-danger" role="alert">
-                <p>@errorMessage</p>
-            </div>
-        }
-        <h1>Home</h1>
-        @if (isTeacher)
+	<Authorized>
+		@if (!string.IsNullOrEmpty(errorMessage))
+		{
+			<div class="alert alert-danger" role="alert">
+				<p>@errorMessage</p>
+			</div>
+		}
+		<h1>Home</h1>
+		@* @if (isTeacher)
         {
             <section class="p-4 bg-light rounded shadow-sm">
                 <header class="mb-3">
@@ -38,189 +38,211 @@
 
         }
         else if (isStudent)
-        {
-            <section class="p-4 bg-light rounded shadow-sm">
-                <header class="mb-3">
-                    <small class="text-muted"   >Student Dashboard</small><br/>
-                    <small class="text-primary">Welcome, @userName!</small><br />
-                    <small class="text-muted">Courseid:@courseIdAsString</small>
-                </header>
-            <article>
-                <p class="lead">Here’s what’s happening today:</p>
-                    @if (Modules != null && Modules.Count() > 0)
-                    {
-                        foreach (ModuleDto item in Modules)
-                        {
-                          foreach (ModuleActivityDto activityDto in item.ModuleActivities)
-                            {
-                                <small class="card-hover" @onclick="Toggle">@GetActivityTypeName(@activityDto.ActivityTypeId)  @activityDto.Name - @activityDto.StartDate.ToShortTimeString() - @activityDto.EndDate.ToShortTimeString()</small>
-                                <br />
-                                @if (isEditing)
-                                {
-                                    <SubmissionAddComponent />
-                                }
-                            }
-                        }
-                    }
-                    @if (Assignments != null && Assignments.Any())
-                    {
-                        <div class="row g-3">
-                            @foreach (var item in Assignments)
-                            {
-                                <div class="col-md-4">
-                                    <div class="card shadow-sm h-100 assignment-card"
-                                         style="cursor: pointer;"
-                                         @onclick="@(() => NavigateTo($"assignments/{item.Id}"))">
+        { *@
+		<section class="p-4 bg-light rounded shadow-sm">
+			<header class="mb-3">
+				<small class="text-muted">Student Dashboard</small><br />
+				<small class="text-primary">Welcome, @userName!</small><br />
+				<small class="text-muted">Courseid:@courseIdAsString</small>
+			</header>
+			<article class="my-4">
+				<p class="lead mb-4">Here’s what’s happening today:</p>
 
-                                        <div class="card-body">
-                                            <h5 class="card-title">@item.Name</h5>
-                                            <p class="card-text text-muted mb-1">
-                                                Due: @item.DueDate.ToShortDateString()
-                                            </p>
-                                            @if (!string.IsNullOrWhiteSpace(item.Description))
-                                            {
-                                                <p class="card-text text-truncate">
-                                                    @item.Description
-                                                </p>
-                                            }
-                                        </div>
-                                        <div class="card-footer text-end">
-                                            <span class="text-primary">View Details →</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            }
-                        </div>
-                    }
-                    else
-                    {
-                        <p class="text-muted">No assignments available.</p>
-                    }
+				@if (Modules != null && Modules.Any())
+				{
+					<div class="row g-3 mb-4">
+						@foreach (var module in Modules)
+						{
+							<div class="col-md-6 col-lg-4">
+								<div class="card shadow-sm h-100 clickable-card"
+									 @onclick="@(() => NavigateTo($"modules/{module.Id}"))">
+									<div class="card-body">
+										<h5 class="card-title text-primary mb-2">@module.Name</h5>
+										<p class="card-subtitle text-muted small mb-3">
+											Start: @module.StartDate.ToString("yyyy-MM-dd")
+											&nbsp;|&nbsp;
+											End: @module.EndDate.ToString("yyyy-MM-dd")
+										</p>
 
-                </article>
-            </section>
+										@if (module.ModuleActivities != null && module.ModuleActivities.Any())
+										{
+											<ul class="list-unstyled mb-0">
+												@{
+													module.ModuleActivities = module.ModuleActivities.OrderBy(a => a.StartDate).ToList();
+												}
+												@foreach (var activityDto in module.ModuleActivities)
+												{
+													<li class="mb-1">
+														<span class="d-block text-body fw-semibold clickable-activity"
+															  @onclick:stopPropagation="true"
+															  @onclick="@(() => NavigateTo($"activities/{activityDto.Id}"))">
+															@GetActivityTypeName(activityDto.ActivityTypeId):
+															@activityDto.Name
+															<small class="text-muted">
+																(@activityDto.StartDate.ToShortTimeString() - @activityDto.EndDate.ToShortTimeString())
+															</small>
+														</span>
+													</li>
+												}
+											</ul>
+										}
+									</div>
+								</div>
+							</div>
+						}
+					</div>
+				}
+
+				@if (Assignments != null && Assignments.Any())
+				{
+					<h4 class="mb-3">Assignments</h4>
+					<div class="row g-4">
+						@foreach (var item in Assignments)
+						{
+							<div class="col-md-4">
+								<div class="card shadow-sm h-100 assignment-card clickable-card"
+									 @onclick="@(() => NavigateTo($"assignments/{item.Id}"))">
+									<div class="card-body">
+										<h5 class="card-title">@item.Name</h5>
+										<p class="card-text text-muted mb-1">
+											Due: @item.DueDate.ToShortDateString()
+										</p>
+										@if (!string.IsNullOrWhiteSpace(item.Description))
+										{
+											<p class="card-text text-truncate">
+												@item.Description
+											</p>
+										}
+									</div>
+									<div class="card-footer text-end text-primary fw-semibold">
+										View Details →
+									</div>
+								</div>
+							</div>
+						}
+					</div>
+				}
+				else
+				{
+					<p class="text-muted">No assignments available.</p>
+				}
+			</article>
+		</section>
 
 
-        }
-    </Authorized>
-    <NotAuthorized>
-        <h3>You are not authorized - please log in.</h3>
-    </NotAuthorized>
+		@*  } *@
+	</Authorized>
+	<NotAuthorized>
+		<h3>You are not authorized - please log in.</h3>
+	</NotAuthorized>
 </AuthorizeView>
 
-@code 
+@code
 {
-    [Inject]
-    private IApiService myApi { get; set; } = default!;
-    [Inject]
-    AuthenticationStateProvider AuthenticationStateProvider { get; set; } = default!;
+	[Inject]
+	private IApiService myApi { get; set; } = default!;
+	[Inject]
+	AuthenticationStateProvider AuthenticationStateProvider { get; set; } = default!;
 
-    private IEnumerable<ModuleDto>? Modules { get; set; }
-    private IEnumerable<AssignmentDto>? Assignments { get; set; }
-    public List<ActivityTypeDto> Types { get; set; } = new List<ActivityTypeDto>();
+	private IEnumerable<ModuleDto>? Modules { get; set; }
+	private IEnumerable<AssignmentDto>? Assignments { get; set; }
+	public List<ActivityTypeDto> Types { get; set; } = new List<ActivityTypeDto>();
 
-    private bool isTeacher;
-    private bool isStudent;
-    private bool isLoading;
-    private string? userName;
-    string? courseIdAsString;
-    private string? UserId;
-
-    Guid? currentlyEditing;
-    bool isEditing = false;
-    private string? errorMessage;
+	private bool isTeacher;
+	private bool isStudent;
+	private bool isLoading;
+	private string? userName;
+	string? courseIdAsString;
+	private string? UserId;
+	private string? errorMessage;
 
 
-    protected override async Task OnInitializedAsync()
-    {
-        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-        var user = authState.User;
-        userName = user.Identity?.Name;
-        if (!user.Identity.IsAuthenticated || user == null) return;
+	protected override async Task OnInitializedAsync()
+	{
+		var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+		var user = authState.User;
+		userName = user.Identity?.Name;
+		if (!user.Identity.IsAuthenticated || user == null) return;
 
-        UserId = user.FindFirst(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
-
-
-        courseIdAsString = user.FindFirst("CourseId")?.Value;
-
-        isLoading = true;
-
-        isTeacher = user.IsInRole("Teacher");
-        isStudent = user.IsInRole("Student");
-
-        await LoadActivities(courseIdAsString);
-        await LoadAssignments(courseIdAsString);
-
-        isLoading = false;
-    }
-    private void NavigateTo(string path)
-    {
-        Navigation.NavigateTo(path);
-    }
-
-    private async Task LoadAssignments(string CourseId)
-    {
-        if (!isStudent) return;
-        try
-        {
-            Assignments = await myApi.CallApiGetAsync<IEnumerable<AssignmentDto>>($"courses/{CourseId}/assignments");
-        }
-        catch (HttpRequestException apiEx)
-        {
-            errorMessage = $"API Error: {apiEx.StatusCode} - {apiEx.Message}";
-            Console.WriteLine("there was an API error: " + apiEx.Message);
-        }
-
-    }
-
-    private async Task LoadActivities(string? courseIdAsString)
-    {
-        try
-        {
-            DateTime idag = DateTime.UtcNow;
-            string timeString = idag.ToString("yyyy-MM-dd");
-            if (isStudent )
-            {
-                if (courseIdAsString != null && courseIdAsString.Length > 0)
-                {
-                    if (Guid.TryParse(courseIdAsString, out var courseId))
-                    {
-                        Console.WriteLine(courseId);
-                        Modules = await myApi.CallApiGetAsync<IEnumerable<ModuleDto>>($"modules/course/{courseId}/today/{timeString}");
-                    }
-
-                }
-
-            }
-            else if(isTeacher)
-            {
-                Modules = await myApi.CallApiGetAsync<IEnumerable<ModuleDto>>($"modules/today/{timeString}");
-            }
-
-            Types = (await myApi.CallApiGetAsync<List<ActivityTypeDto>>("activity-types"));
-
-        }
-        catch (HttpRequestException apiEx)
-        {
-            errorMessage = $"API Error: {apiEx.StatusCode} - {apiEx.Message}";
-            Console.WriteLine("there was an API error: " + apiEx.Message);
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine("there was an error: " + ex.Message);
-        }
+		UserId = user.FindFirst(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
 
 
-    }
+		courseIdAsString = user.FindFirst("CourseId")?.Value;
 
-    public string GetActivityTypeName(int activityTypeId)
-    {
-        return Types.FirstOrDefault(t => t.Id == activityTypeId)?.Name ?? "  ";
+		isLoading = true;
 
-    }
-    private void Toggle()
-    {
-        isEditing = !isEditing;
-    }
+		isTeacher = user.IsInRole("Teacher");
+		isStudent = user.IsInRole("Student");
+
+		await LoadActivities(courseIdAsString);
+		await LoadAssignments(courseIdAsString);
+
+		isLoading = false;
+	}
+	private void NavigateTo(string path)
+	{
+		Navigation.NavigateTo(path);
+	}
+
+	private async Task LoadAssignments(string CourseId)
+	{
+		if (!isStudent) return;
+		try
+		{
+			Assignments = await myApi.CallApiGetAsync<IEnumerable<AssignmentDto>>($"courses/{CourseId}/assignments");
+		}
+		catch (HttpRequestException apiEx)
+		{
+			errorMessage = $"API Error: {apiEx.StatusCode} - {apiEx.Message}";
+			Console.WriteLine("there was an API error: " + apiEx.Message);
+		}
+
+	}
+
+	private async Task LoadActivities(string? courseIdAsString)
+	{
+		try
+		{
+			DateTime idag = DateTime.UtcNow;
+			string timeString = idag.ToString("yyyy-MM-dd");
+			if (isStudent)
+			{
+				if (courseIdAsString != null && courseIdAsString.Length > 0)
+				{
+					if (Guid.TryParse(courseIdAsString, out var courseId))
+					{
+						Console.WriteLine(courseId);
+						Modules = await myApi.CallApiGetAsync<IEnumerable<ModuleDto>>($"modules/course/{courseId}/today/{timeString}");
+					}
+
+				}
+
+			}
+			else if (isTeacher)
+			{
+				Modules = await myApi.CallApiGetAsync<IEnumerable<ModuleDto>>($"modules/today/{timeString}");
+			}
+
+			Types = (await myApi.CallApiGetAsync<List<ActivityTypeDto>>("activity-types"));
+
+		}
+		catch (HttpRequestException apiEx)
+		{
+			errorMessage = $"API Error: {apiEx.StatusCode} - {apiEx.Message}";
+			Console.WriteLine("there was an API error: " + apiEx.Message);
+		}
+		catch (Exception ex)
+		{
+			Console.WriteLine("there was an error: " + ex.Message);
+		}
+
+
+	}
+
+	public string GetActivityTypeName(int activityTypeId)
+	{
+		return Types.FirstOrDefault(t => t.Id == activityTypeId)?.Name ?? "  ";
+
+	}
 }
 

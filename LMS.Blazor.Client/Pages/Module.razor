@@ -37,8 +37,10 @@
                     <AuthorizeView Roles="Teacher">
                         <ActivityAddComponent ModuleId=Id />
                     </AuthorizeView>
+                    <ul class="list-group mt-2">
                     @foreach (var moduleact in ModuleActivities)
                     {
+                       
                         @if (isEditingActivity && CurrentActivityGuid == moduleact.Id)
                         {
                             <AuthorizeView Roles="Teacher">
@@ -50,6 +52,7 @@
                             <ActivityComponent OnMessageSent="StartActivityEditing" Activity=moduleact />
                         }
                     }
+					</ul>
                 }
 
             </div>

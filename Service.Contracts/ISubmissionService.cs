@@ -10,5 +10,6 @@ public interface ISubmissionService
     Task<SubmissionDto?> GetSubmissionByIdAsync(Guid submissionId);
     Task<List<SubmissionDto>> GetSubmissionsByApplicationUserIdAsync(string userId);
     Task<List<Submission>> GetSubmissionsByDocumentIdAsync(Guid documentId);
+    Task<List<SubmissionDto>> GetSubmissionsByAssignmentIdAsync(Guid assignmentId);
     Task<SubmissionDto> CreateSubmissionAsync(SubmissionCreateDto submissionCreateDto, IFormFile file);
 }

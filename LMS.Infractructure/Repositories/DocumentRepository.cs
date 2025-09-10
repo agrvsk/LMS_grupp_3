@@ -6,14 +6,16 @@ using System.Threading.Tasks;
 using Domain.Contracts.Repositories;
 using Domain.Models.Entities;
 using LMS.Infractructure.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace LMS.Infractructure.Repositories;
 
 public class DocumentRepository: RepositoryBase<Document>, IDocumentRepository
 {
-
+    private readonly ApplicationDbContext _context;
     public DocumentRepository(ApplicationDbContext context) : base(context)
     {
+        _context = context;
     }
     public async Task<Document?> GetDocumentByIdAsync(Guid documentId)
     {
@@ -21,7 +23,7 @@ public class DocumentRepository: RepositoryBase<Document>, IDocumentRepository
     }
     public async Task<List<Document>> GetAllDocumentsAsync()
     {
-        return (await FindAllAsync(trackChanges: false)).ToList();
+        return _context.Documents.AsQueryable().Include(d => d.Uploader).ToList();
     }
     public async Task<List<Document>> GetDocumentsByParentAsync(Guid parentId, string parentType)
     {

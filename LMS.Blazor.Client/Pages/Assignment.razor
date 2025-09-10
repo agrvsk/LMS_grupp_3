@@ -1,6 +1,8 @@
 ﻿@page "/assignments/{Id:guid}"
 @inject IApiService ApiService
 @rendermode InteractiveWebAssembly
+@inject NavigationManager Navigation
+@inject AuthenticationStateProvider Auth
 <h3>Assignment</h3>
 @if (AssignmentDto == null)
 {
@@ -15,7 +17,15 @@ else
 			<p class="card-text"><strong>Due Date:</strong> @AssignmentDto.DueDate.ToString("f")</p>
 		</div>
 	</div>
-	<SubmissionAddComponent AssignmentId="@Id" />
+	if(isTeacher)
+	{
+		<DocumentComponent Documents="@SubmittedAssignments" />
+	}
+	else
+	{
+		<SubmissionAddComponent AssignmentId="@Id" />
+	}
+	
 }
 
 @code {
@@ -23,14 +33,33 @@ else
 	public Guid Id { get; set; }
 
 	private AssignmentDto? AssignmentDto;
+	private List<DocumentDto> SubmittedAssignments = new List<DocumentDto>();
+
+	private bool isTeacher;
 
 	protected override async Task OnParametersSetAsync()
 	{
+		var auth = await Auth.GetAuthenticationStateAsync();
+		var user = auth.User;
+		if (!(user.Identity?.IsAuthenticated ?? false))
+		{
+			Navigation.NavigateTo("authentication/login");
+			return;
+		}
+
+		isTeacher = user.IsInRole("Teacher");
+		
+		
 		await LoadAssignment();
 	}
 	private async Task LoadAssignment()
 	{
 		AssignmentDto = await ApiService.CallApiGetAsync<AssignmentDto>($"assignments/{Id}");
+		if(isTeacher)
+		{
+			SubmittedAssignments = await ApiService.CallApiGetAsync<List<DocumentDto>>($"submissions/assignment/{Id}/");
+		}
+
 	}
 
 }

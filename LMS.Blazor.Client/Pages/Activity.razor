@@ -17,10 +17,11 @@
 		<!-- Main content area -->
 		<div class="col-12 col-lg-9">
 			<h3>Activity @CurrentActivity?.Name</h3>
+			<p><strong>Activity Date:</strong> @CurrentActivity?.StartDate.ToShortDateString()</p>
+			<p><strong>Time:</strong> @CurrentActivity?.StartDate.ToShortTimeString() - @CurrentActivity?.EndDate.ToShortTimeString()</p>
 			<p>@CurrentActivity?.Description</p>
 			<div class="row">
 				<div class="col-12 col-lg-9">
-					<h4>Documents</h4> @* This line should probably be in the doc component *@
 
 					<DocumentComponent Documents="@DocumentDtos" />
 					<DocumentAddComponent ParentId=Id ParentType="Activity" />

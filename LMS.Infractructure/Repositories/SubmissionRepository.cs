@@ -46,6 +46,13 @@ public class SubmissionRepository : RepositoryBase<Submission>, ISubmissionRepos
             .ContinueWith(task => task.Result.ToList());
     }
 
+    public async Task<List<Submission>> GetSubmissionsByAssignmentIdAsync(Guid assignmentId)
+    {
+        
+        return await FindByConditionAsync(s => s.AssignmentId == assignmentId, trackChanges: false)
+            .ContinueWith(task => task.Result.ToList());
+    }
+
 
     public void CreateModule(Submission submission)
     {

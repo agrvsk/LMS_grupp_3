@@ -44,6 +44,15 @@ namespace LMS.Presentation.Controllers
             return Ok(submission);
         }
 
+        [HttpGet("assignment/{assignmentId}")]
+        public async Task<IActionResult> GetSubmissionsByAssignmentId(Guid assignmentId)
+        {
+            var submissions = await _serviceManager.SubmissionService.GetSubmissionsByAssignmentIdAsync(assignmentId);
+            if (submissions == null || !submissions.Any())
+                return NotFound();
+            return Ok(submissions);
+        }
+
         [HttpPost]
         public async Task<IActionResult> CreateSubmission([FromForm] string submissionDtoJson, IFormFile file)
         {

@@ -1,31 +1,34 @@
 ﻿@using LMS.Shared.DTOs.EntityDto
-<div class="container mt-4">
-	<div class="card shadow-sm">
-		<div class="card-body">
-			<h5 class="card-title">@Activity.Name</h5>
+@inject NavigationManager nav
 
-			<p class="card-text">
-				@Activity.StartDate.ToString("MMM dd HH:mm") - @Activity.EndDate.ToString("HH:mm")
-			</p>
-		</div>
-		<a href="activities/@Activity.Id" class="stretched-link"></a>
-	</div>
+<li class="list-group-item d-flex justify-content-between align-items-center activity-item"
+    @onclick="@(() => nav.NavigateTo($"activities/{Activity.Id}"))"
+    style="cursor: pointer;">
+    <div class="flex-grow-1">
+        <strong class="text-primary">@Activity.Name</strong>
+        <br />
+        <small class="text-muted">
+            @Activity.StartDate.ToString("MMM dd HH:mm") – @Activity.EndDate.ToString("HH:mm")
+        </small>
+    </div>
 
-	<AuthorizeView Roles="Teacher">
-	<button @onclick="StartEditing">Edit</button>
+    <AuthorizeView Roles="Teacher">
+        <div class="ms-2">
+            <button class="btn btn-sm btn-outline-secondary"
+                    @onclick:stopPropagation="true"
+                    @onclick="StartEditing">
+                Edit
+            </button>
+        </div>
     </AuthorizeView>
-
-</div>
+</li>
 
 @code {
-	[Parameter]
-	public ModuleActivityDto Activity { get; set; }
+    [Parameter] public ModuleActivityDto Activity { get; set; }
+    [Parameter] public EventCallback<Guid> OnMessageSent { get; set; }
 
-	[Parameter]
-	public EventCallback<Guid> OnMessageSent { get; set; }
-
-	private async Task StartEditing()
-	{
-		await OnMessageSent.InvokeAsync(Activity.Id);
-	}
+    private async Task StartEditing()
+    {
+        await OnMessageSent.InvokeAsync(Activity.Id);
+    }
 }

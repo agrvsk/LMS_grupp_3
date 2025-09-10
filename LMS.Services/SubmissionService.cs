@@ -52,6 +52,12 @@ public class SubmissionService : ISubmissionService
         return (await uow.SubmissionRepository.GetSubmissionsByDocumentIdAsync(documentId)).OrderBy(c => c.SubmissionDate).ToList();
     }
 
+    public async Task<List<SubmissionDto>> GetSubmissionsByAssignmentIdAsync(Guid assignmentId)
+    {
+        var data = await uow.SubmissionRepository.GetSubmissionsByAssignmentIdAsync(assignmentId);
+        return mapper.Map<List<SubmissionDto>>(data).OrderBy(c => c.SubmissionDate).ToList();
+    }
+
     public async Task<SubmissionDto> CreateSubmissionAsync(SubmissionCreateDto submissionCreateDto, IFormFile file)
     {
         var assignment = await uow.AssignmentRepository.GetAssignmentByIdAsync(submissionCreateDto.AssignmentId);

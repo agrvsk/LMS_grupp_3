@@ -19,12 +19,14 @@ public class DocumentService : IDocumentService
     private readonly IUnitOfWork uow;
     private readonly IMapper mapper;
     private readonly IFileHandlerService fileHandlerService;
+    private readonly UserManager<ApplicationUser> userManager;
 
-    public DocumentService(IUnitOfWork uow, IMapper mapper, IFileHandlerService fileHandlerService)
+    public DocumentService(IUnitOfWork uow, IMapper mapper, IFileHandlerService fileHandlerService, UserManager<ApplicationUser> userManager)
     {
         this.uow = uow;
         this.mapper = mapper;
         this.fileHandlerService = fileHandlerService;
+        this.userManager = userManager;
     }
 
     public async Task<DocumentDto?> GetDocumentByIdAsync(Guid documentId)
@@ -38,12 +40,22 @@ public class DocumentService : IDocumentService
     {
         var documents = await uow.DocumentRepository.GetAllDocumentsAsync();
         var documentDtos = mapper.Map<List<DocumentDto>>(documents);
+        foreach (var doc in documentDtos)
+        {
+            var user = await userManager.FindByIdAsync(doc.UploaderId);
+            doc.UploaderName = await userManager.GetEmailAsync(user);
+        }
         return documentDtos.OrderBy(c => c.UploadDate).ToList();
     }
     public async Task<List<DocumentDto>> GetDocumentsByParentAsync(Guid parentId, string parentType)
     {
         var documents = await uow.DocumentRepository.GetDocumentsByParentAsync(parentId, parentType);
         var documentDtos = mapper.Map<List<DocumentDto>>(documents);
+        foreach (var doc in documentDtos)
+        {
+            var userEmail = (await userManager.FindByIdAsync(doc.UploaderId))?.Email;
+            doc.UploaderName = userEmail ?? "Unknown";
+        }
         return documentDtos;
     }
     public async Task<DocumentDto> CreateDocumentAsync(DocumentCreateDto documentDto, Stream fileStream)

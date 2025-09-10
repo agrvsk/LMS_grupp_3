@@ -33,6 +33,7 @@ public class MapperProfile : Profile
         CreateMap<CourseCreateDto, CourseDto>().ReverseMap();
 
         CreateMap<DocumentDto, Document>().ReverseMap();
+        //CreateMap<Document, DocumentDto>().ForMember(dest => dest.UploaderName, opt => opt.MapFrom(src => src.Uploader.Email));
         CreateMap<DocumentCreateDto, Document>().ReverseMap();
 
         CreateMap<SubmissionCreateDto, Submission>()
