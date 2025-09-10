@@ -17,9 +17,6 @@
             <DataAnnotationsValidator />
             <ValidationSummary />
             <div>
-                <p>@ActivityUpdDto.Id</p>
-            </div>
-            <div>
                 <label for="name" class="form-label">Name</label>
                 <InputText class="form-control" @bind-Value="@ActivityUpdDto.Name" id="name" placeholder="Name" />
                 <ValidationMessage For="@(() => ActivityUpdDto.Name)" />
@@ -30,14 +27,17 @@
                 <ValidationMessage For="@(() => ActivityUpdDto.Description)" />
             </div>
             <div>
-                <label for="start" class="form-label">StartDate</label>
-                <InputDate class="form-control" @bind-Value="@ActivityUpdDto.StartDate" id="start" placeholder="StartDate" />
-                <ValidationMessage For="@(() => ActivityUpdDto.StartDate)" />
+                <label for="activityDate" class="form-label">Activity Date</label>
+                <InputDate class="form-control" @bind-Value="ActivityDate" id="activityDate" />
             </div>
-            <div>
-                <label for="end" class="form-label">EndDate</label>
-                <InputDate class="form-control" @bind-Value="@ActivityUpdDto.EndDate" id="end" placeholder="EndDate" />
-                <ValidationMessage For="@(() => ActivityUpdDto.EndDate)" />
+            <div class="mb-3">
+                <label>Start Time</label>
+                <InputText type="time" @bind-Value="StartTimeString" class="form-control" placeholder="HH:mm" />
+            </div>
+
+            <div class="mb-3">
+                <label>End Time</label>
+                <InputText type="time" @bind-Value="EndTimeString" class="form-control" placeholder="HH:mm" />
             </div>
             <div>
                 <label for="category" class="form-label">Category</label>
@@ -50,19 +50,6 @@
                 </InputSelect>
                 <ValidationMessage For="@(() => ActivityUpdDto.ActivityTypeId)" />
             </div>
-            @* 
-		<div>
-			<label for="typeid" class="form-label">ActivityTypeId</label>
-			<InputNumber class="form-control" @bind-Value="@ActivityUpdDto.ActivityTypeId" id="typeid" placeholder="ActivityTypeId" />
-			<ValidationMessage For="@(() => ActivityUpdDto.ActivityTypeId)" />
-		</div>
-
-		<div>
-			<label for="type" class="form-label">Type</label>
-			<InputText class="form-control" @bind-Value="@ActivityUpdDto.Type" id="type" placeholder="Type" />
-			<ValidationMessage For="@(() => ActivityUpdDto.Type)" />
-		</div>
- *@
             
                 <button type="cancel" class="btn btn-primary" @onclick="StopEditing">Cancel</button>
                 <button type="submit" class="btn btn-primary">Save</button>
@@ -91,11 +78,49 @@
     public List<ActivityTypeDto> Types { get; set; } = new List<ActivityTypeDto>();
     private string? errorMessage;
 
+    private DateTime ActivityDate
+    {
+        get => _activityDate;
+        set
+        {
+            _activityDate = value;
+            // preserve times
+            var startTime = ActivityUpdDto.StartDate.TimeOfDay;
+            var endTime = ActivityUpdDto.EndDate.TimeOfDay;
+            ActivityUpdDto.StartDate = value.Date + startTime;
+            ActivityUpdDto.EndDate = value.Date + endTime;
+        }
+    }
+    private DateTime _activityDate;
+
+    public string StartTimeString
+    {
+        get => ActivityUpdDto.StartDate.ToString("HH:mm");
+        set
+        {
+            if (TimeSpan.TryParse(value, out var ts))
+            {
+                ActivityUpdDto.StartDate = ActivityDate.Date + ts;
+            }
+        }
+    }
+
+    public string EndTimeString
+    {
+        get => ActivityUpdDto.EndDate.ToString("HH:mm");
+        set
+        {
+            if (TimeSpan.TryParse(value, out var ts))
+            {
+                ActivityUpdDto.EndDate = ActivityDate.Date + ts;
+            }
+        }
+    }
+
     protected override async Task OnInitializedAsync()
     {
 
-
-        //await base.OnInitializedAsync();
+        ActivityDate = Activity.StartDate.Date;
         ActivityUpdDto = new ModuleActivityUpdateDto
         {
             Id = Activity.Id,

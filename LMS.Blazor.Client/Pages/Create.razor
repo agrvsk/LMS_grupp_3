@@ -8,12 +8,7 @@
 
 <h3 style="text-align: center">New course:</h3>
 <div class="container mt-4">
-	@if (!string.IsNullOrEmpty(errorMessage))
-	{
-		<div class="alert alert-danger" role="alert">
-			<p>@errorMessage</p>
-		</div>
-	}
+	
 	<div>
 		<div class="card-body lead">
 			<EditForm Model="@CourseForm" OnValidSubmit="@(() => HandleValidSubmit())">
@@ -126,6 +121,12 @@
 			</EditForm>
 		</div>
 	</div>
+	@if (!string.IsNullOrEmpty(errorMessage))
+	{
+		<div class="alert alert-danger" role="alert">
+			<p>@errorMessage</p>
+		</div>
+	}
 </div>
 
 

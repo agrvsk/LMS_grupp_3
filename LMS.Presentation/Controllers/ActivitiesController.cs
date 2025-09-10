@@ -50,7 +50,7 @@ namespace LMS.Presentation.Controllers
                 return BadRequest("Activity data is null");
             if (!await _serviceManager.DateValidationService.ValidateModuleActivityUppdateDatesAsync(activityDto.StartDate, activityDto.EndDate, activityDto.ModuleId))
             {
-                ModelState.AddModelError("DateValidation", "End date must be greater than start date and within module dates.");
+                ModelState.AddModelError("DateValidation", "Aktiviteter får inte överlappa och starttid måste vara innan sluttid.");
                 return BadRequest(ModelState);
             }
                 var createdActivity = await _serviceManager.ModuleActivityService.CreateActivityAsync(activityDto);
@@ -66,6 +66,12 @@ namespace LMS.Presentation.Controllers
             var activityDto = JsonConvert.DeserializeObject<ModuleActivityCreateDto>(activityDtoJson);
             if (activityDto == null)
                 return BadRequest("Invalid activity data.");
+
+            if (!await _serviceManager.DateValidationService.ValidateModuleActivityUppdateDatesAsync(activityDto.StartDate, activityDto.EndDate, activityDto.ModuleId))
+            {
+                ModelState.AddModelError("DateValidation", "Aktiviteter får inte överlappa och starttid måste vara innan sluttid.");
+                return BadRequest(ModelState);
+            }
 
             // Read all files from the form dynamically
             var files = Request.Form.Files.ToList(); // <-- grab them all

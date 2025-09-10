@@ -44,13 +44,18 @@ else
 					</div>
 
 					<div class="mb-3">
-						<label>Start Date</label>
-						<InputDate @bind-Value="ActivityModel.StartDate" class="form-control" />
+						<label>Activity Date</label>
+						<InputDate @bind-Value="ActivityDate" class="form-control" />
 					</div>
 
 					<div class="mb-3">
-						<label>End Date</label>
-						<InputDate @bind-Value="ActivityModel.EndDate" class="form-control" />
+						<label>Start Time</label>
+						<InputText type="time" @bind-Value="StartTimeString" class="form-control" placeholder="HH:mm" />
+					</div>
+
+					<div class="mb-3">
+						<label>End Time</label>
+						<InputText type ="time" @bind-Value="EndTimeString" class="form-control" placeholder="HH:mm" />
 					</div>
 
 					<div class="mb-3">
@@ -89,6 +94,46 @@ else
 	private List<DocumentInfo> AllDocsToUpload = new();
 	private List<ActivityTypeDto> Types = new();
 	private string? errorMessage;
+
+	private DateTime _activityDate = DateTime.Today;
+	private DateTime ActivityDate
+	{
+		get => _activityDate;
+		set
+		{
+			_activityDate = value;
+			// Preserve times when date changes
+			var startTime = ActivityModel.StartDate.TimeOfDay;
+			var endTime = ActivityModel.EndDate.TimeOfDay;
+
+			ActivityModel.StartDate = value.Date + startTime;
+			ActivityModel.EndDate = value.Date + endTime;
+		}
+	}
+
+	public string StartTimeString
+	{
+		get => ActivityModel.StartDate.ToString("HH:mm");
+		set
+		{
+			if (TimeSpan.TryParse(value, out var ts))
+			{
+				ActivityModel.StartDate = ActivityDate.Date + ts;
+			}
+		}
+	}
+
+	public string EndTimeString
+	{
+		get => ActivityModel.EndDate.ToString("HH:mm");
+		set
+		{
+			if (TimeSpan.TryParse(value, out var ts))
+			{
+				ActivityModel.EndDate = ActivityDate.Date + ts;
+			}
+		}
+	}
 
 	protected override async Task OnInitializedAsync()
 	{
@@ -171,151 +216,3 @@ else
 	}
 	private void Toggle() => isAdding = !isAdding;
 }
-
-@* @code {
-	[Parameter]
-	public Guid ModuleId { get; set; }
-
-	public ModuleActivityCreateDto Activity { get; set; } = new ModuleActivityCreateDto();
-	public List<DocumentInfo> AllDocsToUpload { get; set; } = new();
-	public List<ActivityTypeDto> Types { get; set; }
-	private bool isAdding = false;
-	private string? errorMessage;
-
-	[Inject]
-	private IApiService myApi { get; set; } = default!;
-
-	public string StartTimeString
-	{
-		get => Activity.StartDate.ToString("HH:mm");
-		set
-		{
-			if (TimeSpan.TryParse(value, out var ts))
-			{
-				Activity.StartDate = Activity.StartDate.Date + ts;
-			}
-		}
-	}
-	public string EndTimeString
-	{
-		get => Activity.EndDate.ToString("HH:mm");
-		set
-		{
-			if (TimeSpan.TryParse(value, out var ts))
-			{
-				Activity.EndDate = Activity.EndDate.Date + ts;
-			}
-		}
-	}
-
-	private List<AssignmentFormModel> Assignments { get; set; } = new();
-	private List<int> AssignmentComponents { get; set; } = new();
-	[CascadingParameter] private Task<AuthenticationState> AuthStateTask { get; set; }
-
-	private void AddAssignmentComponent()
-	{
-		AssignmentComponents.Add(AssignmentComponents.Count);
-	}
-
-	private void HandleAssignmentAdded(int index, AssignmentCreateDto assignment)
-	{
-		if (Assignments.Count > index)
-			Assignments[index] = assignment;
-		else
-			Assignments.Add(assignment);
-
-		// Collect documents from the assignment
-		foreach (var doc in assignment.AttachedDocuments)
-		{
-			if (!AllDocsToUpload.Any(d => d.TempId == doc.TempId))
-			{
-				AllDocsToUpload.Add(doc);
-			}
-		}
-	}
-
-	private async Task HandleValidSubmit()
-	{
-		var authState = await AuthStateTask;
-		var user = authState.User;
-		string? UploaderId = null;
-		if (user.Identity?.IsAuthenticated == true)
-		{
-			UploaderId = user.FindFirst(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
-		}
-		
-		using var content = new MultipartFormDataContent();
-
-		// 1. Prepare the DTO with TempIds
-		var activityDto = new ModuleActivityCreateWithAssignmentsDto
-		{
-			Name = Activity.Name,
-			Description = Activity.Description,
-			StartDate = Activity.StartDate,
-			EndDate = Activity.EndDate,
-			ModuleId = ModuleId,
-			ActivityTypeId = Activity.ActivityTypeId,
-			Assignments = new List<AssignmentCreateDto>
-	{
-		new AssignmentCreateDto
-		{
-			Name = "Homework 1",
-			Description = "Solve problems",
-			DueDate = DateTime.UtcNow.AddDays(5),
-			AttachedDocuments = new List<DocumentMetadataDto>
-			{
-				new DocumentMetadataDto
-				{
-					TempId = "doc1",
-					Name = "Instructions.pdf",
-					Description = "Homework instructions",
-					UploaderId = UploaderId
-				}
-			}
-		}
-	}
-		};
-
-		// 2. Add the JSON to the multipart form
-		var json = JsonSerializer.Serialize(activityDto);
-		content.Add(new StringContent(json, Encoding.UTF8, "application/json"), "activityDtoJson");
-
-		// 3. Attach the actual file(s)
-		foreach (var doc in AllDocsToUpload) // e.g., from InputFile
-		{
-			var fileContent = new StreamContent(doc.File.OpenReadStream(maxAllowedSize: 10_000_000));
-			fileContent.Headers.ContentType = new MediaTypeHeaderValue(doc.File.ContentType);
-			content.Add(fileContent, doc.TempId, doc.File.Name); // TempId ties it back
-		}
-
-		// 4. Send to API
-		var createdActivity = await myApi.CallApiPostMultipartAsync<ModuleActivityDto>(
-			"activities/with-documents",
-			content
-		);
-		
-		
-		
-		// Activity.ModuleId = ModuleId;
-		// var newCourseDto = await myApi.CallApiPostAsync<ModuleActivityCreateDto, ModuleActivityDto>("activities", Activity);
-		Toggle();
-	}
-
-	}
-
-	protected override async Task OnInitializedAsync()
-	{
-		try
-		{
-			Types = (await myApi.CallApiGetAsync<List<ActivityTypeDto>>("activity-types"));
-		}
-		catch (HttpRequestException apiEx)
-		{
-			errorMessage = $"API Error: {apiEx.StatusCode} - {apiEx.Message}";
-			Console.WriteLine("there was an API error: " + apiEx.Message);
-		}
-
-	}
-
-	private void Toggle() => isAdding = !isAdding;
-} *@

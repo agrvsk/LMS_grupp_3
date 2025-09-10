@@ -136,24 +136,39 @@ public class ClientApiService(IHttpClientFactory httpClientFactory, NavigationMa
 
         //Handle customized errors
         if (response.StatusCode == HttpStatusCode.BadRequest)
+{
+    var errorJson = await response.Content.ReadAsStringAsync();
+    if (!string.IsNullOrEmpty(errorJson))
+    {
+        try
         {
-            var errorJson = await response.Content.ReadAsStringAsync();
-            if (!string.IsNullOrEmpty(errorJson))
+            using var doc = JsonDocument.Parse(errorJson);
+            if (doc.RootElement.TryGetProperty("errors", out var errorsProp))
             {
-                //ModelState
-                var errors = JsonSerializer.Deserialize<Dictionary<string, string[]>>(errorJson,
-                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                var errors = JsonSerializer.Deserialize<Dictionary<string, string[]>>(
+                    errorsProp.GetRawText(),
+                    new JsonSerializerOptions { PropertyNameCaseInsensitive = true }
+                );
 
-                if (errors != null)
+                if (errors != null && errors.Any())
                 {
-                    var rrr = errors.FirstOrDefault();
-                    Console.WriteLine($"{rrr.Key}: {string.Join(", ", rrr.Value)}");
-                    throw new ValidationException(string.Join(", ", rrr.Value));
+                    var first = errors.First();
+                    Console.WriteLine($"{first.Key}: {string.Join(", ", first.Value)}");
+                    throw new ValidationException(string.Join(", ", first.Value));
                 }
-
-
+            }
+            else
+            {
+                // fallback: throw the entire body
+                throw new ValidationException($"API validation error: {errorJson}");
             }
         }
+        catch (JsonException)
+        {
+            throw new ValidationException($"API returned bad request: {errorJson}");
+        }
+    }
+}
 
 
         response.EnsureSuccessStatusCode();

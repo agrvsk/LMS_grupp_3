@@ -21,5 +21,6 @@ public record ModuleActivityUpdateDto
     
 //    public ActivityType Type { get; set; }
     public Guid ModuleId { get; set; }
+    public List<AssignmentDto>? Assignments { get; set; }
 
 }
