@@ -136,7 +136,8 @@ else
 				TempId = d.TempId,
 				Name = d.FileName,
 				Description = d.Description,
-				UploaderId = uploaderId
+				UploaderId = uploaderId,
+				FileType = d.FileType
 			}).ToList()
 		}).ToList();
 

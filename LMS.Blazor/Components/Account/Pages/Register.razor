@@ -107,13 +107,25 @@
 	public async Task RegisterUser(EditContext editContext)
 	{
 		var user = CreateUser();
-		if (Input.selectedCourseId == null) throw new InvalidOperationException("CourseId must be selected for students");
-		else user.CourseId = Input.selectedCourseId;
+				
+		if (Input.role == "Student")
+		{
+			if (Input.selectedCourseId == null)
+			{
+				identityErrors = new List<IdentityError>
+			{
+				new IdentityError { Description = "CourseId must be selected for students" }
+			};
+				return;
+			}
 
+			user.CourseId = Input.selectedCourseId;
+		}
 
 		await UserStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
 		var emailStore = GetEmailStore();
 		await emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
+
 		var result = await UserManager.CreateAsync(user, Input.Password);
 		if (!result.Succeeded)
 		{
@@ -122,11 +134,15 @@
 		}
 
 		var roleResult = await UserManager.AddToRoleAsync(user, Input.role);
-		if (!roleResult.Succeeded) throw new InvalidOperationException("Could not add user to role: " + roleResult.Errors.ToString());
-
+		if (!roleResult.Succeeded)
+		{
+			identityErrors = roleResult.Errors;
+			return;
+		}
 
 		Logger.LogInformation("User created a new account with password.");
-
+		
+		
 		var userId = await UserManager.GetUserIdAsync(user);
 		var code = await UserManager.GenerateEmailConfirmationTokenAsync(user);
 		code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
@@ -143,9 +159,50 @@
 				new() { ["email"] = Input.Email, ["returnUrl"] = ReturnUrl });
 		}
 
-		//await SignInManager.SignInAsync(user, isPersistent: false);
+        await SignInManager.SignInAsync(user, isPersistent: false);
+
 		RedirectManager.RedirectTo(ReturnUrl);
 	}
+		// var user = CreateUser();
+		// if (Input.selectedCourseId == null) throw new InvalidOperationException("CourseId must be selected for students");
+		// else user.CourseId = Input.selectedCourseId;
+
+
+		// await UserStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
+		// var emailStore = GetEmailStore();
+		// await emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
+		// var result = await UserManager.CreateAsync(user, Input.Password);
+		// if (!result.Succeeded)
+		// {
+		// 	identityErrors = result.Errors;
+		// 	return;
+		// }
+
+		// var roleResult = await UserManager.AddToRoleAsync(user, Input.role);
+		// if (!roleResult.Succeeded) throw new InvalidOperationException("Could not add user to role: " + roleResult.Errors.ToString());
+
+
+		// Logger.LogInformation("User created a new account with password.");
+
+		// var userId = await UserManager.GetUserIdAsync(user);
+		// var code = await UserManager.GenerateEmailConfirmationTokenAsync(user);
+		// code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
+		// var callbackUrl = NavigationManager.GetUriWithQueryParameters(
+		// 	NavigationManager.ToAbsoluteUri("Account/ConfirmEmail").AbsoluteUri,
+		// 	new Dictionary<string, object?> { ["userId"] = userId, ["code"] = code, ["returnUrl"] = ReturnUrl });
+
+		// await EmailSender.SendConfirmationLinkAsync(user, Input.Email, HtmlEncoder.Default.Encode(callbackUrl));
+
+		// if (UserManager.Options.SignIn.RequireConfirmedAccount)
+		// {
+		// 	RedirectManager.RedirectTo(
+		// 		"Account/RegisterConfirmation",
+		// 		new() { ["email"] = Input.Email, ["returnUrl"] = ReturnUrl });
+		// }
+
+		// //await SignInManager.SignInAsync(user, isPersistent: false);
+		// RedirectManager.RedirectTo(ReturnUrl);
+	// }
 
 	private ApplicationUser CreateUser()
 	{

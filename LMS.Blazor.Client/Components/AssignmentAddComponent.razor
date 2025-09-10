@@ -31,17 +31,21 @@
     {
         foreach (var file in e.GetMultipleFiles())
         {
+            var ext = Path.GetExtension(file.Name).ToLowerInvariant();
+            
             using var stream = file.OpenReadStream(maxAllowedSize: 10_000_000);
             using var ms = new MemoryStream();
             await stream.CopyToAsync(ms);
+			var name = Path.GetFileNameWithoutExtension(file.Name);
 
             Assignment.Documents.Add(new DocumentInfo
             {
                 TempId = Guid.NewGuid().ToString(),
-                FileName = file.Name,
+                FileName = name,
                 ContentType = file.ContentType,
-                Content = ms.ToArray(),   // buffered bytes, safe after re-render
-                Description = string.Empty // optional, your model can handle it
+                Content = ms.ToArray(),   
+                Description = string.Empty,
+                FileType = ext
             });
         }
 

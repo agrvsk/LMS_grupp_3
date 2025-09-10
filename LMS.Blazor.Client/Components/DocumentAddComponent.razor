@@ -75,7 +75,7 @@
         }
     }
 
-    private readonly string[] permittedExtensions = { ".pdf", ".docx", ".xlsx", ".png", ".jpg", ".json" };
+    private readonly string[] permittedExtensions = { ".pdf", ".docx", ".xlsx", ".png", ".jpg", ".json", ".pptx" };
     private const long maxFileSize = 10_000_000; // 10 MB
     private string? fileError;
     private async void OnFileSelected(InputFileChangeEventArgs e)

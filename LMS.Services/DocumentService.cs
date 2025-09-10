@@ -142,4 +142,12 @@ public class DocumentService : IDocumentService
             return false;
         }
     }
+    public async Task<(Stream Stream, string ContentType, string FileName)?> DownloadDocumentAsync(Guid documentId)
+    {
+        var document = await uow.DocumentRepository.GetDocumentByIdAsync(documentId);
+        if (document == null)
+            return null;
+
+        return await fileHandlerService.GetFileByPathAsync(document.FilePath);
+    }
 }
