@@ -64,3 +64,58 @@ h1:focus {
     height: 750px;
     overflow: auto;
 }
+.clickable-card {
+    cursor: pointer;
+    border: 1px solid #dee2e6; /* subtle gray border (Bootstrap default) */
+    border-radius: 0.5rem;
+    transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+    .clickable-card:hover {
+        box-shadow: 0 0.75rem 1.5rem rgba(0, 0, 0, 0.1);
+        border-color: #0d6efd; /* Bootstrap primary color on hover */
+    }
+
+.clickable-activity {
+    cursor: pointer;
+    transition: color 0.15s ease;
+}
+
+    .clickable-activity:hover {
+        color: #0d6efd; /* Bootstrap primary */
+        text-decoration: underline;
+    }
+/* You can put this in site.css or scoped CSS */
+.activity-item {
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+    .activity-item:hover {
+        background-color: #f8f9fa; /* light gray hover */
+        border-color: #0d6efd; /* Bootstrap primary border on hover */
+    }
+
+/* Target nav links inside your custom nav */
+.nav-scrollable .nav-link {
+    color: white !important; /* force white text */
+    text-decoration: none;
+    padding: 0.25rem 0.5rem;
+    display: flex;
+    align-items: center;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+    /* Hover effect */
+    .nav-scrollable .nav-link:hover {
+        background-color: rgba(255, 255, 255, 0.15);
+        color: #ffd700 !important; /* hover text color */
+    }
+
+    /* Active nav link */
+    .nav-scrollable .nav-link.active {
+        color: white !important;
+        font-weight: bold;
+        border-bottom: 2px solid #ffd700;
+        background-color: rgba(255, 255, 255, 0.1);
+    }
