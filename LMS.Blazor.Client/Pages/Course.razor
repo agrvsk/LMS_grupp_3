@@ -74,8 +74,9 @@ else
                             @foreach (var module in modules)
                             {
                                 <li class="list-group-item d-flex justify-content-between align-items-center">
-                                    <div>
-                                        <strong style="cursor:pointer; color:blue;" @onclick="() => NavigateToModule(module.Id)">
+                                    <div @onclick="() => NavigateToModule(module.Id)"
+                                         style="cursor: pointer; color: inherit;">
+                                        <strong style="color: darkslateblue;">
                                             @module.Name
                                         </strong>
                                         <br />
@@ -98,7 +99,6 @@ else
                                     }
                                     else
                                     {
-                                        <span>@module.Name</span>
                                         <AuthorizeView Roles="Teacher">
                                             <button class="btn btn-sm btn-outline-secondary" @onclick="() => StartEditingModule(module.Id)">Redigera</button>
 
