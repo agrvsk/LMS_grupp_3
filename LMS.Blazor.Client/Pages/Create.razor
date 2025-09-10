@@ -115,18 +115,17 @@
 						<button type="button" class="btn btn-danger" @onclick="@(() => RemoveModule(module))">Remove this module</button>
 					</div>
 				}
-
+				@if (!string.IsNullOrEmpty(errorMessage))
+				{
+					<div class="alert alert-danger" role="alert">
+						<p>@errorMessage</p>
+					</div>
+				}
 				<button type="button" class="btn btn-secondary mb-3" @onclick="AddModule">+ Add Module</button>
 				<button type="submit" class="btn btn-primary">Add</button> <button type="button" class="btn btn-primary">Cancel</button>
 			</EditForm>
 		</div>
 	</div>
-	@if (!string.IsNullOrEmpty(errorMessage))
-	{
-		<div class="alert alert-danger" role="alert">
-			<p>@errorMessage</p>
-		</div>
-	}
 </div>
 
 
