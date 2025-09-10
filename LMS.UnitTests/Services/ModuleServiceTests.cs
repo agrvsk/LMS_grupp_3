@@ -1,4 +1,5 @@
 ﻿using Domain.Models.Entities;
+using Domain.Models.Exceptions;
 using LMS.Services;
 using LMS.Shared.DTOs.EntityDto;
 using LMS.UnitTests.Setups;
@@ -69,13 +70,15 @@ namespace LMS.UnitTests.Services
         public async Task GetModuleByIdAsync_ValidId_ReturnsModule()
         {
             var moduleId = Guid.NewGuid();
-
+            var module = new Module { Id = moduleId, Name = "ModuleTester" };
             var moduledto = new ModuleDto { Id = moduleId, Name = "ModuleTester" };
+
+            MockUow.Setup(u => u.ModuleRepository.GetModuleByIdAsync(moduleId))
+                            .ReturnsAsync(module);
 
             MockMapper.Setup(m => m.Map<ModuleDto>(It.IsAny<Module>()))
                             .Returns(moduledto);
-            //MockUow.Setup(u => u.ModuleRepository.GetModuleByIdAsync(moduleId))
-            //                .ReturnsAsync(module);
+                        
 
             var result = await _service.GetModuleByIdAsync(moduleId);
 
@@ -86,16 +89,14 @@ namespace LMS.UnitTests.Services
 
         [Fact]
         [Trait("ModuleService", "Get Module By Id")]
-        public async Task GetModuleByIdAsync_InvalidId_ReturnsNull()
+        public async Task GetModuleByIdAsync_InvalidId_ThrowsException()
         {
             var id = Guid.NewGuid();
 
             MockUow.Setup(u => u.ModuleRepository.GetModuleByIdAsync(id))
                    .ReturnsAsync((Module?)null);
 
-            var result = await _service.GetModuleByIdAsync(id);
-
-            Assert.Null(result);
+            await Assert.ThrowsAsync<ModuleNotFoundException>(() => _service.GetModuleByIdAsync(id));
         }
 
         [Fact]

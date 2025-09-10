@@ -1,13 +1,14 @@
-﻿using LMS.UnitTests.Setups;
-using LMS.Shared.DTOs.EntityDto;
+﻿using Domain.Models.Entities;
+using Domain.Models.Exceptions;
 using LMS.Services;
+using LMS.Shared.DTOs.EntityDto;
+using LMS.UnitTests.Setups;
+using Moq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Domain.Models.Entities;
-using Moq;
 
 namespace LMS.UnitTests.Services
 {
@@ -17,8 +18,8 @@ namespace LMS.UnitTests.Services
         private readonly CourseService _service;
 
         public CourseServiceTests()
-        {            
-            _service = new CourseService(MockUow.Object, MockMapper.Object);            
+        {
+            _service = new CourseService(MockUow.Object, MockMapper.Object);
         }
 
         #region [GetCourseByIdAsync]
@@ -47,7 +48,7 @@ namespace LMS.UnitTests.Services
 
         [Fact]
         [Trait("CourseService", "Get Course")]
-        public async Task GetCourseByIdAsync_CourseDoesNotExist_ReturnsNull()
+        public async Task GetCourseByIdAsync_CourseDoesNotExist_ThrowsException()
         {
             var courseId = Guid.NewGuid();
 
@@ -55,13 +56,7 @@ namespace LMS.UnitTests.Services
                 .Setup(r => r.GetCourseByIdAsync(courseId))
                 .ReturnsAsync((Course?)null);
 
-            MockMapper
-                .Setup(m => m.Map<CourseDto>(It.IsAny<Course>()))
-                .Returns((CourseDto?)null);
-
-            var result = await _service.GetCourseByIdAsync(courseId);
-
-            Assert.Null(result);
+            await Assert.ThrowsAsync<CourseNotFoundException>(() => _service.GetCourseByIdAsync(courseId));           
         }
         #endregion
 
@@ -123,17 +118,22 @@ namespace LMS.UnitTests.Services
         {
             var courseDto = new CourseCreateDto { Name = "TestCourse", Description = "Lorem Ipsum" };
             var course = new Course { Id = Guid.NewGuid(), Name = "TestCourse", Description = "Lorem Ipsum" };
-
+            var courseDtoResult = new CourseDto { Id = course.Id, Name = course.Name, Description = course.Description };
+                      
             MockMapper
                 .Setup(m => m.Map<Course>(courseDto))
                 .Returns(course);
+                        
+            MockMapper
+                .Setup(m => m.Map<CourseDto>(course))
+                .Returns(courseDtoResult);
 
             var result = await _service.CreateCourseAsync(courseDto);
 
             Assert.NotNull(result);
             Assert.Equal("TestCourse", result.Name);
             MockCourseRepo.Verify(r => r.Create(It.IsAny<Course>()), Times.Once);
-            MockUow.Verify(u => u.CompleteAsync(), Times.Once);
+            MockUow.Verify(u => u.CompleteAsync(), Times.Once);           
         }
         #endregion
 
@@ -152,20 +152,15 @@ namespace LMS.UnitTests.Services
 
             MockMapper
                 .Setup(m => m.Map<CourseDto>(mappedCourse))
-                .Returns(mappedDto);
-
-            //var service = new CourseService(MockUow.Object, MockMapper.Object);
+                .Returns(mappedDto);                       
 
             var result = await _service.UpdateCourseAsync(dto);
 
             Assert.NotNull(result);
             Assert.Equal(dto.Id, result.Id);
             Assert.Equal(dto.Name, result.Name);
-
-            // Verify that the repository methods were called once
-            MockCourseRepo.Verify(r => r.Update(mappedCourse), Times.Once);
-
-            // Verify that the unit of work's CompleteAsync was called once
+            
+            MockCourseRepo.Verify(r => r.Update(mappedCourse), Times.Once);                       
             MockUow.Verify(u => u.CompleteAsync(), Times.Once);
         }
         #endregion
@@ -186,7 +181,7 @@ namespace LMS.UnitTests.Services
             MockCourseRepo.Verify(r => r.Delete(It.IsAny<Course>()), Times.Never);
             MockUow.Verify(u => u.CompleteAsync(), Times.Never);
 
-            Assert.False(result);            
+            Assert.False(result);
         }
 
         [Fact]
@@ -195,10 +190,22 @@ namespace LMS.UnitTests.Services
         {
             var courseId = Guid.NewGuid();
             var course = new Course { Id = courseId };
-
+                        
             MockCourseRepo
                 .Setup(r => r.GetCourseByIdAsync(courseId))
                 .ReturnsAsync(course);
+                        
+            MockDocumentRepo
+                .Setup(r => r.GetDocumentsByParentAsync(courseId, "course"))
+                .ReturnsAsync(new List<Document>());
+
+            MockApplicationUserRepo
+                .Setup(r => r.GetUsersByCourseIdAsync(course.Id))
+                .ReturnsAsync(new List<ApplicationUser>());
+
+            MockModuleRepo
+                .Setup(r => r.GetModulesByCourseIdAsync(courseId))
+                .ReturnsAsync(new List<Module>());
 
             var result = await _service.DeleteCourseAsync(courseId);
 

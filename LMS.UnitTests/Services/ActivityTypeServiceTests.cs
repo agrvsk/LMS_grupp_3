@@ -81,5 +81,18 @@ namespace LMS.UnitTests.Services
             MockMapper.Verify(m => m.Map<List<ActivityTypeDto>>(emptyList), Times.Once);
         }
 
+        [Fact]
+        [Trait("ActivityTypeService", "Get All Activity Types")]
+        public async Task GetAllActivityTypesAsync_RepositoryThrows_ThrowsException()
+        {
+            MockActivityTypeRepo
+                .Setup(r => r.GetAllActivityTypesAsync())
+                .ThrowsAsync(new Exception("Database error"));
+
+            await Assert.ThrowsAsync<Exception>(() => _service.GetAllActivityTypesAsync());
+
+            MockActivityTypeRepo.Verify(r => r.GetAllActivityTypesAsync(), Times.Once);
+            MockMapper.Verify(m => m.Map<List<ActivityTypeDto>>(It.IsAny<List<ActivityType>>()), Times.Never);
+        }        
     }
 }
