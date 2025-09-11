@@ -19,7 +19,7 @@ namespace LMS.UnitTests.Services
 
         public DocumentServiceTests()
         {
-            _service = new DocumentService(MockUow.Object, MockMapper.Object, MockFileHandlerService.Object);
+            _service = new DocumentService(MockUow.Object, MockMapper.Object, MockFileHandlerService.Object, MockUserManager.Object);
         }
 
         #region [GetDocumentByIdAsync]
