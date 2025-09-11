@@ -33,8 +33,8 @@
 				<tr>
 					<td @onclick="() => NavigateToCourse(course.Id)" style="cursor:pointer">@course.Name</td>
 					<td>@course.Description</td>
-					<td>@course.StartDate</td>
-					<td>@course.EndDate</td>
+					<td>@course.StartDate.ToShortDateString()</td>
+					<td>@course.EndDate.ToShortDateString()</td>
 					<td>
 						<ConfirmDelete Title="Delete Course"
 									   Message="Are you sure?"

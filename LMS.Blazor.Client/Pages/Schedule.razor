@@ -33,14 +33,13 @@
 
 
 }
-<p>test</p>
 
 @code
 {
 	[Inject]
 	private IApiService myApi { get; set; } = default!;
 
-	
+
 	private List<AppointmentData> Events = new();
 
 	private List<CourseDto>? Courses { get; set; }
@@ -68,6 +67,7 @@
 		}
 		MySchedule = await myApi.CallApiGetAsync<ScheduleDto>($"schedules/{CourseId}");
 		if (MySchedule == null) return;
+		Console.WriteLine($"{MySchedule.ModuleActivities.Count}");
 
 		FlattenScheduleDto(MySchedule);
 	}
