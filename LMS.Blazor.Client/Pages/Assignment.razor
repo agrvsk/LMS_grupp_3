@@ -4,6 +4,10 @@
 @inject NavigationManager Navigation
 @inject AuthenticationStateProvider Auth
 <h3>Assignment</h3>
+@if(string.IsNullOrEmpty(errorMessage))
+{
+	<p>@errorMessage</p>
+}
 @if (AssignmentDto == null)
 {
 	<p><em>Loading...</em></p>
@@ -34,6 +38,7 @@ else
 
 	private AssignmentDto? AssignmentDto;
 	private List<DocumentDto> SubmittedAssignments = new List<DocumentDto>();
+	private string? errorMessage;
 
 	private bool isTeacher;
 
@@ -48,16 +53,32 @@ else
 		}
 
 		isTeacher = user.IsInRole("Teacher");
-		
-		
+
+
 		await LoadAssignment();
 	}
 	private async Task LoadAssignment()
 	{
-		AssignmentDto = await ApiService.CallApiGetAsync<AssignmentDto>($"assignments/{Id}");
-		if(isTeacher)
+		try
 		{
-			SubmittedAssignments = await ApiService.CallApiGetAsync<List<DocumentDto>>($"submissions/assignment/{Id}/");
+			AssignmentDto = await ApiService.CallApiGetAsync<AssignmentDto>($"assignments/{Id}");
+			if (isTeacher)
+			{
+				SubmittedAssignments = await ApiService.CallApiGetAsync<List<DocumentDto>>($"submissions/assignment/{Id}");
+				if(SubmittedAssignments == null)
+				{
+					SubmittedAssignments = new List<DocumentDto>();
+				}
+				Console.WriteLine(SubmittedAssignments?.Count);
+				foreach (var doc in SubmittedAssignments)
+				{
+					Console.WriteLine($"Document: {doc.Name}, Uploaded by: {doc.UploaderName}");
+				}
+			}
+		}
+		catch (Exception ex)
+		{
+			errorMessage = ex.Message;
 		}
 
 	}

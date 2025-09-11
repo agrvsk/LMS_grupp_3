@@ -186,10 +186,18 @@
 
 	private async Task LoadAssignments(string CourseId)
 	{
-		if (!isStudent) return;
 		try
 		{
-			Assignments = await myApi.CallApiGetAsync<IEnumerable<AssignmentDto>>($"courses/{CourseId}/assignments");
+			if (isTeacher)
+			{
+				Assignments = await myApi.CallApiGetAsync<IEnumerable<AssignmentDto>>("assignments");
+			}
+
+			else if (isStudent)
+			{
+				Assignments = await myApi.CallApiGetAsync<IEnumerable<AssignmentDto>>($"courses/{CourseId}/assignments");
+			}
+			else return;
 		}
 		catch (HttpRequestException apiEx)
 		{

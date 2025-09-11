@@ -32,6 +32,9 @@
 		<!-- Sidebar area -->
 		<div class="col-12 col-lg-3 border-start bg-light">
 			<div class="p-3 sticky-top">
+				@if(Assignments != null)
+				@foreach(var ass in Assignments)
+				{<AssignmentComponent Assignment=ass/>}
 				
 			</div>
 		</div>
@@ -50,6 +53,7 @@
 
 	private List<DocumentDto>? DocumentDtos { get; set; }
 	private ModuleActivityDto CurrentActivity { get; set; }
+	private List<AssignmentDto>? Assignments = new();
 	private string? errorMessage;
 
 	protected override async Task OnInitializedAsync()
@@ -73,10 +77,13 @@
 
 			var respActivity = await myApi.CallApiGetAsync<ModuleActivityDto>($"activities/{Id}");
 			CurrentActivity = respActivity;
-
+			Console.WriteLine("Activity loaded: " + CurrentActivity?.Name);
 			var respDocs = await myApi.CallApiGetAsync<List<DocumentDto>>($"documents/activity/{Id}");
 			DocumentDtos = respDocs?.ToList();
-
+			Console.WriteLine("Documents loaded: " + DocumentDtos?.Count);
+			var respAssignments = await myApi.CallApiGetAsync<List<AssignmentDto>>($"assignments/activity/{Id}");
+			Assignments = respAssignments?.ToList();
+			Console.WriteLine("Assignments loaded: " + Assignments?.Count);
 
 			Loading = false;
 

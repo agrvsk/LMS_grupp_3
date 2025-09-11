@@ -21,5 +21,15 @@ namespace LMS.Services
                 throw new Exception("Assignment not found.");
             return mapper.Map<AssignmentDto>(assignment);
         }
+        public async Task<List<AssignmentDto>> GetAssignmentsByActivityId(Guid activityId)
+        {
+            var assignments = await uow.AssignmentRepository.GetAssignmentsByActivityIdAsync(activityId);
+            return mapper.Map<List<AssignmentDto>>(assignments);
+        }
+        public async Task<List<AssignmentDto>> GetAllAssignmentsAsync()
+        {
+            var assignments = await uow.AssignmentRepository.GetAllAssignmentsAsync();
+            return mapper.Map<List<AssignmentDto>>(assignments);
+        }
     }
 }

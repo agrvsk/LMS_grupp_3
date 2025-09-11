@@ -22,35 +22,30 @@ public class SubmissionRepository : RepositoryBase<Submission>, ISubmissionRepos
     public async Task<List<Submission>> GetAllSubmissionsAsync()
     {
         
-        return await FindAllAsync(trackChanges: false).ContinueWith(task => task.Result.ToList());
+        return (await FindAllAsync(trackChanges: false)).ToList();
     }
 
     public async Task<Submission?> GetSubmissionByIdAsync(Guid submissionId)
     {
-        
-        return await FindByConditionAsync(s => s.Id == submissionId, trackChanges: false)
-            .ContinueWith(task => task.Result.SingleOrDefault());
+
+        return (await FindByConditionAsync(s => s.Id == submissionId, trackChanges: false)).SingleOrDefault();
     }
 
     public async Task<List<Submission>> GetSubmissionsByApplicationUserIdAsync(string userId)
     {
         
-        return await FindByConditionAsync(s => s.Submitters.Any(u => u.Id == userId), trackChanges: false)
-            .ContinueWith(task => task.Result.ToList());
+        return (await FindByConditionAsync(s => s.Submitters.Any(u => u.Id == userId), trackChanges: false)).ToList();
     }
 
     public async Task<List<Submission>> GetSubmissionsByDocumentIdAsync(Guid documentId)
     {
         
-        return await FindByConditionAsync(s => s.DocumentId == documentId, trackChanges: false)
-            .ContinueWith(task => task.Result.ToList());
+        return (await FindByConditionAsync(s => s.DocumentId == documentId, trackChanges: false)).ToList();
     }
 
     public async Task<List<Submission>> GetSubmissionsByAssignmentIdAsync(Guid assignmentId)
     {
-        
-        return await FindByConditionAsync(s => s.AssignmentId == assignmentId, trackChanges: false)
-            .ContinueWith(task => task.Result.ToList());
+        return (await FindByConditionAsync(s => s.AssignmentId == assignmentId, trackChanges: false)).ToList();
     }
 
 

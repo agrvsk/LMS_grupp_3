@@ -1,0 +1,34 @@
+﻿@using LMS.Shared.DTOs.EntityDto
+@inject NavigationManager nav
+
+<li class="list-group-item d-flex justify-content-between align-items-center activity-item"
+    @onclick="@(() => nav.NavigateTo($"Assignment/{Assignment.Id}"))"
+    style="cursor: pointer;">
+    <div class="flex-grow-1">
+        <strong class="text-primary">@Assignment.Name</strong>
+        <br />
+        <small class="text-muted">
+            Due: @Assignment.DueDate.ToString("g")
+        </small>
+    </div>
+
+    @* <AuthorizeView Roles="Teacher">
+        <div class="ms-2">
+            <button class="btn btn-sm btn-outline-secondary"
+                    @onclick:stopPropagation="true"
+                    @onclick="StartEditing">
+                Edit
+            </button>
+        </div>
+    </AuthorizeView> *@
+</li>
+
+@code {
+    [Parameter] public AssignmentDto Assignment { get; set; }
+    // [Parameter] public EventCallback<Guid> OnMessageSent { get; set; }
+
+    // private async Task StartEditing()
+    // {
+    //     await OnMessageSent.InvokeAsync(Assignment.Id);
+    // }
+}

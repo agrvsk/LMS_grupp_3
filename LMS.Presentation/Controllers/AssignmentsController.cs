@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace LMS.Presentation.Controllers
 {
-    
+
     [Route("/assignments")]
     [ApiController]
     public class AssignmentsController : ControllerBase
@@ -23,6 +23,19 @@ namespace LMS.Presentation.Controllers
         {
             var assignment = _serviceManager.AssignmentService.GetAssignmentById(id);
             return Ok(assignment.Result);
+        }
+        [HttpGet("activity/{activityId}")]
+        public async Task<IActionResult> GetAssignmentsByActivityId(Guid activityId)
+        {
+            var assignments = _serviceManager.AssignmentService.GetAssignmentsByActivityId(activityId);
+            return Ok(assignments.Result);
+        }
+        [HttpGet]
+        public async Task<IActionResult> GetAllAssignments()
+        {
+            var assignments = await
+                _serviceManager.AssignmentService.GetAllAssignmentsAsync();
+            return Ok(assignments);
         }
     }
 }
