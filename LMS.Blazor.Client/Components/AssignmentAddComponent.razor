@@ -36,12 +36,11 @@
             using var stream = file.OpenReadStream(maxAllowedSize: 10_000_000);
             using var ms = new MemoryStream();
             await stream.CopyToAsync(ms);
-			var name = Path.GetFileNameWithoutExtension(file.Name);
 
             Assignment.Documents.Add(new DocumentInfo
             {
                 TempId = Guid.NewGuid().ToString(),
-                FileName = name,
+                FileName = file.Name,
                 ContentType = file.ContentType,
                 Content = ms.ToArray(),   
                 Description = string.Empty,

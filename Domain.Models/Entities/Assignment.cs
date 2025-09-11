@@ -18,5 +18,7 @@ namespace Domain.Models.Entities
         public List<Guid>? DocumentIds { get; set; }
         public List<Document>? Documents { get; set; }
         public List<Submission> Submissions { get; set; } = new List<Submission>();
+        public Guid ModuleActivityId { get; set; }
+        public ModuleActivity? ModuleActivity { get; set; }
     }
 }

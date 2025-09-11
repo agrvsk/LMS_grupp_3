@@ -64,7 +64,8 @@ public class DocumentService : IDocumentService
         document.Id = Guid.NewGuid();
         document.UploadDate = DateTime.UtcNow;
 
-        var filePath = await fileHandlerService.UploadFileAsync(fileStream, $"{documentDto.Name}_{document.Id}{documentDto.FileType}", $"Uploads/{document.ParentType}");
+        var fileName = Path.GetFileNameWithoutExtension(documentDto.Name) + "_" + document.Id + documentDto.FileType;
+        var filePath = await fileHandlerService.UploadFileAsync(fileStream, fileName, $"Uploads/{document.ParentType}");
         document.FilePath = filePath;
 
         uow.DocumentRepository.Create(document);

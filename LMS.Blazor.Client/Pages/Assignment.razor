@@ -23,7 +23,7 @@ else
 	</div>
 	if(isTeacher)
 	{
-		<DocumentComponent Documents="@SubmittedAssignments" />
+		<SubmissionComponent Submissions=SubmittedAssignments/>
 	}
 	else
 	{
@@ -37,7 +37,7 @@ else
 	public Guid Id { get; set; }
 
 	private AssignmentDto? AssignmentDto;
-	private List<DocumentDto> SubmittedAssignments = new List<DocumentDto>();
+	private List<SubmissionDto> SubmittedAssignments = new List<SubmissionDto>();
 	private string? errorMessage;
 
 	private bool isTeacher;
@@ -64,15 +64,10 @@ else
 			AssignmentDto = await ApiService.CallApiGetAsync<AssignmentDto>($"assignments/{Id}");
 			if (isTeacher)
 			{
-				SubmittedAssignments = await ApiService.CallApiGetAsync<List<DocumentDto>>($"submissions/assignment/{Id}");
+				SubmittedAssignments = await ApiService.CallApiGetAsync<List<SubmissionDto>>($"submissions/assignment/{Id}");
 				if(SubmittedAssignments == null)
 				{
-					SubmittedAssignments = new List<DocumentDto>();
-				}
-				Console.WriteLine(SubmittedAssignments?.Count);
-				foreach (var doc in SubmittedAssignments)
-				{
-					Console.WriteLine($"Document: {doc.Name}, Uploaded by: {doc.UploaderName}");
+					SubmittedAssignments = new List<SubmissionDto>();
 				}
 			}
 		}

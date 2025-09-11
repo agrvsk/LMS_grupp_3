@@ -70,25 +70,33 @@ public class ModuleActivityService : IModuleActivityService
         {
             var assignment = mapper.Map<Assignment>(assignmentDto);
             assignment.Id = Guid.NewGuid();
+
+            assignment.ModuleActivityId = activity.Id;
+            assignment.Submissions = new List<Submission>();
             uow.AssignmentRepository.Create(assignment);
 
             foreach (var docMeta in assignmentDto.Documents)
             {
                 if (!fileLookup.TryGetValue(docMeta.TempId, out var file))
                     throw new Exception($"File for TempId '{docMeta.TempId}' not found.");
-
+                
                 // Save file to disk
+                var extension = Path.GetExtension(file.FileName);
+                var safeName = Path.GetFileNameWithoutExtension(file.FileName);
+                var docId = Guid.NewGuid();
+                var fileName = $"{safeName}_{docId}{extension}";
+
                 using var stream = file.OpenReadStream();
                 var filePath = await fileHandlerService.UploadFileAsync(
                     stream,
-                    $"{Guid.NewGuid()}_{docMeta.Name}",
-                    $"Uploads/Activity/Assignments"
+                    fileName,
+                    $"Uploads/Assignments"
                 );
 
                 // Create document entity
                 var document = new Document
                 {
-                    Id = Guid.NewGuid(),
+                    Id = docId,
                     Name = docMeta.Name,
                     Description = docMeta.Description,
                     UploadDate = DateTime.UtcNow,

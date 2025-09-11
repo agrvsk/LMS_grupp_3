@@ -72,6 +72,23 @@ public class ModuleService : IModuleService
     public async Task<bool> DeleteModuleAsync(Guid moduleId)
     {
         var module = await uow.ModuleRepository.GetModuleByIdAsync(moduleId);
+        foreach (var activity in module.ModuleActivities.ToList())
+        {
+            foreach (var assignment in activity.Assignments.ToList())
+            {
+                foreach (var submission in assignment.Submissions.ToList())
+                {
+                    uow.SubmissionRepository.Delete(submission);
+                }
+
+                activity.Assignments.Remove(assignment); // break the FK
+                uow.AssignmentRepository.Delete(assignment);
+            }
+
+            module.ModuleActivities.Remove(activity); // break parent link
+            uow.ModuleActivityRepository.Delete(activity);
+        }
+
         if (module != null)
         {
             uow.ModuleRepository.Delete(module);

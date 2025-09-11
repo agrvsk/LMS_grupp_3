@@ -15,4 +15,5 @@ public class Submission
     public Document? SubmissionDocument { get; set; }
     public Guid AssignmentId { get; set; }
     public Assignment Assignment { get; set; }
+    public string? Comment { get; set; }
 }

@@ -64,7 +64,10 @@ public class SubmissionService : ISubmissionService
         if (assignment == null)
             throw new Exception("Assignment not found.");
 
-        var fileName = $"{Guid.NewGuid()}_{file.FileName}";
+        var extension = Path.GetExtension(file.FileName);
+        var safeFileName = Path.GetFileNameWithoutExtension(file.FileName);
+        var docId = Guid.NewGuid();
+        var fileName = $"{safeFileName}_{docId}{extension}";
         var path = fileHandlerService.UploadFileAsync(file.OpenReadStream(), fileName, $"Uploads/Submissions/{assignment.Name}");
 
         var submission = mapper.Map<Submission>(submissionCreateDto);
@@ -81,7 +84,7 @@ public class SubmissionService : ISubmissionService
 
         var document = new Document
         {
-            Id = Guid.NewGuid(),
+            Id = docId,
             Name = Path.GetFileNameWithoutExtension(file.FileName),
             FilePath = path.Result,
             UploaderId = submissionCreateDto.SubmitterIds.First(),

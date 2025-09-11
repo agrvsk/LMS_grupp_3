@@ -1,5 +1,79 @@
-﻿<h3>SubmissionComponent</h3>
+﻿@using LMS.Shared.DTOs.EntityDto
+@inject NavigationManager Nav
+@rendermode InteractiveWebAssembly
+
+
+<div class="container mt-4">
+    <h3 class="text-center">Submissions</h3>
+    @if (Submissions == null || !Submissions.Any())
+    {
+        <p class="text-center text-muted">No submissions yet.</p>
+    }
+    else
+    {
+        @foreach (var sub in Submissions)
+        {
+            <div class="card mb-3 shadow-sm">
+                <div class="card-body">
+                    <!-- Submitters -->
+                    <div class="mb-2">
+                        <strong>Submitted by:</strong>
+                        @if (sub.Submitters != null && sub.Submitters.Any())
+                        {
+                            @string.Join(", ", sub.Submitters.Select(u => u.Email))
+                        }
+                        else
+                        {
+                            <em>No submitter</em>
+                        }
+                    </div>
+
+                    <!-- Comment -->
+                    @if (!string.IsNullOrWhiteSpace(sub.Comment))
+                    {
+                        <div class="mb-2">
+                            <strong>Comment:</strong> @sub.Comment
+                        </div>
+                    }
+
+                    <!-- Document -->
+                    @if (sub.Document != null)
+                    {
+                        <div class="d-flex align-items-center">
+                            <strong>Document:</strong>
+                            <span class="ms-2">@sub.Document.Name</span>
+                            <button class="btn btn-sm btn-outline-secondary" @onclick="() => DownloadClicked(sub.Document.Id)" title="Download">
+                                <i class="bi bi-download"></i> Download
+                            </button>
+                        </div>
+                    }
+
+                    <!-- Submission date -->
+                    <div class="mt-2 text-muted">
+                        Submitted: @sub.SubmissionDate.ToString("f")
+                    </div>
+                </div>
+            </div>
+        }
+    }
+</div>
 
 @code {
+    [Parameter]
+    public List<SubmissionDto> Submissions { get; set; } = new();
 
+    private string? errorMessage;
+
+    private void DownloadClicked(Guid documentId)
+    {
+        try
+        {
+            var url = Nav.ToAbsoluteUri($"/proxy?endpoint=documents/{documentId}/download");
+            Nav.NavigateTo(url.ToString(), forceLoad: true);
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+        }
+    }
 }

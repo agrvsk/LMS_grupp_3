@@ -45,7 +45,12 @@ public class SubmissionRepository : RepositoryBase<Submission>, ISubmissionRepos
 
     public async Task<List<Submission>> GetSubmissionsByAssignmentIdAsync(Guid assignmentId)
     {
-        return (await FindByConditionAsync(s => s.AssignmentId == assignmentId, trackChanges: false)).ToList();
+        return context.Submissions
+            .Include(s => s.SubmissionDocument)
+            .Include(s => s.Submitters)
+            .Where(s => s.AssignmentId == assignmentId)
+            .AsNoTracking()
+            .ToList();
     }
 
 

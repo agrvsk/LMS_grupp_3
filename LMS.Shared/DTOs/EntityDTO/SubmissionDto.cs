@@ -12,9 +12,7 @@ public record SubmissionDto
     public Guid Id { get; set; }
     public Guid AssignmentId { get; set; }
     public List<UserDto> Submitters { get; set; } = new();
-    public DocumentDto Document { get; set; } = default!;
+    public DocumentDto? Document { get; set; } = default!;
     public DateTime SubmissionDate { get; set; }
-    public string? Description { get; set; }
-
-    public DocumentDto? DocumentDto { get; set; }
+    public string? Comment { get; set; }
 }

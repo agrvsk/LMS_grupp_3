@@ -18,7 +18,7 @@ public class MapperProfile : Profile
 
         CreateMap<ModuleActivityDto, ModuleActivity>().ReverseMap();
         CreateMap<ModuleActivityCreateDto, ModuleActivity>()
-    .ForMember(dest => dest.Assignments, opt => opt.MapFrom(src => src.Assignments));
+    .ForMember(dest => dest.Assignments, opt => opt.Ignore());
         CreateMap<ModuleActivityCreateDto, ModuleActivityDto>().ReverseMap();
         CreateMap<ModuleActivityUpdateDto, ModuleActivity>().ReverseMap();
         CreateMap<ModuleActivityUpdateDto, ModuleActivityDto>().ReverseMap();
@@ -44,7 +44,9 @@ public class MapperProfile : Profile
         CreateMap<ActivityTypeDto, ActivityType>().ReverseMap();
 
         CreateMap<Submission, SubmissionDto>()
-        .ForMember(dest => dest.DocumentDto, opt => opt.MapFrom(src => src.SubmissionDocument));
+    .ForMember(dest => dest.Submitters, opt => opt.MapFrom(src => src.Submitters))
+    .ForMember(dest => dest.Document, opt => opt.MapFrom(src => src.SubmissionDocument))
+    .ForMember(dest => dest.Comment, opt => opt.MapFrom(src => src.Comment));
 
 
         CreateMap<AssignmentCreateDto, Assignment>()
