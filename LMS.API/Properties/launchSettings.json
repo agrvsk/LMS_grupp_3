@@ -11,14 +11,14 @@
     "https": {
         "commandName": "Project",
         "launchBrowser": true,
-        "XlaunchUrl": "https://localhost:7213/swagger/index.html",
-        "launchUrl": "https://astrix-api.azurewebsites.net/swagger/index.html",
+        "launchUrl": "https://localhost:7213/swagger/index.html",
+        "XlaunchUrl": "https://astrix-api.azurewebsites.net/swagger/index.html",
         "environmentVariables": {
             "ASPNETCORE_ENVIRONMENT": "Development"
         },
         "dotnetRunMessages": true,
-        "XapplicationUrl": "https://localhost:7213;http://localhost:5166",
-        "applicationUrl": "https://astrix-api.azurewebsites.net;http://localhost:5166"
+        "applicationUrl": "https://localhost:7213;http://localhost:5166",
+        "XapplicationUrl": "https://astrix-api.azurewebsites.net;http://localhost:5166"
     }
   },
   "$schema": "https://json.schemastore.org/launchsettings.json"
