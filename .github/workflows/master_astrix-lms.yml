@@ -44,7 +44,7 @@ jobs:
           dotnet tool install dotnet-ef
  
       - name: Generate EF Core Migration Script
-        run: dotnet ef migrations script --idempotent --configuration Release --no-build --output "${{github.workspace}}/sql/sql-script.sql" --context LMS.Infractructure.Data.AppicatonDbContext --project ${{github.workspace}}/LMS.Infractructure/LMS.Infractructure.csproj
+        run: dotnet ef migrations script --idempotent --configuration Release --no-build --output "${{github.workspace}}/sql/sql-script.sql" --context LMS.Infractructure.Data.AppicatonDbContext --project ${{github.workspace}}/LMS.API/LMS.API.csproj
  
       - uses: actions/upload-artifact@v4
         with:
@@ -98,3 +98,4 @@ jobs:
           path: ./ddl-updates/sql-script.sql
 
           
+
