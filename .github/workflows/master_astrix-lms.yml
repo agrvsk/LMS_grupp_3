@@ -52,4 +52,4 @@ jobs:
           app-name: 'astrix-LMS'
           slot-name: 'Production'
           package: .
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_2035337ED4A64A6DA9D33F8E2BB334B2 }}
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_33E01E6DCEFD480FA20687315F574306 }}
