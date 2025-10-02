@@ -19,16 +19,17 @@
           "ASPNETCORE_ENVIRONMENT": "Development"
         }
       },
-      "https": {
-        "commandName": "Project",
-        "dotnetRunMessages": true,
-        "launchBrowser": true,
-        "inspectUri": "{wsProtocol}://{url.hostname}:{url.port}/_framework/debug/ws-proxy?browser={browserInspectUri}",
-        "applicationUrl": "https://localhost:7224;http://localhost:5097",
-        "environmentVariables": {
-          "ASPNETCORE_ENVIRONMENT": "Development"
-        }
-      },
+        "https": {
+            "commandName": "Project",
+            "dotnetRunMessages": true,
+            "launchBrowser": true,
+            "inspectUri": "{wsProtocol}://{url.hostname}:{url.port}/_framework/debug/ws-proxy?browser={browserInspectUri}",
+            "XapplicationUrl": "https://localhost:7224;http://localhost:5097",
+            "applicationUrl": "https://astrix-lms.azurewebsites.net;http://localhost:5097",
+            "environmentVariables": {
+                "ASPNETCORE_ENVIRONMENT": "Development"
+            }
+        },
       "IIS Express": {
         "commandName": "IISExpress",
         "launchBrowser": true,
