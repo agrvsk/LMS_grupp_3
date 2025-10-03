@@ -6,9 +6,9 @@
       "connectionId": "ConnectionStrings:XApplicationDbContext"
     },
     "mssql1": {
-      "ignored": "true",
-      "type": "mssql",
-      "connectionId": "ConnectionStrings:ApplicationDbContext"
+        "ignored": "true",
+        "type": "mssql",
+        "connectionId": "ConnectionStrings:DefaultConnection"
     }
   }
 }
