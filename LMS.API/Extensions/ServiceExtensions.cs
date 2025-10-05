@@ -12,14 +12,25 @@ public static class ServiceExtensions
 {
     public static void ConfigureCors(this IServiceCollection services)
     {
+        /*
+services.AddCors(options =>
+{
+    options.AddPolicy("AllowBlazor", builder =>
+    {
+        builder.WithOrigins("https://din-blazor-url")
+               .AllowAnyHeader()
+               .AllowAnyMethod();
+    });
+});         
+        */
         services.AddCors(options =>
         {
             //ToDo: Restrict access to your BlazorApp only!
             options.AddDefaultPolicy(policy =>
             {
-                //..
-                //..
-                //..
+                policy.WithOrigins("https://astrixlms.azurewebsites.net")
+                       .AllowAnyHeader()
+                       .AllowAnyMethod();
             });
 
             //Can be used during development
