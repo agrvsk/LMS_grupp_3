@@ -159,7 +159,7 @@
 
         if (!response.IsSuccessStatusCode)
         {
-            Logger.LogWarning("Login response: {StatusCode}, content: {Content}", response.StatusCode, responseContent);
+            Logger.LogWarning("Login response: {StatusCode}, content: {Content}", response.StatusCode, response.Content);
             return null;
         }
 
