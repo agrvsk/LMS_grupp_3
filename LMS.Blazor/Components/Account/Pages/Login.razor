@@ -168,7 +168,7 @@
 
         var token = await response.Content.ReadFromJsonAsync<TokenDto>();
         Logger.LogWarning("Login response: {StatusCode}, content: {Content}", response.StatusCode, token.ToString() );
-
+         
         return token;
         //return await response.Content.ReadFromJsonAsync<TokenDto>();
     }
