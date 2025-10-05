@@ -157,12 +157,19 @@
         var response = await httpClient.PostAsJsonAsync("api/auth/login", 
                                                     new UserAuthDto { UserName = username, Password = password });
 
+        Logger.LogInformation("Login response: {StatusCode} ", response?.StatusCode );
+
+
         if (!response.IsSuccessStatusCode)
         {
-            Logger.LogWarning("Login response: {StatusCode}, content: {Content}", response.StatusCode, response?.Content);
+            Logger.LogWarning("Login response: {StatusCode}", response.StatusCode);
             return null;
         }
 
-        return await response.Content.ReadFromJsonAsync<TokenDto>();
+        var token = await response.Content.ReadFromJsonAsync<TokenDto>();
+        Logger.LogWarning("Login response: {StatusCode}, content: {Content}", response.StatusCode, token.ToString() );
+
+        return token;
+        //return await response.Content.ReadFromJsonAsync<TokenDto>();
     }
 }
