@@ -28,9 +28,9 @@ services.AddCors(options =>
             //ToDo: Restrict access to your BlazorApp only!
             options.AddDefaultPolicy(policy =>
             {
-                policy.WithOrigins("https://astrixlms.azurewebsites.net")
-                       .AllowAnyHeader()
-                       .AllowAnyMethod();
+                //policy.WithOrigins("https://astrixlms.azurewebsites.net")
+                //       .AllowAnyHeader()
+                //       .AllowAnyMethod();
             });
 
             //Can be used during development
