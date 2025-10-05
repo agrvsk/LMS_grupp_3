@@ -41,7 +41,8 @@ public class Program
         }
 
         app.UseHttpsRedirection();
-        app.UseCors("AllowAll"); 
+//        app.UseCors("AllowAll"); 
+        app.UseCors("CorsPolicy");
 
         app.UseAuthentication();
         app.UseAuthorization();
