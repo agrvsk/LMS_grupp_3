@@ -159,6 +159,7 @@
 
         if (!response.IsSuccessStatusCode)
         {
+            Logger.LogWarning("Login response: {StatusCode}, content: {Content}", response.StatusCode, responseContent);
             return null;
         }
 
