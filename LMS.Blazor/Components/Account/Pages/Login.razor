@@ -100,19 +100,24 @@
             errorMessage = "Email or password is incorrect";
             return;
         }
+        Logger.LogInformation("LoginUser user found... ");
 
         //ToDo: make service of API call to remote server (LMS.API)!
         var tokens = await GetTokensFromApi(user.UserName!, Input.Password);
 
         if (tokens is null)
         {
-            errorMessage = "Failed to login please try again.";
+            Logger.LogInformation("token blev null från API... ");
+            errorMessage = "Failed to login please try again.(No token)";
             return;
         }
+        Logger.LogInformation("token returnerades ok från API... ");
 
         var result = await SignInManager.PasswordSignInAsync(user, Input.Password, Input.RememberMe, lockoutOnFailure: false);
         if (result.Succeeded)
         {
+            Logger.LogInformation("SignIn OK ");
+
             await TokenStorage.StoreTokensAsync(user.Id, tokens);
 
             Logger.LogInformation("User logged in.");
@@ -122,17 +127,23 @@
         }
         else if (result.RequiresTwoFactor)
         {
+            Logger.LogInformation("SignIn 2-faktor ");
+
             RedirectManager.RedirectTo(
                 "Account/LoginWith2fa",
                 new() { ["returnUrl"] = ReturnUrl, ["rememberMe"] = Input.RememberMe });
         }
         else if (result.IsLockedOut)
         {
+            Logger.LogInformation("SignIn lockout ");
+
             Logger.LogWarning("User account locked out.");
             RedirectManager.RedirectTo("Account/Lockout");
         }
         else
         {
+            Logger.LogInformation("ELSE ");
+
             errorMessage = "Error: Invalid login attempt.";
         }
     }
@@ -153,7 +164,12 @@
 
     private async Task<TokenDto?> GetTokensFromApi(string username, string password)
     {
+        Logger.LogInformation("Login - i GetTokensFromApi" );
+
         var httpClient = HttpClientFactory.CreateClient("LmsAPIClient");
+
+        Logger.LogInformation("Login efter HttpClient ");
+
         var response = await httpClient.PostAsJsonAsync("api/auth/login", 
                                                     new UserAuthDto { UserName = username, Password = password });
 
